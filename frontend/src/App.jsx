@@ -17,7 +17,6 @@ import VendorLogin from "./components/VendorLogin";
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
 import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
-
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
 
 function App() {
@@ -41,7 +40,6 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-               
 
                 {/* Vendor Routes */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
@@ -55,8 +53,23 @@ function App() {
                 />
                 <Route
                   path="/vendor/menu"
-                  element={<VendorMenuManager></VendorMenuManager>}
+                  element={
+                   
+                      <VendorMenuManager />
+                
+                  }
                 />
+                <Route
+                  path="/vendor/daily-menus"
+                  element={
+                    <VendorProtectedRoute>
+                      <DailyMenus />
+                    </VendorProtectedRoute>
+                  }
+                />
+
+                {/* Catch all route - redirect to landing page */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
 
               {/* Toast Container */}

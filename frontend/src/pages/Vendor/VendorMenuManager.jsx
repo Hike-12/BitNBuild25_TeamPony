@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from "react";
-import MenuItems from "./MenuItems";
-import DailyMenus from "./DailyMenus";
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
@@ -18,11 +16,27 @@ const VendorMenuManager = () => {
         `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
         {
           credentials: "include",
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          }
         }
       );
+      
+      if (response.status === 401) {
+        setError("Please login to access the dashboard");
+        // You might want to redirect to login page here
+        // window.location.href = '/vendor/login';
+        return;
+      }
+      
       if (response.ok) {
         const data = await response.json();
-        setDashboardData(data.dashboard_data);
+        if (data.success) {
+          setDashboardData(data.dashboard_data);
+        } else {
+          setError(data.error || "Failed to fetch dashboard data");
+        }
       } else {
         setError("Failed to fetch dashboard data");
       }
@@ -144,12 +158,18 @@ const VendorMenuManager = () => {
                     {new Date(menu.date).toLocaleDateString()}
                     <br />
                     <small>
-                      Items: {menu.items_count} | Price: {menu.total_price} |
-                      Orders: {menu.orders_count} |
+                      Items: {menu.items_count} | Price: ₹{menu.full_dabba_price} |
+                      Dabbas Sold: {menu.dabbas_sold}/{menu.max_dabbas} |
+                      {menu.is_veg_only && <span style={{ color: "green" }}> Veg Only |</span>}
                       <span style={{ color: menu.is_active ? "green" : "red" }}>
                         {menu.is_active ? " Active" : " Inactive"}
                       </span>
                     </small>
+                    {menu.todays_special && (
+                      <div style={{ marginTop: "5px", fontStyle: "italic" }}>
+                        Today's Special: {menu.todays_special}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -178,8 +198,8 @@ const VendorMenuManager = () => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === "menu-items" && <MenuItems />}
-        {activeTab === "daily-menus" && <DailyMenus />}
+        {activeTab === "menu-items" && <div>Menu Items Component</div>}
+        {activeTab === "daily-menus" && <div>Daily Menus Component</div>}
       </div>
     </div>
   );
