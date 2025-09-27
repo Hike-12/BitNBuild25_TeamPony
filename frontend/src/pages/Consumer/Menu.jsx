@@ -4,6 +4,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { Link } from 'react-router-dom';
 import OrderForm from '../../components/OrderForm';
 import SubscriptionForm from '../../components/SuscriptionForm';
+import toast from 'react-hot-toast'; // ADD THIS IMPORT
 import { 
   FiSun, 
   FiMoon, 
@@ -26,9 +27,8 @@ import {
   MdFastfood,
   MdCake,
   MdLocalBar,
-  MdSetMeal
+  MdSetMeal  // ADD THIS IMPORT
 } from 'react-icons/md';
-import toast from 'react-hot-toast';
 
 const Menu = () => {
   const { user, logout } = useAuth();
@@ -46,29 +46,27 @@ const Menu = () => {
   const [selectedVendor, setSelectedVendor] = useState(null);
 
   // Fetch all vendor daily menus (public route)
-// Fetch all vendor daily menus (public route)
-const fetchMenus = async () => {
-  try {
-    setLoading(true);
-    // Remove the token - this is a public endpoint
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/public/daily-menus`);
-    const data = await response.json();
+  const fetchMenus = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/public/daily-menus`);
+      const data = await response.json();
 
-    if (data.success) {
-      setMenus(data.menus || []);
-      setError('');
-    } else {
-      setError(data.error || 'Failed to fetch menus');
-      toast.error('Failed to load menus');
+      if (data.success) {
+        setMenus(data.menus || []);
+        setError('');
+      } else {
+        setError(data.error || 'Failed to fetch menus');
+        toast.error('Failed to load menus');
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      toast.error('Network error occurred');
+      console.error('Error fetching menus:', err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    setError('Network error. Please try again.');
-    toast.error('Network error occurred');
-    console.error('Error fetching menus:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     fetchMenus();
@@ -95,19 +93,38 @@ const fetchMenus = async () => {
 
   // Handle Order Click
   const handleOrderClick = (menu) => {
+    console.log('Order clicked for menu:', menu); // DEBUG LOG
+    
     if (!menu.is_active || (menu.max_dabbas - (menu.dabbas_sold || 0)) === 0) {
       toast.error('This menu is not available for ordering');
       return;
     }
+    
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please login to place an order');
+      return;
+    }
+    
     setSelectedMenu(menu);
     setSelectedVendor(menu.vendor);
     setShowOrderForm(true);
+    console.log('Order form should open now'); // DEBUG LOG
   };
 
   // Handle Subscription Click
   const handleSubscriptionClick = (vendor) => {
+    console.log('Subscribe clicked for vendor:', vendor); // DEBUG LOG
+    
+    // Check if user is logged in
+    if (!user) {
+      toast.error('Please login to create a subscription');
+      return;
+    }
+    
     setSelectedVendor(vendor);
     setShowSubscriptionForm(true);
+    console.log('Subscription form should open now'); // DEBUG LOG
   };
 
   // Close modals
@@ -131,7 +148,7 @@ const fetchMenus = async () => {
 
   return (
     <div className="min-h-screen transition-all duration-300" style={{ backgroundColor: theme.background }}>
-      {/* Header */}
+      {/* Header - same as before */}
       <header className="border-b sticky top-0 z-40 backdrop-blur-md"
               style={{ backgroundColor: `${theme.panels}95`, borderColor: theme.border }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -167,16 +184,25 @@ const fetchMenus = async () => {
                   <FiUser size={16} color="white" />
                 </div>
                 <span className="font-medium" style={{ color: theme.text }}>
-                  {user?.first_name || user?.username}
+                  {user?.first_name || user?.username || 'Guest'}
                 </span>
               </div>
 
-              <button onClick={() => logout()} 
+              {user ? (
+                <button onClick={() => logout()} 
+                        className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
+                        style={{ backgroundColor: theme.error, color: 'white' }}>
+                  <FiLogOut size={16} />
+                  <span>Logout</span>
+                </button>
+              ) : (
+                <Link to="/login"
                       className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
-                      style={{ backgroundColor: theme.error, color: 'white' }}>
-                <FiLogOut size={16} />
-                <span>Logout</span>
-              </button>
+                      style={{ backgroundColor: theme.primary, color: 'white' }}>
+                  <FiUser size={16} />
+                  <span>Login</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -362,7 +388,11 @@ const fetchMenus = async () => {
                     
                     <div className="flex space-x-2">
                       <button 
-                        onClick={() => handleSubscriptionClick(menu.vendor)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleSubscriptionClick(menu.vendor);
+                        }}
                         className="px-4 py-2 border rounded-lg font-medium transition-all duration-300 hover:scale-105 text-sm"
                         style={{ 
                           borderColor: theme.primary,
@@ -374,7 +404,11 @@ const fetchMenus = async () => {
                       </button>
                       
                       <button 
-                        onClick={() => handleOrderClick(menu)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleOrderClick(menu);
+                        }}
                         disabled={!menu.is_active || (menu.max_dabbas - (menu.dabbas_sold || 0)) === 0}
                         className="px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2"
                         style={{ 
