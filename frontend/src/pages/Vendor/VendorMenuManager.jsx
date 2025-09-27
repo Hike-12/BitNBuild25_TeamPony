@@ -7,7 +7,7 @@ const VendorMenuManager = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { theme, isDarkMode, setIsDarkMode } = useTheme();
+  const { theme, isDarkMode, toggleTheme } = useTheme();
   const getVendorAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
     return token ? { Authorization: `Bearer ${token}` } : {};
@@ -122,7 +122,7 @@ const VendorMenuManager = () => {
 
       {/* Light/Dark Mode Toggle Floating Button */}
       <button
-        onClick={() => setIsDarkMode(!isDarkMode)}
+        onClick={toggleTheme}
         style={{
           position: "fixed",
           top: 32,
@@ -130,34 +130,34 @@ const VendorMenuManager = () => {
           zIndex: 100,
           background: theme.panels,
           color: theme.text,
-          border: `2px solid ${theme.border}`,
+          border: `2.5px solid ${theme.primary}`,
           borderRadius: "50%",
-          width: "52px",
-          height: "52px",
-          boxShadow: "0 4px 16px 0 rgba(0,0,0,0.10)",
+          width: "56px",
+          height: "56px",
+          boxShadow: `0 6px 24px 0 ${theme.border}`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          transition: "background 0.2s, color 0.2s",
+          transition: "background 0.2s, color 0.2s, border 0.2s",
         }}
         aria-label="Toggle light/dark mode"
       >
-        {isDarkMode ? <FaSun style={{ fontSize: "1.5rem", color: theme.primary }} /> : <FaMoon style={{ fontSize: "1.5rem", color: theme.primary }} />}
+        {isDarkMode ? <FaSun style={{ fontSize: "1.7rem", color: theme.primary }} /> : <FaMoon style={{ fontSize: "1.7rem", color: theme.primary }} />}
       </button>
 
-      <div className="relative" style={{ zIndex: 10, minHeight: "100vh", padding: "48px 0" }}>
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-8 lg:px-12">
+      <div className="relative" style={{ zIndex: 10, minHeight: "100vh", padding: "56px 0 64px 0" }}>
+        <div className="w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-8">
           {/* Header Section */}
-          <div className="flex items-center gap-6 mb-12 justify-center">
-            <div className="rounded-2xl p-5 flex items-center justify-center shadow-lg" style={{ backgroundColor: theme.panels }}>
-              <FaUtensils style={{ color: theme.primary, fontSize: "3rem" }} />
+          <div className="flex items-center gap-8 mb-12 justify-center">
+            <div className="rounded-2xl p-6 flex items-center justify-center shadow-lg border-2" style={{ backgroundColor: theme.panels, borderColor: theme.primary }}>
+              <FaUtensils style={{ color: theme.primary, fontSize: "3.2rem" }} />
             </div>
             <div>
-              <h1 className="text-5xl font-extrabold tracking-tight" style={{ color: theme.primary, letterSpacing: "0.03em" }}>
+              <h1 className="text-5xl font-extrabold tracking-tight" style={{ color: theme.primary, letterSpacing: "0.03em", marginBottom: "0.5rem" }}>
                 Vendor Menu Management
               </h1>
-              <p className="text-xl font-medium mt-3" style={{ color: theme.textSecondary }}>
+              <p className="text-xl font-medium" style={{ color: theme.textSecondary, marginTop: "0.5rem" }}>
                 Manage your kitchen, menu items, and daily menus in style.
               </p>
             </div>
@@ -165,9 +165,9 @@ const VendorMenuManager = () => {
 
           {/* Dashboard Overview */}
           {dashboardData && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-14">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-14">
               {/* Stats Card */}
-              <div className="rounded-3xl border shadow-xl p-10 flex flex-col gap-8" style={{ background: theme.panels, borderColor: theme.border }}>
+              <div className="rounded-3xl border-2 shadow-xl p-10 flex flex-col gap-8" style={{ background: theme.panels, borderColor: theme.primary }}>
                 <h2 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: theme.text }}>
                   <FaClipboardList style={{ color: theme.primary }} /> Stats
                 </h2>
@@ -196,7 +196,7 @@ const VendorMenuManager = () => {
               </div>
 
               {/* Kitchen Info Card */}
-              <div className="rounded-3xl border shadow-xl p-10 flex flex-col gap-6" style={{ background: theme.panels, borderColor: theme.border }}>
+              <div className="rounded-3xl border-2 shadow-xl p-10 flex flex-col gap-6" style={{ background: theme.panels, borderColor: theme.primary }}>
                 <h2 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: theme.text }}>
                   <FaUserCheck style={{ color: theme.primary }} /> Kitchen Info
                 </h2>
@@ -218,7 +218,7 @@ const VendorMenuManager = () => {
               </div>
 
               {/* Recent Menus Card */}
-              <div className="rounded-3xl border shadow-xl p-10 flex flex-col gap-6" style={{ background: theme.panels, borderColor: theme.border }}>
+              <div className="rounded-3xl border-2 shadow-xl p-10 flex flex-col gap-6" style={{ background: theme.panels, borderColor: theme.primary }}>
                 <h2 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: theme.text }}>
                   <FaClipboardList style={{ color: theme.primary }} /> Recent Menus
                 </h2>
@@ -260,7 +260,7 @@ const VendorMenuManager = () => {
           )}
 
           {/* Tab Navigation */}
-          <div className="flex items-end mb-10" style={{ borderBottom: `2px solid ${theme.border}` }}>
+          <div className="flex items-end mb-10" style={{ borderBottom: `2.5px solid ${theme.primary}` }}>
             <div
               style={activeTab === "menu-items" ? activeTabStyle : tabStyle}
               onClick={() => setActiveTab("menu-items")}
@@ -276,7 +276,7 @@ const VendorMenuManager = () => {
           </div>
 
           {/* Tab Content */}
-          <div className="rounded-3xl border p-10 shadow-xl" style={{ background: theme.panels, borderColor: theme.border, minHeight: "320px" }}>
+          <div className="rounded-3xl border-2 p-10 shadow-xl" style={{ background: theme.panels, borderColor: theme.primary, minHeight: "320px" }}>
             {activeTab === "menu-items" && <div className="text-xl font-medium flex items-center gap-2" style={{ color: theme.textSecondary }}><FaUtensils /> Menu Items Component</div>}
             {activeTab === "daily-menus" && <div className="text-xl font-medium flex items-center gap-2" style={{ color: theme.textSecondary }}><FaCalendarAlt /> Daily Menus Component</div>}
           </div>
