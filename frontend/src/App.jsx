@@ -18,6 +18,7 @@ import VendorDashboard from "./pages/Vendor/VendorDashboard";
 import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
+import Menu from "./pages/Consumer/Menu"
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
               <Routes>
                 {/* Landing Page Route */}
                 <Route path="/" element={<LandingPage />} />
+                <Route path="/menu" element={<Menu />} />
 
                 {/* Consumer Routes */}
                 <Route path="/login" element={<Login />} />

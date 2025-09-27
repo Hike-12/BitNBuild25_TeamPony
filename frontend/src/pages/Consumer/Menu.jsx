@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Link } from 'react-router-dom';
+import OrderForm from '../../components/OrderForm';
+import SubscriptionForm from '../../components/SuscriptionForm';
 import { 
   FiSun, 
   FiMoon, 
@@ -12,7 +14,11 @@ import {
   FiClock,
   FiShoppingCart,
   FiArrowLeft,
-  FiStar
+  FiStar,
+  FiHeart,
+  FiBell,
+  FiUser,
+  FiLogOut
 } from 'react-icons/fi';
 import { 
   MdRestaurant, 
@@ -33,35 +39,36 @@ const Menu = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Fetch all vendor menus
-  const fetchMenus = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/menus/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-      });
+  // Modal states
+  const [showOrderForm, setShowOrderForm] = useState(false);
+  const [showSubscriptionForm, setShowSubscriptionForm] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState(null);
+  const [selectedVendor, setSelectedVendor] = useState(null);
 
-      const data = await response.json();
+  // Fetch all vendor daily menus (public route)
+// Fetch all vendor daily menus (public route)
+const fetchMenus = async () => {
+  try {
+    setLoading(true);
+    // Remove the token - this is a public endpoint
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/public/daily-menus`);
+    const data = await response.json();
 
-      if (data.success) {
-        setMenus(data.menus);
-        setError('');
-      } else {
-        setError(data.error || 'Failed to fetch menus');
-        toast.error('Failed to load menus');
-      }
-    } catch (err) {
-      setError('Network error. Please try again.');
-      toast.error('Network error occurred');
-      console.error('Error fetching menus:', err);
-    } finally {
-      setLoading(false);
+    if (data.success) {
+      setMenus(data.menus || []);
+      setError('');
+    } else {
+      setError(data.error || 'Failed to fetch menus');
+      toast.error('Failed to load menus');
     }
-  };
+  } catch (err) {
+    setError('Network error. Please try again.');
+    toast.error('Network error occurred');
+    console.error('Error fetching menus:', err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     fetchMenus();
@@ -69,126 +76,107 @@ const Menu = () => {
 
   // Filter menus based on search and category
   const filteredMenus = menus.filter(menu => {
-    const matchesSearch = menu.vendor.kitchen_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         menu.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = menu.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         menu.vendor?.business_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         menu.todays_special?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    if (selectedCategory === 'all') {
-      return matchesSearch;
-    }
+    const matchesCategory = selectedCategory === 'all' || 
+                           (selectedCategory === 'veg' && menu.is_veg_only) ||
+                           (selectedCategory === 'non_veg' && !menu.is_veg_only);
     
-    return matchesSearch && menu.menu_items.some(item => item.category === selectedCategory);
+    return matchesSearch && matchesCategory;
   });
 
   const categories = [
     { value: 'all', label: 'All Categories', icon: <MdSetMeal /> },
-    { value: 'main_course', label: 'Main Course', icon: <MdRestaurant /> },
-    { value: 'side_dish', label: 'Side Dish', icon: <MdLocalDining /> },
-    { value: 'bread', label: 'Bread', icon: <MdFastfood /> },
-    { value: 'dessert', label: 'Dessert', icon: <MdCake /> },
-    { value: 'beverage', label: 'Beverage', icon: <MdLocalBar /> },
-    { value: 'snack', label: 'Snack', icon: <MdFastfood /> }
+    { value: 'veg', label: 'Vegetarian', icon: <MdLocalDining /> },
+    { value: 'non_veg', label: 'Non-Vegetarian', icon: <MdFastfood /> }
   ];
 
-  const getCategoryIcon = (category) => {
-    const categoryMap = {
-      'main_course': <MdRestaurant />,
-      'side_dish': <MdLocalDining />,
-      'bread': <MdFastfood />,
-      'dessert': <MdCake />,
-      'beverage': <MdLocalBar />,
-      'snack': <MdFastfood />
-    };
-    return categoryMap[category] || <MdRestaurant />;
+  // Handle Order Click
+  const handleOrderClick = (menu) => {
+    if (!menu.is_active || (menu.max_dabbas - (menu.dabbas_sold || 0)) === 0) {
+      toast.error('This menu is not available for ordering');
+      return;
+    }
+    setSelectedMenu(menu);
+    setSelectedVendor(menu.vendor);
+    setShowOrderForm(true);
+  };
+
+  // Handle Subscription Click
+  const handleSubscriptionClick = (vendor) => {
+    setSelectedVendor(vendor);
+    setShowSubscriptionForm(true);
+  };
+
+  // Close modals
+  const closeModals = () => {
+    setShowOrderForm(false);
+    setShowSubscriptionForm(false);
+    setSelectedMenu(null);
+    setSelectedVendor(null);
   };
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center transition-all duration-300"
-        style={{ backgroundColor: theme.background }}
-      >
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.background }}>
         <div className="text-center">
-          <div 
-            className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent mx-auto mb-4"
-            style={{ borderColor: `${theme.primary} transparent transparent transparent` }}
-          ></div>
-          <div className="text-xl font-semibold" style={{ color: theme.text }}>Loading delicious menus...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" style={{ borderColor: theme.primary }}></div>
+          <div className="text-xl font-semibold" style={{ color: theme.text }}>Loading menus...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div 
-      className="min-h-screen transition-all duration-300"
-      style={{ backgroundColor: theme.background }}
-    >
+    <div className="min-h-screen transition-all duration-300" style={{ backgroundColor: theme.background }}>
       {/* Header */}
-      <header 
-        className="sticky top-0 z-50 transition-all duration-300 border-b backdrop-blur-md"
-        style={{ 
-          backgroundColor: `${theme.panels}95`,
-          borderColor: theme.border 
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-6">
+      <header className="border-b sticky top-0 z-40 backdrop-blur-md"
+              style={{ backgroundColor: `${theme.panels}95`, borderColor: theme.border }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              {/* Back to Dashboard */}
-              <Link
-                to="/dashboard"
-                className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ 
-                  backgroundColor: theme.panels,
-                  color: theme.textSecondary 
-                }}
-              >
+              <Link to="/dashboard" className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+                    style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
                 <FiArrowLeft size={20} />
               </Link>
-              
-              {/* Logo */}
-              <div className="flex items-center space-x-2">
-                <MdRestaurant 
-                  size={28} 
-                  style={{ color: theme.primary }} 
-                />
-                <span 
-                  className="text-2xl font-bold"
-                  style={{ color: theme.primary }}
-                >
-                  NourishNet
-                </span>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                   style={{ backgroundColor: theme.primary }}>
+                <MdRestaurant size={24} color="white" />
               </div>
+              <h1 className="text-2xl font-bold" style={{ color: theme.text }}>NourishNet</h1>
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                style={{ 
-                  backgroundColor: theme.panels,
-                  color: theme.textSecondary 
-                }}
-              >
+              <button className="p-2 rounded-lg hover:opacity-80 transition-opacity relative"
+                      style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
+                <FiBell size={20} />
+                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+                      style={{ backgroundColor: theme.primary }}></span>
+              </button>
+
+              <button onClick={toggleTheme} className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+                      style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
                 {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
               </button>
 
-              {/* User Info */}
               <div className="flex items-center space-x-3">
-                <div 
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold"
-                  style={{ 
-                    backgroundColor: theme.secondary,
-                    color: 'white'
-                  }}
-                >
-                  {user?.first_name?.charAt(0) || user?.username?.charAt(0) || 'U'}
+                <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                     style={{ backgroundColor: theme.secondary }}>
+                  <FiUser size={16} color="white" />
                 </div>
-                <span style={{ color: theme.text }}>
+                <span className="font-medium" style={{ color: theme.text }}>
                   {user?.first_name || user?.username}
                 </span>
               </div>
+
+              <button onClick={() => logout()} 
+                      className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
+                      style={{ backgroundColor: theme.error, color: 'white' }}>
+                <FiLogOut size={16} />
+                <span>Logout</span>
+              </button>
             </div>
           </div>
         </div>
@@ -198,348 +186,206 @@ const Menu = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 
-            className="text-4xl font-bold mb-2"
-            style={{ color: theme.text }}
-          >
+          <h1 className="text-4xl font-bold mb-2" style={{ color: theme.text }}>
             Available Tiffin Menus
           </h1>
-          <p 
-            className="text-lg"
-            style={{ color: theme.textSecondary }}
-          >
+          <p className="text-lg" style={{ color: theme.textSecondary }}>
             Discover delicious home-cooked meals from verified vendors in your area
           </p>
         </div>
 
         {/* Search and Filter Controls */}
-        <div 
-          className="p-6 rounded-2xl border mb-8"
-          style={{ 
-            backgroundColor: theme.panels,
-            borderColor: theme.border 
-          }}
-        >
+        <div className="p-6 rounded-2xl border mb-8"
+             style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
           <div className="flex flex-col md:flex-row gap-4">
-            {/* Search Box */}
+            {/* Search Bar */}
             <div className="flex-1 relative">
-              <FiSearch 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                style={{ color: theme.textSecondary }}
-                size={20}
-              />
+              <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2"
+                        style={{ color: theme.textSecondary }} size={20} />
               <input
                 type="text"
-                placeholder="Search by kitchen name or menu..."
+                placeholder="Search menus, vendors, or specialties..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
+                className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
                 style={{
                   backgroundColor: theme.background,
                   borderColor: theme.border,
-                  color: theme.text,
-                  focusRingColor: theme.primary
+                  color: theme.text
                 }}
               />
             </div>
-            
+
             {/* Category Filter */}
-            <div className="relative min-w-48">
-              <FiFilter 
-                className="absolute left-3 top-1/2 transform -translate-y-1/2" 
-                style={{ color: theme.textSecondary }}
-                size={20}
-              />
+            <div className="flex items-center space-x-2">
+              <FiFilter style={{ color: theme.textSecondary }} size={20} />
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-lg border focus:ring-2 focus:ring-opacity-50 transition-all duration-300 appearance-none cursor-pointer"
+                className="px-4 py-3 border rounded-xl focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
                 style={{
                   backgroundColor: theme.background,
                   borderColor: theme.border,
                   color: theme.text
                 }}
               >
-                {categories.map(cat => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
+                {categories.map(category => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
                   </option>
                 ))}
               </select>
             </div>
           </div>
-          
-          {/* Results Count */}
-          <div className="mt-4 pt-4 border-t" style={{ borderColor: theme.border }}>
-            <p style={{ color: theme.textSecondary }}>
-              Found <span style={{ color: theme.primary, fontWeight: 'bold' }}>{filteredMenus.length}</span> available menus
-              {searchTerm && ` for "${searchTerm}"`}
-            </p>
-          </div>
         </div>
 
         {/* Error State */}
-        {error && (
-          <div 
-            className="p-6 rounded-2xl border text-center mb-8"
-            style={{ 
-              backgroundColor: `${theme.error}10`,
-              borderColor: theme.error,
-              color: theme.error 
-            }}
-          >
-            <p className="mb-4">{error}</p>
+        {error ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">😞</div>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: theme.text }}>
+              {error}
+            </h3>
             <button 
               onClick={fetchMenus}
-              className="px-6 py-2 rounded-lg font-semibold transition-all duration-300"
-              style={{ 
-                backgroundColor: theme.primary,
-                color: 'white'
-              }}
+              className="px-6 py-3 rounded-lg font-medium transition-all duration-300"
+              style={{ backgroundColor: theme.primary, color: 'white' }}
             >
               Try Again
             </button>
           </div>
-        )}
-
-        {/* Menus Grid */}
-        {filteredMenus.length === 0 && !loading && !error ? (
-          <div 
-            className="text-center py-16 rounded-2xl border"
-            style={{ 
-              backgroundColor: theme.panels,
-              borderColor: theme.border 
-            }}
-          >
-            <MdRestaurant 
-              size={64} 
-              className="mx-auto mb-4 opacity-50"
-              style={{ color: theme.textSecondary }}
-            />
-            <h3 
-              className="text-xl font-semibold mb-2"
-              style={{ color: theme.text }}
-            >
+        ) : filteredMenus.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🍽️</div>
+            <h3 className="text-xl font-semibold mb-2" style={{ color: theme.text }}>
               No menus found
             </h3>
             <p style={{ color: theme.textSecondary }}>
-              {searchTerm ? 'Try adjusting your search terms' : 'No menus are currently available'}
+              Try adjusting your search or filter criteria
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredMenus.map(menu => (
+          /* Menus Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredMenus.map((menu) => (
               <div
-                key={menu.id}
-                className="rounded-2xl border shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
-                style={{
-                  backgroundColor: theme.panels,
-                  borderColor: theme.border
-                }}
+                key={menu._id}
+                className="rounded-3xl border overflow-hidden hover:shadow-2xl transition-all duration-500 hover:scale-105"
+                style={{ backgroundColor: theme.panels, borderColor: theme.border }}
               >
-                {/* Menu Card Header */}
-                <div className="p-6 border-b" style={{ borderColor: theme.border }}>
-                  <div className="flex justify-between items-start mb-3">
-                    <h3 
-                      className="text-xl font-bold"
-                      style={{ color: theme.text }}
-                    >
-                      {menu.name}
-                    </h3>
-                    <div 
-                      className="px-3 py-1 rounded-full text-sm font-semibold"
-                      style={{ 
-                        backgroundColor: `${theme.success}20`,
-                        color: theme.success 
-                      }}
-                    >
-                      Available
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <MdRestaurant style={{ color: theme.primary }} />
-                      <span 
-                        className="font-semibold"
-                        style={{ color: theme.primary }}
-                      >
-                        {menu.vendor.kitchen_name}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <FiMapPin style={{ color: theme.textSecondary }} />
-                      <span 
-                        className="text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {menu.vendor.address}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center space-x-2">
-                      <FiPhone style={{ color: theme.textSecondary }} />
-                      <span 
-                        className="text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {menu.vendor.phone_number}
+                {/* Menu Image */}
+                {menu.image && (
+                  <div className="h-48 bg-cover bg-center relative"
+                       style={{ backgroundImage: `url(${menu.image})` }}>
+                    <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+                    <div className="absolute top-4 right-4">
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                        menu.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {menu.is_active ? 'Available' : 'Sold Out'}
                       </span>
                     </div>
                   </div>
-                </div>
+                )}
 
-                {/* Menu Items */}
                 <div className="p-6">
-                  <h4 
-                    className="font-semibold mb-4 flex items-center space-x-2"
-                    style={{ color: theme.text }}
-                  >
-                    <MdLocalDining />
-                    <span>Today's Menu ({new Date(menu.date).toLocaleDateString()})</span>
-                  </h4>
-                  
-                  <div className="space-y-3 mb-6">
-                    {menu.menu_items.slice(0, 3).map(item => (
-                      <div 
-                        key={item.id}
-                        className="flex justify-between items-start p-3 rounded-lg border"
-                        style={{ 
-                          backgroundColor: theme.background,
-                          borderColor: theme.border 
-                        }}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-1">
-                            <span style={{ color: theme.primary }}>
-                              {getCategoryIcon(item.category)}
-                            </span>
-                            <span 
-                              className="font-medium"
-                              style={{ color: theme.text }}
-                            >
-                              {item.name}
-                            </span>
-                          </div>
-                          
-                          <p 
-                            className="text-sm mb-2"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            {item.description}
-                          </p>
-                          
-                          <div className="flex items-center space-x-2 text-xs">
-                            {item.is_vegetarian && (
-                              <span 
-                                className="px-2 py-1 rounded-full"
-                                style={{ 
-                                  backgroundColor: `${theme.success}20`,
-                                  color: theme.success 
-                                }}
-                              >
-                                Veg
-                              </span>
-                            )}
-                            {item.is_spicy && (
-                              <span 
-                                className="px-2 py-1 rounded-full"
-                                style={{ 
-                                  backgroundColor: `${theme.error}20`,
-                                  color: theme.error 
-                                }}
-                              >
-                                Spicy
-                              </span>
-                            )}
-                            <div className="flex items-center space-x-1">
-                              <FiClock style={{ color: theme.textSecondary }} />
-                              <span style={{ color: theme.textSecondary }}>
-                                {item.preparation_time}m
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div 
-                          className="text-lg font-bold ml-4"
-                          style={{ color: theme.success }}
-                        >
-                          ₹{item.price}
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {menu.menu_items.length > 3 && (
-                      <div 
-                        className="text-center text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        +{menu.menu_items.length - 3} more items
-                      </div>
+                  {/* Menu Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
+                        {menu.name}
+                      </h3>
+                      <p className="flex items-center space-x-1" style={{ color: theme.textSecondary }}>
+                        <FiMapPin size={16} />
+                        <span>{menu.vendor?.business_name || 'Vendor Name'}</span>
+                      </p>
+                    </div>
+                    <button className="p-2 hover:opacity-80 transition-opacity">
+                      <FiHeart size={20} style={{ color: theme.textSecondary }} />
+                    </button>
+                  </div>
+
+                  {/* Menu Tags */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {menu.is_veg_only && (
+                      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                        Vegetarian
+                      </span>
+                    )}
+                    {menu.cooking_style && (
+                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                        {menu.cooking_style}
+                      </span>
                     )}
                   </div>
 
-                  {/* Special Instructions */}
-                  {menu.special_instructions && (
-                    <div 
-                      className="p-3 rounded-lg mb-4 border-l-4"
-                      style={{ 
-                        backgroundColor: `${theme.primary}10`,
-                        borderColor: theme.primary 
-                      }}
-                    >
-                      <p 
-                        className="text-sm font-medium mb-1"
-                        style={{ color: theme.text }}
-                      >
-                        Special Instructions:
-                      </p>
-                      <p 
-                        className="text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {menu.special_instructions}
-                      </p>
+                  {/* Today's Special */}
+                  {menu.todays_special && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                      <div className="flex items-start space-x-2">
+                        <FiStar className="text-yellow-600 mt-0.5" size={16} />
+                        <div>
+                          <h4 className="font-medium text-yellow-800 text-sm">Today's Special</h4>
+                          <p className="text-yellow-700 text-sm mt-1">{menu.todays_special}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
+
+                  {/* Menu Items Count */}
+                  <div className="flex justify-between text-sm mb-4" style={{ color: theme.textSecondary }}>
+                    <span>Main: {menu.main_items?.length || 0}</span>
+                    <span>Sides: {menu.side_items?.length || 0}</span>
+                    <span>Extras: {menu.extras?.length || 0}</span>
+                  </div>
+
+                  {/* Availability */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center space-x-2">
+                      <FiClock size={16} style={{ color: theme.textSecondary }} />
+                      <span className="text-sm" style={{ color: theme.textSecondary }}>
+                        Available today
+                      </span>
+                    </div>
+                    <div className="text-sm" style={{ color: theme.textSecondary }}>
+                      {Math.max(0, menu.max_dabbas - (menu.dabbas_sold || 0))} left
+                    </div>
+                  </div>
 
                   {/* Menu Footer */}
                   <div className="flex justify-between items-center">
                     <div>
-                      <div 
-                        className="text-2xl font-bold"
-                        style={{ color: theme.success }}
-                      >
-                        ₹{menu.total_price}
-                      </div>
-                      <div 
-                        className="text-sm"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {menu.available_slots} slots remaining
+                      <div className="text-2xl font-bold" style={{ color: theme.success }}>
+                        ₹{menu.full_dabba_price}
                       </div>
                     </div>
                     
-                    <button 
-                      className="px-6 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                      style={{ 
-                        backgroundColor: menu.available_slots > 0 ? theme.primary : theme.textSecondary,
-                        color: 'white'
-                      }}
-                      disabled={menu.available_slots === 0}
-                      onClick={() => {
-                        if (menu.available_slots > 0) {
-                          toast.success('Order feature coming soon!');
-                        }
-                      }}
-                    >
-                      <FiShoppingCart />
-                      <span>
-                        {menu.available_slots === 0 ? 'Sold Out' : 'Order Now'}
-                      </span>
-                    </button>
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => handleSubscriptionClick(menu.vendor)}
+                        className="px-4 py-2 border rounded-lg font-medium transition-all duration-300 hover:scale-105 text-sm"
+                        style={{ 
+                          borderColor: theme.primary,
+                          color: theme.primary,
+                          backgroundColor: `${theme.primary}10`
+                        }}
+                      >
+                        Subscribe
+                      </button>
+                      
+                      <button 
+                        onClick={() => handleOrderClick(menu)}
+                        disabled={!menu.is_active || (menu.max_dabbas - (menu.dabbas_sold || 0)) === 0}
+                        className="px-4 py-2 rounded-lg font-medium transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center space-x-2"
+                        style={{ 
+                          backgroundColor: theme.primary,
+                          color: 'white'
+                        }}
+                      >
+                        <FiShoppingCart size={16} />
+                        <span>Order</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -547,6 +393,32 @@ const Menu = () => {
           </div>
         )}
       </div>
+
+      {/* Order Form Modal */}
+      {showOrderForm && selectedMenu && selectedVendor && (
+        <OrderForm
+          menu={selectedMenu}
+          vendor={selectedVendor}
+          onClose={closeModals}
+          onSuccess={(order) => {
+            toast.success('Order placed successfully!');
+            fetchMenus(); // Refresh to update availability
+            closeModals();
+          }}
+        />
+      )}
+
+      {/* Subscription Form Modal */}
+      {showSubscriptionForm && selectedVendor && (
+        <SubscriptionForm
+          vendor={selectedVendor}
+          onClose={closeModals}
+          onSuccess={(subscription) => {
+            toast.success('Subscription created successfully!');
+            closeModals();
+          }}
+        />
+      )}
     </div>
   );
 };
