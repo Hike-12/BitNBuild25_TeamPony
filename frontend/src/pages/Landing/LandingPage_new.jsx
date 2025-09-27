@@ -496,7 +496,7 @@ const LandingPage = () => {
                   borderColor: activeFeature === index ? feature.color : `${theme.border}30`,
                   boxShadow: activeFeature === index ? `0 10px 30px ${feature.color}20` : `0 4px 16px ${theme.primary}10`
                 }}
-                onClick={() => handleFeatureClick(index, feature.points)}
+                // onClick={() => handleFeatureClick(index, feature.points)}
               >
                 {activeFeature === index && (
                   <div 
