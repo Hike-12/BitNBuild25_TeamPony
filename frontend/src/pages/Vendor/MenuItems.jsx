@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FaLeaf, FaFireAlt, FaDrumstickBite, FaBreadSlice, FaUtensils, FaGlassWhiskey, FaIceCream, FaCarrot, FaSeedling, FaCheckCircle, FaTimesCircle, FaEdit, FaTrash } from "react-icons/fa";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import toast from "react-hot-toast";
@@ -124,30 +125,20 @@ const MenuItems = () => {
   };
 
   const categories = [
-    { value: "roti_bread", label: "Roti/Bread" },
-    { value: "sabzi", label: "Sabzi" },
-    { value: "dal", label: "Dal" },
-    { value: "rice_item", label: "Rice Items" },
-    { value: "non_veg", label: "Non-Veg" },
-    { value: "pickle_papad", label: "Pickle/Papad" },
-    { value: "sweet", label: "Sweet" },
-    { value: "drink", label: "Drink" },
-    { value: "raita_salad", label: "Raita/Salad" },
+    { value: "roti_bread", label: "Roti/Bread", icon: <FaBreadSlice /> },
+    { value: "sabzi", label: "Sabzi", icon: <FaCarrot /> },
+    { value: "dal", label: "Dal", icon: <FaUtensils /> },
+    { value: "rice_item", label: "Rice Items", icon: <FaSeedling /> },
+    { value: "non_veg", label: "Non-Veg", icon: <FaDrumstickBite /> },
+    { value: "pickle_papad", label: "Pickle/Papad", icon: <FaLeaf /> },
+    { value: "sweet", label: "Sweet", icon: <FaIceCream /> },
+    { value: "drink", label: "Drink", icon: <FaGlassWhiskey /> },
+    { value: "raita_salad", label: "Raita/Salad", icon: <FaSeedling /> },
   ];
 
-  const getCategoryEmoji = (category) => {
-    const emojiMap = {
-      roti_bread: "🍞",
-      sabzi: "🥬",
-      dal: "🍲",
-      rice_item: "🍚",
-      non_veg: "🍖",
-      pickle_papad: "🥒",
-      sweet: "🍮",
-      drink: "🥤",
-      raita_salad: "🥗",
-    };
-    return emojiMap[category] || "🍽️";
+  const getCategoryIcon = (category) => {
+    const found = categories.find((cat) => cat.value === category);
+    return found ? found.icon : <FaUtensils />;
   };
 
   if (loading) {
@@ -158,7 +149,7 @@ const MenuItems = () => {
       >
         <div className="text-center">
           <div
-            className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent mx-auto mb-4"
+            className="animate-spin rounded-full h-20 w-20 border-8 border-t-transparent mx-auto mb-6 shadow-lg"
             style={{
               borderColor: `${theme?.primary || '#007bff'} transparent transparent transparent`,
             }}
@@ -183,7 +174,7 @@ const MenuItems = () => {
           </p>
           <button
             onClick={fetchMenuItems}
-            className="px-6 py-2 rounded-lg font-semibold transition-all duration-300"
+            className="px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-md hover:scale-105"
             style={{
               backgroundColor: theme?.primary || '#007bff',
               color: "white",
@@ -203,7 +194,7 @@ const MenuItems = () => {
     >
       {/* Header */}
       <header
-        className="sticky top-0 z-40 border-b backdrop-blur-md"
+        className="sticky top-0 z-40 border-b backdrop-blur-md shadow-xl"
         style={{
           backgroundColor: `${theme?.panels || '#f8f9fa'}95`,
           borderColor: theme?.border || '#dee2e6',
@@ -226,16 +217,16 @@ const MenuItems = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+  <main className="max-w-7xl mx-auto py-10 px-4 sm:px-8 lg:px-12">
         {/* Header Section */}
         <div
-          className="rounded-2xl border p-6 mb-6 backdrop-blur-sm"
+          className="rounded-3xl border p-8 mb-10 backdrop-blur-sm shadow-xl"
           style={{
             backgroundColor: theme?.panels || '#f8f9fa',
             borderColor: theme?.border || '#dee2e6',
           }}
         >
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center justify-between flex-wrap gap-6">
             <div>
               <h2
                 className="text-xl font-semibold mb-2"
@@ -252,7 +243,7 @@ const MenuItems = () => {
             </div>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+              className="px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-md hover:scale-105"
               style={{
                 backgroundColor: theme?.success || '#28a745',
                 color: "white",
@@ -266,7 +257,7 @@ const MenuItems = () => {
         {/* Menu Items Grid */}
         {menuItems.length === 0 ? (
           <div
-            className="rounded-2xl border p-8 text-center"
+            className="rounded-3xl border p-12 text-center shadow-xl flex flex-col items-center justify-center"
             style={{
               backgroundColor: theme?.panels || '#f8f9fa',
               borderColor: theme?.border || '#dee2e6',
@@ -278,7 +269,7 @@ const MenuItems = () => {
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
-              className="px-6 py-3 rounded-lg font-semibold transition-all duration-300"
+              className="px-8 py-3 rounded-xl font-bold transition-all duration-300 shadow-md hover:scale-105"
               style={{
                 backgroundColor: theme?.primary || '#007bff',
                 color: "white",
@@ -288,7 +279,7 @@ const MenuItems = () => {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {menuItems.map((item) => (
               <div
                 key={item.id || item._id}
@@ -396,13 +387,13 @@ const MenuItems = () => {
                       className="text-sm hover:opacity-80 transition-opacity"
                       style={{ color: theme?.primary || '#007bff' }}
                     >
-                      Edit
+                      <FaEdit /> Edit
                     </button>
                     <button
                       className="text-sm hover:opacity-80 transition-opacity"
                       style={{ color: theme?.error || '#dc3545' }}
                     >
-                      Delete
+                      <FaTrash /> Delete
                     </button>
                   </div>
                 </div>
@@ -414,9 +405,9 @@ const MenuItems = () => {
 
       {/* Create Menu Item Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
           <div
-            className="rounded-2xl border p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="rounded-3xl border p-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
             style={{
               backgroundColor: theme?.panels || '#f8f9fa',
               borderColor: theme?.border || '#dee2e6',
@@ -435,7 +426,7 @@ const MenuItems = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateMenuItem} className="space-y-4">
+            <form onSubmit={handleCreateMenuItem} className="space-y-6">
               {/* Item Name */}
               <div>
                 <label
@@ -449,7 +440,7 @@ const MenuItems = () => {
                   name="name"
                   value={createForm.name}
                   onChange={handleCreateFormChange}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
+                  className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300 text-lg shadow"
                   style={{
                     backgroundColor: theme?.background || '#ffffff',
                     borderColor: theme?.border || '#dee2e6',
@@ -461,7 +452,7 @@ const MenuItems = () => {
               </div>
 
               {/* Category and Price */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label
                     className="block mb-2 font-medium"
@@ -473,7 +464,7 @@ const MenuItems = () => {
                     name="category"
                     value={createForm.category}
                     onChange={handleCreateFormChange}
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
+                    className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300 text-lg shadow"
                     style={{
                       backgroundColor: theme?.background || '#ffffff',
                       borderColor: theme?.border || '#dee2e6',
@@ -502,7 +493,7 @@ const MenuItems = () => {
                     onChange={handleCreateFormChange}
                     min="0"
                     step="0.01"
-                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
+                    className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300 text-lg shadow"
                     style={{
                       backgroundColor: theme?.background || '#ffffff',
                       borderColor: theme?.border || '#dee2e6',
@@ -515,8 +506,8 @@ const MenuItems = () => {
               </div>
 
               {/* Checkboxes */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <label className="flex items-center cursor-pointer">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <label className="flex items-center cursor-pointer text-lg font-bold">
                   <input
                     type="checkbox"
                     name="is_vegetarian"
@@ -530,7 +521,7 @@ const MenuItems = () => {
                   </span>
                 </label>
 
-                <label className="flex items-center cursor-pointer">
+                <label className="flex items-center cursor-pointer text-lg font-bold">
                   <input
                     type="checkbox"
                     name="is_spicy"
@@ -542,7 +533,7 @@ const MenuItems = () => {
                   <span style={{ color: theme?.textSecondary || '#6c757d' }}>🌶️ Spicy</span>
                 </label>
 
-                <label className="flex items-center cursor-pointer">
+                <label className="flex items-center cursor-pointer text-lg font-bold">
                   <input
                     type="checkbox"
                     name="is_available_today"
@@ -558,7 +549,7 @@ const MenuItems = () => {
               </div>
 
               {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-4">
+              <div className="flex justify-end space-x-6 pt-6">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
@@ -570,7 +561,7 @@ const MenuItems = () => {
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-8 py-3 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                   style={{
                     backgroundColor: theme?.success || '#28a745',
                     color: "white",
