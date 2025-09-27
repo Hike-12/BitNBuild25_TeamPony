@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import { getAuthHeaders, handleApiError } from "../../utils/api";
+import { FaGem, FaUsers, FaRupeeSign, FaUtensils } from "react-icons/fa";
 
 const VendorDashboard = () => {
-  const { isDarkMode, theme } = useTheme();
+  // const { isDarkMode, theme } = useTheme();
   const [showOverview, setShowOverview] = useState(false);
   const { vendor, logout } = useVendorAuth();
   const [profile, setProfile] = useState(null);
@@ -246,7 +247,7 @@ const VendorDashboard = () => {
             </h3>
             <p className="text-3xl font-bold text-[#F0F6FC]">
               {dashboardData?.totalOrders || 0}
-            </h3>
+            </p>
             <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
               Total Orders
             </p>

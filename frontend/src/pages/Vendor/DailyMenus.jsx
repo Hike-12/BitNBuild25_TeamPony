@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
-import { FaCalendarAlt, FaLeaf, FaCheckCircle, FaTimesCircle, FaStar, FaFire } from "react-icons/fa";
+import { FaCalendarAlt, FaLeaf, FaCheckCircle, FaTimesCircle, FaStar, FaFire, FaUtensils, FaFireAlt } from "react-icons/fa";
 import { MdFoodBank } from "react-icons/md";
 import { GiCookingPot } from "react-icons/gi";
 
