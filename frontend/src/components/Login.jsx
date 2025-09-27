@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { Sun, Moon, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -14,6 +17,7 @@ const Login = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { user, login, register } = useAuth();
+  const { isDarkMode, toggleTheme, theme } = useTheme();
 
   if (user) {
     return <Navigate to="/dashboard" />;
@@ -105,16 +109,64 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center px-4">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 transition-all duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Theme Toggle */}
+      <button
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+        style={{ 
+          backgroundColor: theme.panels,
+          color: theme.text,
+          border: `1px solid ${theme.border}`
+        }}
+      >
+        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
       <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-[#F0F6FC]">
-            {isLogin ? 'Sign in to your account' : 'Create your account'}
+        <div className="text-center">
+          <div className="mb-6">
+            <div 
+              className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center shadow-lg"
+              style={{ backgroundColor: theme.primary }}
+            >
+              <User size={32} color="white" />
+            </div>
+          </div>
+          <h2 
+            className="text-3xl font-bold mb-2"
+            style={{ color: theme.text }}
+          >
+            {isLogin ? 'Welcome Back' : 'Join NourishNet'}
           </h2>
+          <p 
+            className="text-sm"
+            style={{ color: theme.textSecondary }}
+          >
+            {isLogin ? 'Sign in to your account' : 'Create your account to get started'}
+          </p>
         </div>
-        <form className="mt-8 space-y-6 bg-[#161B22] p-8 rounded-lg border border-[#21262D]" onSubmit={handleSubmit}>
+
+        <form 
+          className="space-y-6 p-8 rounded-2xl shadow-xl border backdrop-blur-sm"
+          style={{ 
+            backgroundColor: theme.panels,
+            borderColor: theme.border
+          }}
+          onSubmit={handleSubmit}
+        >
           {errors.form && (
-            <div className="bg-[#EF4444] bg-opacity-10 border border-[#EF4444] text-[#EF4444] px-4 py-3 rounded">
+            <div 
+              className="px-4 py-3 rounded-lg border text-sm font-medium"
+              style={{ 
+                backgroundColor: `${theme.error}15`,
+                borderColor: theme.error,
+                color: theme.error
+              }}
+            >
               {errors.form}
             </div>
           )}
@@ -122,43 +174,88 @@ const Login = () => {
           <div className="space-y-4">
             {/* Username Field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+              <label 
+                htmlFor="username" 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: theme.text }}
+              >
                 Username
               </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                placeholder="Enter your username"
-              />
-              {errors.username && <p className="mt-1 text-sm text-[#EF4444]">{errors.username}</p>}
+              <div className="relative">
+                <User 
+                  size={18} 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                  style={{ color: theme.textSecondary }}
+                />
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                  style={{ 
+                    backgroundColor: theme.background,
+                    borderColor: errors.username ? theme.error : theme.border,
+                    color: theme.text,
+                    focusRingColor: theme.primary
+                  }}
+                  placeholder="Enter your username"
+                />
+              </div>
+              {errors.username && (
+                <p className="mt-1 text-sm font-medium" style={{ color: theme.error }}>
+                  {errors.username}
+                </p>
+              )}
             </div>
 
             {/* Signup Only Fields */}
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                  <label 
+                    htmlFor="email" 
+                    className="block text-sm font-semibold mb-2"
+                    style={{ color: theme.text }}
+                  >
                     Email
                   </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                    placeholder="Enter your email"
-                  />
-                  {errors.email && <p className="mt-1 text-sm text-[#EF4444]">{errors.email}</p>}
+                  <div className="relative">
+                    <Mail 
+                      size={18} 
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.email ? theme.error : theme.border,
+                        color: theme.text
+                      }}
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="mt-1 text-sm font-medium" style={{ color: theme.error }}>
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                    <label 
+                      htmlFor="first_name" 
+                      className="block text-sm font-semibold mb-2"
+                      style={{ color: theme.text }}
+                    >
                       First Name
                     </label>
                     <input
@@ -167,14 +264,27 @@ const Login = () => {
                       type="text"
                       value={formData.first_name}
                       onChange={handleChange}
-                      className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
+                      className="w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.first_name ? theme.error : theme.border,
+                        color: theme.text
+                      }}
                       placeholder="First name"
                     />
-                    {errors.first_name && <p className="mt-1 text-sm text-[#EF4444]">{errors.first_name}</p>}
+                    {errors.first_name && (
+                      <p className="mt-1 text-sm font-medium" style={{ color: theme.error }}>
+                        {errors.first_name}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                    <label 
+                      htmlFor="last_name" 
+                      className="block text-sm font-semibold mb-2"
+                      style={{ color: theme.text }}
+                    >
                       Last Name
                     </label>
                     <input
@@ -183,10 +293,19 @@ const Login = () => {
                       type="text"
                       value={formData.last_name}
                       onChange={handleChange}
-                      className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
+                      className="w-full px-4 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.last_name ? theme.error : theme.border,
+                        color: theme.text
+                      }}
                       placeholder="Last name"
                     />
-                    {errors.last_name && <p className="mt-1 text-sm text-[#EF4444]">{errors.last_name}</p>}
+                    {errors.last_name && (
+                      <p className="mt-1 text-sm font-medium" style={{ color: theme.error }}>
+                        {errors.last_name}
+                      </p>
+                    )}
                   </div>
                 </div>
               </>
@@ -194,19 +313,47 @@ const Login = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+              <label 
+                htmlFor="password" 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: theme.text }}
+              >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                placeholder={isLogin ? "Enter your password" : "Create a password (min 8 characters)"}
-              />
-              {errors.password && <p className="mt-1 text-sm text-[#EF4444]">{errors.password}</p>}
+              <div className="relative">
+                <Lock 
+                  size={18} 
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2" 
+                  style={{ color: theme.textSecondary }}
+                />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-12 py-3 rounded-lg border transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                  style={{ 
+                    backgroundColor: theme.background,
+                    borderColor: errors.password ? theme.error : theme.border,
+                    color: theme.text
+                  }}
+                  placeholder={isLogin ? "Enter your password" : "Create a password (min 8 characters)"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:opacity-70 transition-opacity"
+                  style={{ color: theme.textSecondary }}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm font-medium" style={{ color: theme.error }}>
+                  {errors.password}
+                </p>
+              )}
             </div>
           </div>
 
@@ -214,11 +361,15 @@ const Login = () => {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#F97316] hover:bg-[#EA580C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F97316] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 px-4 rounded-lg text-white font-semibold transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              style={{ 
+                backgroundColor: theme.primary,
+                boxShadow: `0 4px 20px ${theme.primary}30`
+              }}
             >
               {loading 
                 ? (isLogin ? 'Signing in...' : 'Creating account...') 
-                : (isLogin ? 'Sign in' : 'Create account')
+                : (isLogin ? 'Sign In' : 'Create Account')
               }
             </button>
           </div>
@@ -227,7 +378,8 @@ const Login = () => {
             <button
               type="button"
               onClick={switchMode}
-              className="text-[#F97316] hover:text-[#EA580C] text-sm underline bg-transparent border-none cursor-pointer"
+              className="text-sm font-medium hover:underline transition-all duration-200"
+              style={{ color: theme.secondary }}
             >
               {isLogin 
                 ? "Don't have an account? Sign up" 

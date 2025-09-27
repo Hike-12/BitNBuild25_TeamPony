@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useVendorAuth } from '../context/VendorAuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { Sun, Moon, Store, User, Mail, Lock, Phone, FileText, MapPin, Eye, EyeOff } from 'lucide-react';
 
 const VendorLogin = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -18,6 +21,7 @@ const VendorLogin = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const { vendor, login, register } = useVendorAuth();
+  const { isDarkMode, toggleTheme, theme } = useTheme();
 
   if (vendor) {
     return <Navigate to="/vendor/dashboard" />;
@@ -133,63 +137,152 @@ const VendorLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1117] flex items-center justify-center px-4">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-8 transition-all duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Theme Toggle */}
+      <button
+        onClick={toggleTheme}
+        className="fixed top-6 right-6 p-3 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-10"
+        style={{ 
+          backgroundColor: theme.panels,
+          color: theme.text,
+          border: `1px solid ${theme.border}`
+        }}
+      >
+        {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
       <div className="max-w-2xl w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-[#F0F6FC]">
-            {isLogin ? 'Vendor Sign In' : 'Register Your Business'}
+        <div className="text-center">
+          <div className="mb-6">
+            <div 
+              className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-xl"
+              style={{ backgroundColor: theme.primary }}
+            >
+              <Store size={40} color="white" />
+            </div>
+          </div>
+          <h2 
+            className="text-4xl font-bold mb-3"
+            style={{ color: theme.text }}
+          >
+            {isLogin ? 'Vendor Portal' : 'Join as Partner'}
           </h2>
-          <p className="mt-2 text-center text-sm text-[#8B949E]">
-            {isLogin ? 'Access your vendor dashboard' : 'Join NourishNet as a vendor partner'}
+          <p 
+            className="text-lg"
+            style={{ color: theme.textSecondary }}
+          >
+            {isLogin ? 'Access your business dashboard' : 'Register your business with NourishNet'}
           </p>
         </div>
-        <form className="mt-8 space-y-6 bg-[#161B22] p-8 rounded-lg border border-[#21262D]" onSubmit={handleSubmit}>
+
+        <form 
+          className="space-y-6 p-10 rounded-3xl shadow-2xl border backdrop-blur-sm"
+          style={{ 
+            backgroundColor: theme.panels,
+            borderColor: theme.border
+          }}
+          onSubmit={handleSubmit}
+        >
           {errors.form && (
-            <div className="bg-[#EF4444] bg-opacity-10 border border-[#EF4444] text-[#EF4444] px-4 py-3 rounded">
+            <div 
+              className="px-6 py-4 rounded-xl border text-sm font-semibold"
+              style={{ 
+                backgroundColor: `${theme.error}15`,
+                borderColor: theme.error,
+                color: theme.error
+              }}
+            >
               {errors.form}
             </div>
           )}
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Username Field */}
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+              <label 
+                htmlFor="username" 
+                className="block text-sm font-bold mb-3"
+                style={{ color: theme.text }}
+              >
                 Username
               </label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                value={formData.username}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                placeholder="Enter your username"
-              />
-              {errors.username && <p className="mt-1 text-sm text-[#EF4444]">{errors.username}</p>}
+              <div className="relative">
+                <User 
+                  size={20} 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                  style={{ color: theme.textSecondary }}
+                />
+                <input
+                  id="username"
+                  name="username"
+                  type="text"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:border-opacity-100"
+                  style={{ 
+                    backgroundColor: theme.background,
+                    borderColor: errors.username ? theme.error : theme.border,
+                    color: theme.text
+                  }}
+                  placeholder="Enter your username"
+                />
+              </div>
+              {errors.username && (
+                <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                  {errors.username}
+                </p>
+              )}
             </div>
 
             {/* Signup Only Fields */}
             {!isLogin && (
               <>
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-[#F0F6FC] mb-2">
-                    Email
+                  <label 
+                    htmlFor="email" 
+                    className="block text-sm font-bold mb-3"
+                    style={{ color: theme.text }}
+                  >
+                    Email Address
                   </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                    placeholder="Enter your email"
-                  />
-                  {errors.email && <p className="mt-1 text-sm text-[#EF4444]">{errors.email}</p>}
+                  <div className="relative">
+                    <Mail 
+                      size={20} 
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.email ? theme.error : theme.border,
+                        color: theme.text
+                      }}
+                      placeholder="Enter your email"
+                    />
+                  </div>
+                  {errors.email && (
+                    <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label htmlFor="first_name" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                    <label 
+                      htmlFor="first_name" 
+                      className="block text-sm font-bold mb-3"
+                      style={{ color: theme.text }}
+                    >
                       First Name
                     </label>
                     <input
@@ -198,14 +291,27 @@ const VendorLogin = () => {
                       type="text"
                       value={formData.first_name}
                       onChange={handleChange}
-                      className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
+                      className="w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.first_name ? theme.error : theme.border,
+                        color: theme.text
+                      }}
                       placeholder="First name"
                     />
-                    {errors.first_name && <p className="mt-1 text-sm text-[#EF4444]">{errors.first_name}</p>}
+                    {errors.first_name && (
+                      <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                        {errors.first_name}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label htmlFor="last_name" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                    <label 
+                      htmlFor="last_name" 
+                      className="block text-sm font-bold mb-3"
+                      style={{ color: theme.text }}
+                    >
                       Last Name
                     </label>
                     <input
@@ -214,76 +320,165 @@ const VendorLogin = () => {
                       type="text"
                       value={formData.last_name}
                       onChange={handleChange}
-                      className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
+                      className="w-full px-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.last_name ? theme.error : theme.border,
+                        color: theme.text
+                      }}
                       placeholder="Last name"
                     />
-                    {errors.last_name && <p className="mt-1 text-sm text-[#EF4444]">{errors.last_name}</p>}
+                    {errors.last_name && (
+                      <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                        {errors.last_name}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="business_name" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                  <label 
+                    htmlFor="business_name" 
+                    className="block text-sm font-bold mb-3"
+                    style={{ color: theme.text }}
+                  >
                     Business Name
                   </label>
-                  <input
-                    id="business_name"
-                    name="business_name"
-                    type="text"
-                    value={formData.business_name}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                    placeholder="Enter your business name"
-                  />
-                  {errors.business_name && <p className="mt-1 text-sm text-[#EF4444]">{errors.business_name}</p>}
+                  <div className="relative">
+                    <Store 
+                      size={20} 
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <input
+                      id="business_name"
+                      name="business_name"
+                      type="text"
+                      value={formData.business_name}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.business_name ? theme.error : theme.border,
+                        color: theme.text
+                      }}
+                      placeholder="Enter your business name"
+                    />
+                  </div>
+                  {errors.business_name && (
+                    <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                      {errors.business_name}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label htmlFor="business_address" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                  <label 
+                    htmlFor="business_address" 
+                    className="block text-sm font-bold mb-3"
+                    style={{ color: theme.text }}
+                  >
                     Business Address
                   </label>
-                  <textarea
-                    id="business_address"
-                    name="business_address"
-                    rows="3"
-                    value={formData.business_address}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                    placeholder="Enter your complete business address"
-                  />
-                  {errors.business_address && <p className="mt-1 text-sm text-[#EF4444]">{errors.business_address}</p>}
+                  <div className="relative">
+                    <MapPin 
+                      size={20} 
+                      className="absolute left-4 top-4" 
+                      style={{ color: theme.textSecondary }}
+                    />
+                    <textarea
+                      id="business_address"
+                      name="business_address"
+                      rows="3"
+                      value={formData.business_address}
+                      onChange={handleChange}
+                      className="w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none resize-none"
+                      style={{ 
+                        backgroundColor: theme.background,
+                        borderColor: errors.business_address ? theme.error : theme.border,
+                        color: theme.text
+                      }}
+                      placeholder="Enter your complete business address"
+                    />
+                  </div>
+                  {errors.business_address && (
+                    <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                      {errors.business_address}
+                    </p>
+                  )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label htmlFor="phone_number" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                    <label 
+                      htmlFor="phone_number" 
+                      className="block text-sm font-bold mb-3"
+                      style={{ color: theme.text }}
+                    >
                       Phone Number
                     </label>
-                    <input
-                      id="phone_number"
-                      name="phone_number"
-                      type="text"
-                      value={formData.phone_number}
-                      onChange={handleChange}
-                      className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                      placeholder="Phone number"
-                    />
-                    {errors.phone_number && <p className="mt-1 text-sm text-[#EF4444]">{errors.phone_number}</p>}
+                    <div className="relative">
+                      <Phone 
+                        size={20} 
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                        style={{ color: theme.textSecondary }}
+                      />
+                      <input
+                        id="phone_number"
+                        name="phone_number"
+                        type="text"
+                        value={formData.phone_number}
+                        onChange={handleChange}
+                        className="w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                        style={{ 
+                          backgroundColor: theme.background,
+                          borderColor: errors.phone_number ? theme.error : theme.border,
+                          color: theme.text
+                        }}
+                        placeholder="Phone number"
+                      />
+                    </div>
+                    {errors.phone_number && (
+                      <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                        {errors.phone_number}
+                      </p>
+                    )}
                   </div>
 
                   <div>
-                    <label htmlFor="license_number" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+                    <label 
+                      htmlFor="license_number" 
+                      className="block text-sm font-bold mb-3"
+                      style={{ color: theme.text }}
+                    >
                       License Number
                     </label>
-                    <input
-                      id="license_number"
-                      name="license_number"
-                      type="text"
-                      value={formData.license_number}
-                      onChange={handleChange}
-                      className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                      placeholder="License number"
-                    />
-                    {errors.license_number && <p className="mt-1 text-sm text-[#EF4444]">{errors.license_number}</p>}
+                    <div className="relative">
+                      <FileText 
+                        size={20} 
+                        className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                        style={{ color: theme.textSecondary }}
+                      />
+                      <input
+                        id="license_number"
+                        name="license_number"
+                        type="text"
+                        value={formData.license_number}
+                        onChange={handleChange}
+                        className="w-full pl-12 pr-4 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                        style={{ 
+                          backgroundColor: theme.background,
+                          borderColor: errors.license_number ? theme.error : theme.border,
+                          color: theme.text
+                        }}
+                        placeholder="License number"
+                      />
+                    </div>
+                    {errors.license_number && (
+                      <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                        {errors.license_number}
+                      </p>
+                    )}
                   </div>
                 </div>
               </>
@@ -291,40 +486,73 @@ const VendorLogin = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#F0F6FC] mb-2">
+              <label 
+                htmlFor="password" 
+                className="block text-sm font-bold mb-3"
+                style={{ color: theme.text }}
+              >
                 Password
               </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 bg-[#0D1117] border border-[#21262D] text-[#F0F6FC] rounded-md focus:outline-none focus:ring-2 focus:ring-[#F97316] focus:border-[#F97316] sm:text-sm"
-                placeholder={isLogin ? "Enter your password" : "Create a password (min 8 characters)"}
-              />
-              {errors.password && <p className="mt-1 text-sm text-[#EF4444]">{errors.password}</p>}
+              <div className="relative">
+                <Lock 
+                  size={20} 
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2" 
+                  style={{ color: theme.textSecondary }}
+                />
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-12 pr-14 py-4 rounded-xl border-2 transition-all duration-200 focus:outline-none"
+                  style={{ 
+                    backgroundColor: theme.background,
+                    borderColor: errors.password ? theme.error : theme.border,
+                    color: theme.text
+                  }}
+                  placeholder={isLogin ? "Enter your password" : "Create a password (min 8 characters)"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 hover:opacity-70 transition-opacity"
+                  style={{ color: theme.textSecondary }}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-2 text-sm font-semibold" style={{ color: theme.error }}>
+                  {errors.password}
+                </p>
+              )}
             </div>
           </div>
 
-          <div>
+          <div className="pt-4">
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-[#F97316] hover:bg-[#EA580C] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#F97316] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-4 px-6 rounded-xl text-white font-bold text-lg transition-all duration-200 hover:transform hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              style={{ 
+                backgroundColor: theme.primary,
+                boxShadow: `0 8px 32px ${theme.primary}40`
+              }}
             >
               {loading 
                 ? (isLogin ? 'Signing in...' : 'Registering business...') 
-                : (isLogin ? 'Sign in' : 'Register Business')
+                : (isLogin ? 'Sign In to Dashboard' : 'Register Business')
               }
             </button>
           </div>
 
-          <div className="text-center">
+          <div className="text-center pt-4">
             <button
               type="button"
               onClick={switchMode}
-              className="text-[#F97316] hover:text-[#EA580C] text-sm underline bg-transparent border-none cursor-pointer"
+              className="text-base font-semibold hover:underline transition-all duration-200"
+              style={{ color: theme.secondary }}
             >
               {isLogin 
                 ? "Don't have a business account? Register" 
