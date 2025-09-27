@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useVendorAuth } from "../../context/VendorAuthContext";
+import DailyMenus from "./DailyMenus";
+import MenuItems from "./MenuItems";
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
@@ -197,8 +200,8 @@ const VendorMenuManager = () => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === "menu-items" && <div>Menu Items Component</div>}
-        {activeTab === "daily-menus" && <div>Daily Menus Component</div>}
+        {activeTab === "menu-items" && <div><MenuItems /></div>}
+        {activeTab === "daily-menus" && <div><DailyMenus /></div>}
       </div>
     </div>
   );
