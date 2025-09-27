@@ -161,7 +161,7 @@ def login_user(request):
             'error': str(e)
         }, status=500)
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def logout_user(request):
     """Logout user"""
     logout(request)

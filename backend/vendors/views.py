@@ -188,7 +188,7 @@ def login_vendor(request):
             'error': str(e)
         }, status=500)
 
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def logout_vendor(request):
     """Logout vendor"""
     logout(request)
