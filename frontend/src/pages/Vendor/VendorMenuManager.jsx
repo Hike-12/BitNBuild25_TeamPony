@@ -1,24 +1,52 @@
-
 import React, { useState, useEffect } from "react";
 import MenuItems from "./MenuItems";
 import DailyMenus from "./DailyMenus";
-import { useTheme } from "../../context/ThemeContext";
-import { FaCrown, FaSun, FaMoon, FaGem, FaChevronRight, FaClipboardList, FaUtensils, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
-// Google Fonts for premium typography
-if (!document.querySelector('link[href*="Playfair+Display"]')) {
-  const link = document.createElement('link');
-  link.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Merriweather:wght@300;400;700&display=swap';
-  link.rel = 'stylesheet';
-  document.head.appendChild(link);
-}
-
+import { FaSun, FaMoon, FaCheckCircle, FaTimesCircle, FaLeaf, FaFire, FaClock, FaRupeeSign } from "react-icons/fa";
+import { MdDeliveryDining, MdRestaurant, MdFoodBank } from "react-icons/md";
+import { GiIndianPalace, GiHotMeal, GiCookingPot } from "react-icons/gi";
+import { IoFastFood } from "react-icons/io5";
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { isDarkMode, toggleTheme, theme } = useTheme();
+  
+  // Theme state and toggle
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    localStorage.setItem("darkMode", JSON.stringify(!isDarkMode));
+  };
+
+  // Your exact theme configuration
+  const theme = isDarkMode ? {
+    background: "#121212",
+    panels: "#1D1D1D",
+    primary: "#00BCD4",
+    secondary: "#64FFDA",
+    text: "#E0E0E0",
+    textSecondary: "#BDBDBD",
+    border: "#333333",
+    error: "#FF5555",
+    success: "#69F0AE",
+    warning: "#FFEA00",
+  } : {
+    background: "#FFFFFF",
+    panels: "#F2F4F7",
+    primary: "#144640",
+    secondary: "#607D8B",
+    text: "#212121",
+    textSecondary: "#757575",
+    border: "#E0E0E0",
+    error: "#D32F2F",
+    success: "#144640",
+    warning: "#FBC02D",
+  };
 
   const getVendorAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
@@ -59,240 +87,311 @@ const VendorMenuManager = () => {
     }
   };
 
-  // Premium background overlays
-  const bgImage = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80';
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+      <div className="text-center">
+        <GiHotMeal className="text-6xl animate-pulse mx-auto mb-4" style={{ color: theme.primary }} />
+        <div className="text-xl" style={{ color: theme.text }}>Preparing your kitchen dashboard...</div>
+      </div>
+    </div>
+  );
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center text-xl font-bold" style={{ color: theme.primary, background: theme.background }}>Loading vendor menu data...</div>;
-  if (error) return <div className="min-h-screen flex items-center justify-center text-xl font-bold" style={{ color: theme.primary, background: theme.background }}>Error: {error}</div>;
+  if (error) return (
+    <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+      <div className="text-center p-8 rounded-sm shadow-lg" style={{ background: theme.panels }}>
+        <div className="text-xl mb-4" style={{ color: theme.error }}>{error}</div>
+        <button onClick={() => window.location.reload()} className="px-6 py-2 rounded-sm font-medium transition-all hover:opacity-90" style={{ background: theme.primary, color: '#fff' }}>
+          Try Again
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div
-      className="min-h-screen w-full flex flex-col justify-between relative"
-      style={{
-        fontFamily: 'Merriweather, serif',
-        minHeight: '100vh',
-        background: theme.background,
-        position: 'relative',
-      }}
-    >
-      {/* Premium Background Image Overlay */}
+    <div className="min-h-screen font-sans antialiased" style={{ background: theme.background }}>
+      {/* Subtle Background Pattern */}
       <div 
-        className="absolute inset-0 z-0"
+        className="fixed inset-0 opacity-[0.03] pointer-events-none z-0" // Reduced opacity
         style={{
-          backgroundImage: `url('${bgImage}')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundAttachment: 'fixed',
-          opacity: isDarkMode ? 0.13 : 0.06,
+          backgroundImage: `radial-gradient(${theme.border} 0.5px, transparent 0.5px), radial-gradient(${theme.border} 0.5px, ${theme.background} 0.5px)`, // More subtle dot pattern
+          backgroundSize: '20px 20px',
+          backgroundPosition: '0 0, 10px 10px',
         }}
       />
-      {/* Elegant Gradient Overlay */}
-      <div 
-        className="absolute inset-0 z-1"
-        style={{
-          background: `linear-gradient(135deg, 
-            ${isDarkMode ? 'rgba(3,3,3,0.95)' : 'rgba(253,253,247,0.95)'} 0%, 
-            ${isDarkMode ? 'rgba(23,41,34,0.90)' : 'rgba(245,248,242,0.90)'} 50%, 
-            ${isDarkMode ? 'rgba(3,3,3,0.95)' : 'rgba(253,253,247,0.95)'} 100%)`,
-        }}
-      />
-      {/* Luxury Texture Pattern */}
-      <div 
-        className="absolute inset-0 z-2 pointer-events-none"
-        style={{
-          backgroundImage: `radial-gradient(circle at 25% 25%, ${theme.primary}08 0%, transparent 50%), 
-                           radial-gradient(circle at 75% 75%, ${theme.secondary}06 0%, transparent 50%)`,
-        }}
-      />
-
-      {/* Elegant Header */}
-      <header className="w-full flex justify-between items-center px-12 py-8 relative z-10">
-        <div className="flex items-center gap-3">
-          <FaCrown style={{ color: theme.primary, fontSize: '28px' }} />
-          <span 
-            className="text-2xl font-bold" 
-            style={{ 
-              fontFamily: 'Playfair Display, serif', 
-              color: theme.primary,
-              letterSpacing: '1px'
-            }}
-          >
-            Vendor Menu Manager
-          </span>
+      
+      {/* Header - More elegant design */}
+      <header className="relative z-10 shadow-sm" style={{ 
+        background: theme.panels,
+        borderBottom: `1px solid ${theme.border}`
+      }}>
+        <div className="px-6 py-5">
+          <div className="flex justify-between items-center max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 rounded-full" style={{ 
+                background: `${theme.primary}15`, // Use primary with opacity
+              }}>
+                <GiCookingPot className="text-2xl" style={{ color: theme.primary }} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight" style={{ color: theme.text }}>
+                  NourishNet
+                </h1>
+                <p className="text-sm mt-0.5" style={{ color: theme.textSecondary }}>
+                  Tiffin Service Management Platform
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <div className="text-right hidden md:block">
+                <p className="text-xs uppercase tracking-wider font-medium" style={{ color: theme.textSecondary }}>
+                  Today's Dabbas
+                </p>
+                <p className="text-xl font-bold" style={{ color: theme.text }}>45</p>
+              </div>
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-full border hover:scale-110 transition-transform duration-200"
+                style={{ 
+                  background: theme.background,
+                  borderColor: theme.border,
+                  color: theme.text 
+                }}
+              >
+                {isDarkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
+              </button>
+            </div>
+          </div>
         </div>
-        <button
-          onClick={toggleTheme}
-          className="p-4 rounded-full backdrop-blur-sm border transition-all duration-500 hover:scale-110"
-          style={{
-            backgroundColor: `${theme.panels}95`,
-            color: theme.primary,
-            border: `2px solid ${theme.primary}30`,
-            boxShadow: `0 8px 32px ${theme.primary}20`,
-          }}
-        >
-          {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
-        </button>
       </header>
 
-      {/* Dashboard Overview */}
-      <section className="flex flex-col items-center justify-center py-8 px-4 relative z-10">
-        <div className="max-w-5xl w-full mx-auto">
-          <div className="mb-8">
-            <div 
-              className="inline-flex items-center gap-2 px-6 py-2 rounded-full border shadow"
-              style={{
-                backgroundColor: `${theme.primary}10`,
-                borderColor: `${theme.primary}30`,
-                color: theme.primary,
-                fontFamily: 'Playfair Display, serif',
-                textAlign: 'center',
-              }}
-            >
-              <FaGem className="text-base" />
-              <span className="text-xs font-semibold tracking-wide uppercase">Vendor Dashboard</span>
+      {/* Kitchen Status Bar - Simplified and elegant */}
+      <div className="relative z-10 shadow-sm" style={{ background: theme.panels, borderBottom: `2px solid ${theme.border}` }}>
+        <div className="max-w-7xl mx-auto px-6 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${dashboardData?.vendor_info?.is_active ? 'bg-green-500' : 'bg-red-500'} animate-pulse`} />
+                <span className="font-medium" style={{ color: theme.text }}>Kitchen Status: <strong style={{ color: dashboardData?.vendor_info?.is_active ? theme.success : theme.error }}>{dashboardData?.vendor_info?.is_active ? 'Open' : 'Closed'}</strong></span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MdDeliveryDining className="text-xl" style={{ color: theme.primary }} />
+                <span className="font-medium" style={{ color: theme.text }}>Delivery: <strong style={{ color: theme.primary }}>Active</strong></span>
+              </div>
+            </div>
+            <div className="flex items-center gap-2" style={{ color: theme.textSecondary }}>
+              <FaClock />
+              <span>{new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
             </div>
           </div>
-          <div className="rounded-3xl border-2 shadow-xl p-10 mb-8" style={{ background: theme.panels, borderColor: theme.primary, fontFamily: 'Merriweather, serif' }}>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-              <div className="flex flex-col items-center justify-center">
-                <FaClipboardList style={{ color: theme.primary, fontSize: '2rem', marginBottom: '0.5rem' }} />
-                <h3 className="text-lg font-bold mb-1" style={{ color: theme.text, fontFamily: 'Playfair Display, serif' }}>{dashboardData.statistics.total_menu_items}</h3>
-                <p className="font-medium text-xs" style={{ color: theme.textSecondary }}>Total Menu Items</p>
+        </div>
+      </div>
+
+      {/* Main Dashboard - Posh and clean layout */}
+      <div className="relative z-10 max-w-7xl mx-auto px-6 py-12">
+        {/* Stats Cards - Posh Tiffin Style with subtle borders */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* Total Dishes */}
+          <div className="rounded-sm p-6 shadow-md transition-all duration-300 hover:scale-105" style={{ 
+            background: theme.panels,
+            borderLeft: `5px solid ${theme.primary}`,
+            borderTop: `1px solid ${theme.border}`, // Subtle top border
+            borderRight: `1px solid ${theme.border}`, // Subtle right border
+            borderBottom: `1px solid ${theme.border}`, // Subtle bottom border
+          }}>
+            <IoFastFood className="text-4xl mb-3" style={{ color: theme.primary }} />
+            <h3 className="text-3xl font-bold mb-1" style={{ color: theme.text }}>{dashboardData?.statistics?.total_menu_items || 0}</h3>
+            <p className="text-sm font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>Total Dishes</p>
+          </div>
+
+          {/* Available Today */}
+          <div className="rounded-sm p-6 shadow-md transition-all duration-300 hover:scale-105" style={{ 
+            background: theme.panels,
+            borderLeft: `5px solid ${theme.success}`,
+            borderTop: `1px solid ${theme.border}`,
+            borderRight: `1px solid ${theme.border}`,
+            borderBottom: `1px solid ${theme.border}`,
+          }}>
+            <GiHotMeal className="text-4xl mb-3" style={{ color: theme.success }} />
+            <h3 className="text-3xl font-bold mb-1" style={{ color: theme.text }}>{dashboardData?.statistics?.active_menu_items || 0}</h3>
+            <p className="text-sm font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>Available Today</p>
+          </div>
+
+          {/* Menu Plans */}
+          <div className="rounded-sm p-6 shadow-md transition-all duration-300 hover:scale-105" style={{ 
+            background: theme.panels,
+            borderLeft: `5px solid ${theme.warning}`,
+            borderTop: `1px solid ${theme.border}`,
+            borderRight: `1px solid ${theme.border}`,
+            borderBottom: `1px solid ${theme.border}`,
+          }}>
+            <MdFoodBank className="text-4xl mb-3" style={{ color: theme.warning }} />
+            <h3 className="text-3xl font-bold mb-1" style={{ color: theme.text }}>{dashboardData?.statistics?.total_menus || 0}</h3>
+            <p className="text-sm font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>Menu Plans</p>
+          </div>
+
+          {/* Active Deliveries */}
+          <div className="rounded-sm p-6 shadow-md transition-all duration-300 hover:scale-105" style={{ 
+            background: theme.panels,
+            borderLeft: `5px solid ${theme.secondary}`,
+            borderTop: `1px solid ${theme.border}`,
+            borderRight: `1px solid ${theme.border}`,
+            borderBottom: `1px solid ${theme.border}`,
+          }}>
+            <MdDeliveryDining className="text-4xl mb-3" style={{ color: theme.secondary }} />
+            <h3 className="text-3xl font-bold mb-1" style={{ color: theme.text }}>{dashboardData?.statistics?.active_menus || 0}</h3>
+            <p className="text-sm font-medium uppercase tracking-wide" style={{ color: theme.textSecondary }}>Active Deliveries</p>
+          </div>
+        </div>
+
+        {/* Kitchen Info & Recent Menus - Elegant layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
+          {/* Kitchen Card */}
+          <div className="rounded-sm shadow-md p-8" style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: theme.text }}>
+              <MdRestaurant style={{ color: theme.primary }} /> Your Kitchen
+            </h3>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-4 rounded-sm" style={{ background: theme.background, border: `1px solid ${theme.border}` }}>
+                <span className="font-medium" style={{ color: theme.textSecondary }}>Business</span>
+                <span className="font-semibold" style={{ color: theme.text }}>
+                  {dashboardData?.vendor_info?.business_name || "Not Set"}
+                </span>
               </div>
-              <div className="flex flex-col items-center justify-center">
-                <FaUtensils style={{ color: theme.primary, fontSize: '2rem', marginBottom: '0.5rem' }} />
-                <h3 className="text-lg font-bold mb-1" style={{ color: theme.text, fontFamily: 'Playfair Display, serif' }}>{dashboardData.statistics.active_menu_items}</h3>
-                <p className="font-medium text-xs" style={{ color: theme.textSecondary }}>Active Menu Items</p>
+              <div className="flex justify-between items-center p-4 rounded-sm" style={{ background: theme.background, border: `1px solid ${theme.border}` }}>
+                <span className="font-medium" style={{ color: theme.textSecondary }}>Verification</span>
+                <div className="flex items-center gap-2">
+                  {dashboardData?.vendor_info?.is_verified ? (
+                    <>
+                      <FaCheckCircle style={{ color: theme.success }} />
+                      <span style={{ color: theme.success }}>Verified</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaClock style={{ color: theme.warning }} />
+                      <span style={{ color: theme.warning }}>Pending</span>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col items-center justify-center">
-                <FaCheckCircle style={{ color: theme.primary, fontSize: '2rem', marginBottom: '0.5rem' }} />
-                <h3 className="text-lg font-bold mb-1" style={{ color: theme.text, fontFamily: 'Playfair Display, serif' }}>{dashboardData.statistics.total_menus}</h3>
-                <p className="font-medium text-xs" style={{ color: theme.textSecondary }}>Total Menus</p>
-              </div>
-              <div className="flex flex-col items-center justify-center">
-                <FaCheckCircle style={{ color: theme.primary, fontSize: '2rem', marginBottom: '0.5rem' }} />
-                <h3 className="text-lg font-bold mb-1" style={{ color: theme.text, fontFamily: 'Playfair Display, serif' }}>{dashboardData.statistics.active_menus}</h3>
-                <p className="font-medium text-xs" style={{ color: theme.textSecondary }}>Active Daily Menus</p>
+              <div className="flex justify-between items-center p-4 rounded-sm" style={{ background: theme.background, border: `1px solid ${theme.border}` }}>
+                <span className="font-medium" style={{ color: theme.textSecondary }}>Status</span>
+                <div className="flex items-center gap-2">
+                  {dashboardData?.vendor_info?.is_active ? (
+                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold" style={{background: `${theme.success}15`, color: theme.success}}>
+                      Taking Orders
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-semibold" style={{background: `${theme.error}15`, color: theme.error}}>
+                      Closed
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="rounded-xl border shadow-md p-6 text-left flex flex-col justify-center" style={{ backgroundColor: `${theme.panels}90`, borderColor: `${theme.primary}30`, fontFamily: 'Merriweather, serif' }}>
-                <h3 className="font-bold mb-2" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif' }}>Kitchen Information</h3>
-                <p style={{ marginBottom: 4 }}><strong>Business Name:</strong> <span style={{ color: theme.text }}>{dashboardData.vendor_info.business_name || "Not Available"}</span></p>
-                <p style={{ marginBottom: 4 }}><strong>Verification Status:</strong> <span style={{ color: dashboardData.vendor_info.is_verified ? theme.primary : theme.secondary }}>{dashboardData.vendor_info.is_verified ? "Verified" : "Pending Verification"}</span></p>
-                <p><strong>Status:</strong> <span style={{ color: dashboardData.vendor_info.is_active ? theme.primary : theme.secondary }}>{dashboardData.vendor_info.is_active ? "Active" : "Inactive"}</span></p>
-              </div>
-              <div className="rounded-xl border shadow-md p-6 text-left flex flex-col justify-center" style={{ backgroundColor: `${theme.panels}90`, borderColor: `${theme.primary}30`, fontFamily: 'Merriweather, serif' }}>
-                <h3 className="font-bold mb-2" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif' }}>Recent Menus</h3>
-                {dashboardData.recent_menus.length > 0 ? (
-                  <div className="flex flex-col gap-3">
-                    {dashboardData.recent_menus.map((menu) => (
-                      <div key={menu.id} className="rounded-lg border p-3 shadow-sm" style={{ backgroundColor: theme.background, borderColor: theme.primary }}>
-                        <strong style={{ color: theme.primary }}>{menu.name}</strong> - {new Date(menu.date).toLocaleDateString()}
-                        <br />
-                        <small style={{ color: theme.textSecondary }}>
-                          Items: {menu.items_count} | Price: ₹{menu.full_dabba_price} | Dabbas Sold: {menu.dabbas_sold}/{menu.max_dabbas} |
-                          {menu.is_veg_only && <span style={{ color: theme.primary }}> Veg Only |</span>}
-                          <span style={{ color: menu.is_active ? theme.primary : theme.secondary }}>
-                            {menu.is_active ? "Active" : "Inactive"}
+          </div>
+
+          {/* Today's Menus - Clean and well-structured */}
+          <div className="rounded-sm shadow-md p-8" style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+            <h3 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: theme.text }}>
+              <GiCookingPot style={{ color: theme.primary }} /> Today's Tiffins
+            </h3>
+            <div className="space-y-4 max-h-64 overflow-y-auto pr-2">
+              {dashboardData?.recent_menus?.length > 0 ? (
+                dashboardData.recent_menus.map((menu) => (
+                  <div key={menu.id} className="p-4 rounded-sm border-l-4 transition-all duration-300 hover:scale-[1.02]" style={{ 
+                    background: theme.background,
+                    borderColor: theme.primary, // Using primary for emphasis
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  }}>
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <h4 className="font-semibold text-lg" style={{ color: theme.text }}>{menu.name}</h4>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+                            <FaRupeeSign className="inline mr-1" />{menu.full_dabba_price}
                           </span>
-                        </small>
-                        {menu.todays_special && (
-                          <div style={{ marginTop: "5px", fontStyle: "italic", color: theme.secondary }}>
-                            Today's Special: {menu.todays_special}
-                          </div>
-                        )}
+                          {menu.is_veg_only && (
+                            <span className="text-sm flex items-center gap-1 font-medium" style={{ color: theme.success }}>
+                              <FaLeaf /> Pure Veg
+                            </span>
+                          )}
+                        </div>
                       </div>
-                    ))}
+                      <div className="text-right">
+                        <div className="text-xl font-bold" style={{ color: theme.primary }}>
+                          {menu.dabbas_sold}/{menu.max_dabbas}
+                        </div>
+                        <div className="text-xs font-medium" style={{ color: theme.textSecondary }}>Dabbas Sold</div>
+                      </div>
+                    </div>
+                    {menu.todays_special && (
+                      <div className="text-sm font-medium p-2 rounded" style={{ 
+                        background: `${theme.warning}20`, // Warning with opacity
+                        color: theme.warning
+                      }}>
+                        <FaFire className="inline mr-1" /> Today's Special: {menu.todays_special}
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <p style={{ color: theme.textSecondary }}>No menus created yet.</p>
-                )}
-              </div>
+                ))
+              ) : (
+                <div className="text-center py-8" style={{ color: theme.textSecondary }}>
+                  <GiCookingPot className="text-5xl mx-auto mb-2 opacity-30" />
+                  <p className="font-medium">No menus created yet</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      </section>
 
-      {/* Tab Navigation */}
-      <section className="w-full flex justify-center items-center relative z-10 mb-2">
-        <div className="flex gap-2 border-b-2 pb-2" style={{ borderColor: `${theme.primary}30` }}>
+        {/* Tab Navigation - Sophisticated and clean */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-12">
           <button
-            className={`px-8 py-3 rounded-t-xl font-bold text-base transition-all duration-500 hover:scale-105 backdrop-blur-sm border flex items-center gap-2 ${activeTab === "menu-items" ? "shadow-lg" : "hover:shadow-md"}`}
-            style={{
-              backgroundColor: activeTab === "menu-items" ? theme.primary : `${theme.panels}90`,
-              borderColor: theme.primary,
-              color: activeTab === "menu-items" ? '#fff' : theme.primary,
-              fontFamily: 'Playfair Display, serif',
-              letterSpacing: '1px',
-              boxShadow: activeTab === "menu-items" ? `0 6px 20px ${theme.primary}30` : 'none',
-            }}
             onClick={() => setActiveTab("menu-items")}
+            className={`flex-1 py-4 px-6 rounded-sm font-semibold transition-all duration-300 ${
+              activeTab === "menu-items" ? "shadow-md scale-[1.01]" : "hover:shadow-sm"
+            }`}
+            style={{
+              background: activeTab === "menu-items" ? theme.primary : theme.panels,
+              color: activeTab === "menu-items" ? '#fff' : theme.text,
+              border: `1px solid ${activeTab === "menu-items" ? theme.primary : theme.border}`
+            }}
           >
-            <FaUtensils /> Menu Items
+            <IoFastFood className="inline mr-2 text-xl" />
+            Manage Dishes
           </button>
           <button
-            className={`px-8 py-3 rounded-t-xl font-bold text-base transition-all duration-500 hover:scale-105 backdrop-blur-sm border flex items-center gap-2 ${activeTab === "daily-menus" ? "shadow-lg" : "hover:shadow-md"}`}
-            style={{
-              backgroundColor: activeTab === "daily-menus" ? theme.primary : `${theme.panels}90`,
-              borderColor: theme.primary,
-              color: activeTab === "daily-menus" ? '#fff' : theme.primary,
-              fontFamily: 'Playfair Display, serif',
-              letterSpacing: '1px',
-              boxShadow: activeTab === "daily-menus" ? `0 6px 20px ${theme.primary}30` : 'none',
-            }}
             onClick={() => setActiveTab("daily-menus")}
+            className={`flex-1 py-4 px-6 rounded-sm font-semibold transition-all duration-300 ${
+              activeTab === "daily-menus" ? "shadow-md scale-[1.01]" : "hover:shadow-sm"
+            }`}
+            style={{
+              background: activeTab === "daily-menus" ? theme.primary : theme.panels,
+              color: activeTab === "daily-menus" ? '#fff' : theme.text,
+              border: `1px solid ${activeTab === "daily-menus" ? theme.primary : theme.border}`
+            }}
           >
-            <FaClipboardList /> Daily Menus
+            <MdFoodBank className="inline mr-2 text-xl" />
+            Daily Tiffin Plans
           </button>
         </div>
-      </section>
 
-      {/* Tab Content */}
-      <section className="relative z-10 max-w-5xl mx-auto w-full mb-12">
-        {activeTab === "menu-items" && <MenuItems />}
-        {activeTab === "daily-menus" && <DailyMenus />}
-      </section>
-
-      {/* Elegant Footer */}
-      <footer className="w-full py-8 px-6 text-center relative z-10" style={{ backgroundColor: `${theme.panels}95` }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <FaCrown style={{ color: theme.primary, fontSize: '24px' }} />
-            <span 
-              style={{ 
-                color: theme.textSecondary,
-                fontFamily: 'Playfair Display, serif'
-              }} 
-              className="text-sm"
-            >
-              &copy; {new Date().getFullYear()} Vendor Menu Manager. Crafted with excellence.
-            </span>
-          </div>
-          <div className="flex gap-8 justify-center md:justify-end">
-            <a 
-              href="#" 
-              style={{ color: theme.primary }} 
-              className="hover:underline transition-all duration-300 text-sm font-medium"
-            >
-              Instagram
-            </a>
-            <a 
-              href="#" 
-              style={{ color: theme.primary }} 
-              className="hover:underline transition-all duration-300 text-sm font-medium"
-            >
-              Twitter
-            </a>
-            <a 
-              href="#" 
-              style={{ color: theme.primary }} 
-              className="hover:underline transition-all duration-300 text-sm font-medium"
-            >
-              LinkedIn
-            </a>
-          </div>
+        {/* Tab Content */}
+        <div>
+          {activeTab === "menu-items" && <MenuItems />}
+          {activeTab === "daily-menus" && <DailyMenus />}
         </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="mt-16 py-8 text-center" style={{ 
+        background: theme.panels,
+        borderTop: `1px solid ${theme.border}`
+      }}>
+        <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
+          NourishNet Vendor Manager © {new Date().getFullYear()} • Delivering Happiness, One Tiffin at a Time
+        </p>
       </footer>
     </div>
   );

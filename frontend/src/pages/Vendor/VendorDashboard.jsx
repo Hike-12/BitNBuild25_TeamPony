@@ -1,16 +1,48 @@
 import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
-import { getAuthHeaders, handleApiError } from "../../utils/api";
+import { FaUsers, FaRupeeSign, FaShoppingBag, FaUtensils, FaChartLine } from "react-icons/fa";
+import { MdDashboard, MdRestaurant } from "react-icons/md";
 
 const VendorDashboard = () => {
   const { vendor, logout } = useVendorAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
+
+  // Theme matching VendorMenuManager
+  const [isDarkMode] = useState(() => {
+    const saved = localStorage.getItem("darkMode");
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const theme = isDarkMode ? {
+    background: "#121212",
+    panels: "#1D1D1D",
+    primary: "#00BCD4",
+    secondary: "#64FFDA",
+    text: "#E0E0E0",
+    textSecondary: "#BDBDBD",
+    border: "#333333",
+    error: "#FF5555",
+    success: "#69F0AE",
+    warning: "#FFEA00",
+  } : {
+    background: "#FFFFFF",
+    panels: "#F2F4F7",
+    primary: "#144640",
+    secondary: "#607D8B",
+    text: "#212121",
+    textSecondary: "#757575",
+    border: "#E0E0E0",
+    error: "#D32F2F",
+    success: "#144640",
+    warning: "#FBC02D",
+  };
+
   const getVendorAuthHeaders = () => {
-  const token = localStorage.getItem('vendor_token');
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+    const token = localStorage.getItem('vendor_token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  };
 
   useEffect(() => {
     fetchProfile();
@@ -20,11 +52,9 @@ const VendorDashboard = () => {
   const fetchProfile = async () => {
     try {
       const response = await fetch(
-  `${import.meta.env.VITE_API_URL}/api/vendor/profile/`,
-  {
-    headers: getVendorAuthHeaders(),
-  }
-);
+        `${import.meta.env.VITE_API_URL}/api/vendor/profile/`,
+        { headers: getVendorAuthHeaders() }
+      );
       if (response.ok) {
         const data = await response.json();
         setProfile(data.user);
@@ -40,9 +70,7 @@ const VendorDashboard = () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
-        {
-          headers: getVendorAuthHeaders(),
-        }
+        { headers: getVendorAuthHeaders() }
       );
 
       const data = await response.json();
@@ -50,46 +78,54 @@ const VendorDashboard = () => {
         setDashboardData(data);
       }
     } catch (error) {
-      handleApiError(error);
+      console.error("Failed to fetch dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    logout();
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0D1117] flex items-center justify-center">
-        <div className="text-[#F0F6FC] text-xl">Loading...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" 
+            style={{ borderColor: theme.primary }}></div>
+          <div className="text-lg" style={{ color: theme.text }}>Loading dashboard...</div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0D1117]">
+    <div className="min-h-screen" style={{ background: theme.background }}>
       {/* Header */}
-      <header className="bg-[#161B22] border-b border-[#21262D]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-[#F97316]">
-                NourishNet Vendor
-              </h1>
+      <header className="shadow-sm" style={{ background: theme.panels, borderBottom: `1px solid ${theme.border}` }}>
+        <div className="px-6 py-5">
+          <div className="flex justify-between items-center max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 rounded-full" style={{ background: `${theme.primary}15` }}>
+                <MdDashboard className="text-2xl" style={{ color: theme.primary }} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight" style={{ color: theme.text }}>
+                  NourishNet Vendor
+                </h1>
+                <p className="text-sm mt-0.5" style={{ color: theme.textSecondary }}>
+                  Welcome back, {vendor?.first_name || vendor?.username}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-[#8B949E]">
-                Welcome, {vendor?.first_name || vendor?.username}!
-              </span>
-              <span className="text-[#10B981] text-sm px-2 py-1 rounded-full bg-[#10B981] bg-opacity-10">
+            <div className="flex items-center gap-4">
+              <span className="px-3 py-1 rounded-full text-xs font-semibold"
+                style={{
+                  background: vendor?.is_verified ? `${theme.success}15` : `${theme.warning}15`,
+                  color: vendor?.is_verified ? theme.success : theme.warning
+                }}>
                 {vendor?.is_verified ? "Verified" : "Pending Verification"}
               </span>
-              <button
-                onClick={handleLogout}
-                className="bg-[#EF4444] text-white px-4 py-2 rounded-md hover:bg-[#DC2626] transition-colors"
-              >
+              <button onClick={logout}
+                className="px-4 py-2 rounded-sm font-medium transition-all hover:opacity-90"
+                style={{ background: theme.error, color: '#fff' }}>
                 Logout
               </button>
             </div>
@@ -97,129 +133,148 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h3 className="text-sm font-medium text-[#8B949E] mb-2">
-              Total Orders
-            </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
+            style={{ background: theme.panels, borderLeft: `5px solid ${theme.primary}`,
+              border: `1px solid ${theme.border}` }}>
+            <div className="flex items-center justify-between mb-3">
+              <FaShoppingBag className="text-3xl" style={{ color: theme.primary }} />
+              <span className="text-xs font-medium" style={{ color: theme.success }}>
+                {dashboardData?.orderChange || '+12%'}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
               {dashboardData?.totalOrders || 0}
-            </p>
-            <p className="text-sm text-[#10B981] mt-1">
-              {dashboardData?.orderChange} from last month
+            </h3>
+            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              Total Orders
             </p>
           </div>
 
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h3 className="text-sm font-medium text-[#8B949E] mb-2">
-              Active Customers
-            </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">
+          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
+            style={{ background: theme.panels, borderLeft: `5px solid ${theme.success}`,
+              border: `1px solid ${theme.border}` }}>
+            <div className="flex items-center justify-between mb-3">
+              <FaUsers className="text-3xl" style={{ color: theme.success }} />
+              <span className="text-xs font-medium" style={{ color: theme.success }}>
+                {dashboardData?.customerChange || '+8%'}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
               {dashboardData?.activeCustomers || 0}
-            </p>
-            <p className="text-sm text-[#10B981] mt-1">
-              {dashboardData?.customerChange} from last month
-            </p>
-          </div>
-
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h3 className="text-sm font-medium text-[#8B949E] mb-2">Revenue</h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">
-              ₹{dashboardData?.revenue?.toLocaleString() || 0}
-            </p>
-            <p className="text-sm text-[#10B981] mt-1">
-              {dashboardData?.revenueChange} from last month
-            </p>
-          </div>
-
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h3 className="text-sm font-medium text-[#8B949E] mb-2">
-              Menu Items
             </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">
-              {dashboardData?.totalMenuItems || 0}
+            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              Active Customers
             </p>
-            <p className="text-sm text-[#F97316] mt-1">
-              {dashboardData?.outOfStockItems} out of stock
+          </div>
+
+          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
+            style={{ background: theme.panels, borderLeft: `5px solid ${theme.warning}`,
+              border: `1px solid ${theme.border}` }}>
+            <div className="flex items-center justify-between mb-3">
+              <FaRupeeSign className="text-3xl" style={{ color: theme.warning }} />
+              <span className="text-xs font-medium" style={{ color: theme.success }}>
+                {dashboardData?.revenueChange || '+15%'}
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
+              ₹{dashboardData?.revenue?.toLocaleString() || 0}
+            </h3>
+            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              Revenue
+            </p>
+          </div>
+
+          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
+            style={{ background: theme.panels, borderLeft: `5px solid ${theme.secondary}`,
+              border: `1px solid ${theme.border}` }}>
+            <div className="flex items-center justify-between mb-3">
+              <FaUtensils className="text-3xl" style={{ color: theme.secondary }} />
+              <span className="text-xs font-medium" style={{ color: theme.warning }}>
+                {dashboardData?.outOfStockItems || 0} out
+              </span>
+            </div>
+            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
+              {dashboardData?.totalMenuItems || 0}
+            </h3>
+            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
+              Menu Items
             </p>
           </div>
         </div>
 
-        {/* Business Info */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Business Details */}
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
-              Business Information
+          <div className="rounded-sm shadow-md p-8"
+            style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: theme.text }}>
+              <MdRestaurant style={{ color: theme.primary }} /> Business Information
             </h2>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-[#8B949E]">Kitchen Name</span>
-                <span className="text-[#F0F6FC] font-medium">
-                  {vendor?.kitchen_name}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#8B949E]">Owner</span>
-                <span className="text-[#F0F6FC] font-medium">
-                  {vendor?.first_name} {vendor?.last_name}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#8B949E]">Phone</span>
-                <span className="text-[#F0F6FC] font-medium">
-                  {vendor?.phone_number}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[#8B949E]">License</span>
-                <span className="text-[#F0F6FC] font-medium">
-                  {vendor?.license_number}
-                </span>
-              </div>
-              <div className="flex items-start justify-between">
-                <span className="text-[#8B949E]">Address</span>
-                <span className="text-[#F0F6FC] text-right max-w-xs">
-                  {vendor?.address}
-                </span>
-              </div>
+            <div className="space-y-4">
+              {[
+                { label: "Kitchen Name", value: vendor?.kitchen_name },
+                { label: "Owner", value: `${vendor?.first_name} ${vendor?.last_name}` },
+                { label: "Phone", value: vendor?.phone_number },
+                { label: "License", value: vendor?.license_number },
+                { label: "Address", value: vendor?.address }
+              ].map((item, index) => (
+                <div key={index} className="flex justify-between items-center p-3 rounded"
+                  style={{ background: theme.background, border: `1px solid ${theme.border}` }}>
+                  <span className="font-medium" style={{ color: theme.textSecondary }}>{item.label}</span>
+                  <span className="font-semibold text-right" style={{ color: theme.text }}>
+                    {item.value || "Not Set"}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Recent Orders */}
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
-              Recent Orders
+          <div className="rounded-sm shadow-md p-8"
+            style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+            <h2 className="text-xl font-bold mb-6 flex items-center gap-2" style={{ color: theme.text }}>
+              <FaChartLine style={{ color: theme.primary }} /> Recent Orders
             </h2>
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-64 overflow-y-auto">
               {dashboardData?.recentOrders?.length > 0 ? (
                 dashboardData.recentOrders.map((order) => (
-                  <div
-                    key={order.id}
-                    className="flex items-center justify-between py-2 border-b border-[#21262D]"
-                  >
-                    <div>
-                      <p className="text-[#F0F6FC] text-sm">
-                        {order.order_id} - {order.customer_name}
-                      </p>
-                      <p className="text-[#8B949E] text-xs">
-                        {new Date(order.created_at).toLocaleString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-[#10B981] text-sm">
-                        ₹{order.total_amount}
-                      </span>
-                      <p className="text-[#F97316] text-xs">{order.status}</p>
+                  <div key={order.id} className="p-3 rounded border-l-4 transition-all hover:scale-[1.01]"
+                    style={{ 
+                      background: theme.background,
+                      borderColor: theme.primary,
+                      borderRight: `1px solid ${theme.border}`,
+                      borderTop: `1px solid ${theme.border}`,
+                      borderBottom: `1px solid ${theme.border}`
+                    }}>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-semibold" style={{ color: theme.text }}>
+                          {order.customer_name}
+                        </p>
+                        <p className="text-xs" style={{ color: theme.textSecondary }}>
+                          {new Date(order.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold" style={{ color: theme.success }}>
+                          ₹{order.total_amount}
+                        </p>
+                        <span className="text-xs px-2 py-1 rounded"
+                          style={{
+                            background: `${theme.warning}20`,
+                            color: theme.warning
+                          }}>
+                          {order.status}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="py-4 text-center text-[#8B949E]">
-                  No recent orders found.
+                <div className="text-center py-8" style={{ color: theme.textSecondary }}>
+                  No recent orders found
                 </div>
               )}
             </div>
@@ -227,26 +282,31 @@ const VendorDashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="mt-8 bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
+        <div className="mt-8 rounded-sm shadow-md p-8"
+          style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+          <h2 className="text-xl font-bold mb-6" style={{ color: theme.text }}>
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <button className="bg-[#F97316] text-white px-6 py-3 rounded-md hover:bg-[#EA580C] transition-colors">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: theme.primary, color: '#fff' }}>
               Add Menu Item
             </button>
-            <button className="bg-[#10B981] text-white px-6 py-3 rounded-md hover:bg-[#059669] transition-colors">
+            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: theme.success, color: '#fff' }}>
               View Orders
             </button>
-            <button className="bg-[#3B82F6] text-white px-6 py-3 rounded-md hover:bg-[#2563EB] transition-colors">
+            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: theme.secondary, color: '#fff' }}>
               Manage Customers
             </button>
-            <button className="bg-[#8B5CF6] text-white px-6 py-3 rounded-md hover:bg-[#7C3AED] transition-colors">
+            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
+              style={{ background: theme.warning, color: isDarkMode ? '#000' : '#fff' }}>
               View Analytics
             </button>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 };
