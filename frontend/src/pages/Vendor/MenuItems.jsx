@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import toast from "react-hot-toast";
-import { getAuthHeaders, handleApiError } from "../../utils/api";
 
 const MenuItems = () => {
   const { vendor } = useVendorAuth();
@@ -23,6 +22,23 @@ const MenuItems = () => {
   });
   const [createLoading, setCreateLoading] = useState(false);
 
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('vendor_token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    };
+  };
+
+  const handleApiError = (error) => {
+    console.error("API Error:", error);
+    if (error.message.includes('401')) {
+      toast.error("Please login again");
+    } else {
+      toast.error("An error occurred");
+    }
+  };
+
   useEffect(() => {
     fetchMenuItems();
   }, []);
@@ -30,11 +46,15 @@ const MenuItems = () => {
   const fetchMenuItems = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/menu-items/`,
+        `${import.meta.env.VITE_API_URL}/api/vendor/menu-items`,
         {
           headers: getAuthHeaders(),
         }
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
       const data = await response.json();
       if (data.success) {
@@ -42,6 +62,7 @@ const MenuItems = () => {
       }
     } catch (error) {
       handleApiError(error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -66,13 +87,17 @@ const MenuItems = () => {
     setCreateLoading(true);
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/menu-items/`,
+        `${import.meta.env.VITE_API_URL}/api/vendor/menu-items`,
         {
           method: "POST",
           headers: getAuthHeaders(),
           body: JSON.stringify(createForm),
         }
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
 
       const data = await response.json();
       if (data.success) {
@@ -129,16 +154,16 @@ const MenuItems = () => {
     return (
       <div
         className="min-h-screen flex items-center justify-center transition-all duration-300"
-        style={{ backgroundColor: theme.background }}
+        style={{ backgroundColor: theme?.background || '#ffffff' }}
       >
         <div className="text-center">
           <div
             className="animate-spin rounded-full h-16 w-16 border-4 border-t-transparent mx-auto mb-4"
             style={{
-              borderColor: `${theme.primary} transparent transparent transparent`,
+              borderColor: `${theme?.primary || '#007bff'} transparent transparent transparent`,
             }}
           ></div>
-          <div className="text-xl font-semibold" style={{ color: theme.text }}>
+          <div className="text-xl font-semibold" style={{ color: theme?.text || '#000000' }}>
             Loading food items...
           </div>
         </div>
@@ -150,17 +175,17 @@ const MenuItems = () => {
     return (
       <div
         className="min-h-screen flex items-center justify-center transition-all duration-300"
-        style={{ backgroundColor: theme.background }}
+        style={{ backgroundColor: theme?.background || '#ffffff' }}
       >
         <div className="text-center">
-          <p className="text-xl mb-4" style={{ color: theme.error }}>
+          <p className="text-xl mb-4" style={{ color: theme?.error || '#dc3545' }}>
             {error}
           </p>
           <button
             onClick={fetchMenuItems}
             className="px-6 py-2 rounded-lg font-semibold transition-all duration-300"
             style={{
-              backgroundColor: theme.primary,
+              backgroundColor: theme?.primary || '#007bff',
               color: "white",
             }}
           >
@@ -174,25 +199,25 @@ const MenuItems = () => {
   return (
     <div
       className="min-h-screen transition-all duration-300"
-      style={{ backgroundColor: theme.background }}
+      style={{ backgroundColor: theme?.background || '#ffffff' }}
     >
       {/* Header */}
       <header
         className="sticky top-0 z-40 border-b backdrop-blur-md"
         style={{
-          backgroundColor: `${theme.panels}95`,
-          borderColor: theme.border,
+          backgroundColor: `${theme?.panels || '#f8f9fa'}95`,
+          borderColor: theme?.border || '#dee2e6',
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold" style={{ color: theme.primary }}>
+            <h1 className="text-2xl font-bold" style={{ color: theme?.primary || '#007bff' }}>
               🍽️ Food Items Management
             </h1>
             <a
               href="/vendor/dashboard"
               className="transition-colors hover:opacity-80"
-              style={{ color: theme.textSecondary }}
+              style={{ color: theme?.textSecondary || '#6c757d' }}
             >
               ← Back to Dashboard
             </a>
@@ -206,21 +231,21 @@ const MenuItems = () => {
         <div
           className="rounded-2xl border p-6 mb-6 backdrop-blur-sm"
           style={{
-            backgroundColor: theme.panels,
-            borderColor: theme.border,
+            backgroundColor: theme?.panels || '#f8f9fa',
+            borderColor: theme?.border || '#dee2e6',
           }}
         >
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
               <h2
                 className="text-xl font-semibold mb-2"
-                style={{ color: theme.text }}
+                style={{ color: theme?.text || '#000000' }}
               >
                 Your Food Items
               </h2>
-              <p style={{ color: theme.textSecondary }}>
+              <p style={{ color: theme?.textSecondary || '#6c757d' }}>
                 Total Items:{" "}
-                <span className="font-semibold" style={{ color: theme.text }}>
+                <span className="font-semibold" style={{ color: theme?.text || '#000000' }}>
                   {menuItems.length}
                 </span>
               </p>
@@ -229,7 +254,7 @@ const MenuItems = () => {
               onClick={() => setShowCreateModal(true)}
               className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
               style={{
-                backgroundColor: theme.success,
+                backgroundColor: theme?.success || '#28a745',
                 color: "white",
               }}
             >
@@ -243,19 +268,19 @@ const MenuItems = () => {
           <div
             className="rounded-2xl border p-8 text-center"
             style={{
-              backgroundColor: theme.panels,
-              borderColor: theme.border,
+              backgroundColor: theme?.panels || '#f8f9fa',
+              borderColor: theme?.border || '#dee2e6',
             }}
           >
             <div className="text-6xl mb-4">🍽️</div>
-            <p className="text-lg mb-4" style={{ color: theme.textSecondary }}>
+            <p className="text-lg mb-4" style={{ color: theme?.textSecondary || '#6c757d' }}>
               No food items found. Create your first food item to get started.
             </p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="px-6 py-3 rounded-lg font-semibold transition-all duration-300"
               style={{
-                backgroundColor: theme.primary,
+                backgroundColor: theme?.primary || '#007bff',
                 color: "white",
               }}
             >
@@ -266,11 +291,11 @@ const MenuItems = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {menuItems.map((item) => (
               <div
-                key={item.id}
+                key={item.id || item._id}
                 className="rounded-2xl border p-6 hover:shadow-lg transition-all duration-300"
                 style={{
-                  backgroundColor: theme.panels,
-                  borderColor: theme.border,
+                  backgroundColor: theme?.panels || '#f8f9fa',
+                  borderColor: theme?.border || '#dee2e6',
                 }}
               >
                 <div className="flex justify-between items-start mb-4">
@@ -280,7 +305,7 @@ const MenuItems = () => {
                     </span>
                     <h3
                       className="text-xl font-semibold"
-                      style={{ color: theme.text }}
+                      style={{ color: theme?.text || '#000000' }}
                     >
                       {item.name}
                     </h3>
@@ -289,11 +314,11 @@ const MenuItems = () => {
                     className="px-3 py-1 rounded-full text-sm font-medium"
                     style={{
                       backgroundColor: item.is_available_today
-                        ? `${theme.success}20`
-                        : `${theme.error}20`,
+                        ? `${theme?.success || '#28a745'}20`
+                        : `${theme?.error || '#dc3545'}20`,
                       color: item.is_available_today
-                        ? theme.success
-                        : theme.error,
+                        ? theme?.success || '#28a745'
+                        : theme?.error || '#dc3545',
                     }}
                   >
                     {item.is_available_today ? "Available" : "Not Available"}
@@ -302,21 +327,21 @@ const MenuItems = () => {
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>
+                    <span style={{ color: theme?.textSecondary || '#6c757d' }}>
                       Category:
                     </span>
                     <span
                       className="font-medium capitalize"
-                      style={{ color: theme.text }}
+                      style={{ color: theme?.text || '#000000' }}
                     >
                       {item.category.replace("_", " ")}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>Price:</span>
+                    <span style={{ color: theme?.textSecondary || '#6c757d' }}>Price:</span>
                     <span
                       className="font-semibold text-lg"
-                      style={{ color: theme.success }}
+                      style={{ color: theme?.success || '#28a745' }}
                     >
                       ₹{item.price}
                     </span>
@@ -329,8 +354,8 @@ const MenuItems = () => {
                     <span
                       className="px-2 py-1 rounded-full text-xs font-medium"
                       style={{
-                        backgroundColor: `${theme.success}20`,
-                        color: theme.success,
+                        backgroundColor: `${theme?.success || '#28a745'}20`,
+                        color: theme?.success || '#28a745',
                       }}
                     >
                       🌱 Veg
@@ -339,8 +364,8 @@ const MenuItems = () => {
                     <span
                       className="px-2 py-1 rounded-full text-xs font-medium"
                       style={{
-                        backgroundColor: `${theme.error}20`,
-                        color: theme.error,
+                        backgroundColor: `${theme?.error || '#dc3545'}20`,
+                        color: theme?.error || '#dc3545',
                       }}
                     >
                       🍖 Non-Veg
@@ -350,8 +375,8 @@ const MenuItems = () => {
                     <span
                       className="px-2 py-1 rounded-full text-xs font-medium"
                       style={{
-                        backgroundColor: `${theme.warning}20`,
-                        color: theme.warning,
+                        backgroundColor: `${theme?.warning || '#ffc107'}20`,
+                        color: theme?.warning || '#ffc107',
                       }}
                     >
                       🌶️ Spicy
@@ -361,21 +386,21 @@ const MenuItems = () => {
 
                 <div
                   className="flex justify-between items-center pt-4 border-t"
-                  style={{ borderColor: theme.border }}
+                  style={{ borderColor: theme?.border || '#dee2e6' }}
                 >
-                  <p className="text-sm" style={{ color: theme.textSecondary }}>
+                  <p className="text-sm" style={{ color: theme?.textSecondary || '#6c757d' }}>
                     Created: {new Date(item.created_at).toLocaleDateString()}
                   </p>
                   <div className="space-x-2">
                     <button
                       className="text-sm hover:opacity-80 transition-opacity"
-                      style={{ color: theme.primary }}
+                      style={{ color: theme?.primary || '#007bff' }}
                     >
                       Edit
                     </button>
                     <button
                       className="text-sm hover:opacity-80 transition-opacity"
-                      style={{ color: theme.error }}
+                      style={{ color: theme?.error || '#dc3545' }}
                     >
                       Delete
                     </button>
@@ -393,18 +418,18 @@ const MenuItems = () => {
           <div
             className="rounded-2xl border p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
             style={{
-              backgroundColor: theme.panels,
-              borderColor: theme.border,
+              backgroundColor: theme?.panels || '#f8f9fa',
+              borderColor: theme?.border || '#dee2e6',
             }}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold" style={{ color: theme.text }}>
+              <h2 className="text-2xl font-bold" style={{ color: theme?.text || '#000000' }}>
                 🍽️ Add New Food Item
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
                 className="text-2xl hover:opacity-80 transition-opacity"
-                style={{ color: theme.textSecondary }}
+                style={{ color: theme?.textSecondary || '#6c757d' }}
               >
                 ×
               </button>
@@ -415,7 +440,7 @@ const MenuItems = () => {
               <div>
                 <label
                   className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
+                  style={{ color: theme?.textSecondary || '#6c757d' }}
                 >
                   Food Item Name *
                 </label>
@@ -426,10 +451,9 @@ const MenuItems = () => {
                   onChange={handleCreateFormChange}
                   className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
                   style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary,
+                    backgroundColor: theme?.background || '#ffffff',
+                    borderColor: theme?.border || '#dee2e6',
+                    color: theme?.text || '#000000',
                   }}
                   placeholder="e.g., Aloo Gobi, Chicken Curry, Jeera Rice"
                   required
@@ -441,7 +465,7 @@ const MenuItems = () => {
                 <div>
                   <label
                     className="block mb-2 font-medium"
-                    style={{ color: theme.textSecondary }}
+                    style={{ color: theme?.textSecondary || '#6c757d' }}
                   >
                     Category *
                   </label>
@@ -451,10 +475,9 @@ const MenuItems = () => {
                     onChange={handleCreateFormChange}
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
                     style={{
-                      backgroundColor: theme.background,
-                      borderColor: theme.border,
-                      color: theme.text,
-                      focusRingColor: theme.primary,
+                      backgroundColor: theme?.background || '#ffffff',
+                      borderColor: theme?.border || '#dee2e6',
+                      color: theme?.text || '#000000',
                     }}
                   >
                     {categories.map((cat) => (
@@ -468,7 +491,7 @@ const MenuItems = () => {
                 <div>
                   <label
                     className="block mb-2 font-medium"
-                    style={{ color: theme.textSecondary }}
+                    style={{ color: theme?.textSecondary || '#6c757d' }}
                   >
                     Price per portion (₹) *
                   </label>
@@ -481,10 +504,9 @@ const MenuItems = () => {
                     step="0.01"
                     className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
                     style={{
-                      backgroundColor: theme.background,
-                      borderColor: theme.border,
-                      color: theme.text,
-                      focusRingColor: theme.primary,
+                      backgroundColor: theme?.background || '#ffffff',
+                      borderColor: theme?.border || '#dee2e6',
+                      color: theme?.text || '#000000',
                     }}
                     placeholder="e.g., 25, 30, 40"
                     required
@@ -501,9 +523,9 @@ const MenuItems = () => {
                     checked={createForm.is_vegetarian}
                     onChange={handleCreateFormChange}
                     className="mr-2"
-                    style={{ accentColor: theme.primary }}
+                    style={{ accentColor: theme?.primary || '#007bff' }}
                   />
-                  <span style={{ color: theme.textSecondary }}>
+                  <span style={{ color: theme?.textSecondary || '#6c757d' }}>
                     🌱 Vegetarian
                   </span>
                 </label>
@@ -515,9 +537,9 @@ const MenuItems = () => {
                     checked={createForm.is_spicy}
                     onChange={handleCreateFormChange}
                     className="mr-2"
-                    style={{ accentColor: theme.primary }}
+                    style={{ accentColor: theme?.primary || '#007bff' }}
                   />
-                  <span style={{ color: theme.textSecondary }}>🌶️ Spicy</span>
+                  <span style={{ color: theme?.textSecondary || '#6c757d' }}>🌶️ Spicy</span>
                 </label>
 
                 <label className="flex items-center cursor-pointer">
@@ -527,9 +549,9 @@ const MenuItems = () => {
                     checked={createForm.is_available_today}
                     onChange={handleCreateFormChange}
                     className="mr-2"
-                    style={{ accentColor: theme.primary }}
+                    style={{ accentColor: theme?.primary || '#007bff' }}
                   />
-                  <span style={{ color: theme.textSecondary }}>
+                  <span style={{ color: theme?.textSecondary || '#6c757d' }}>
                     Available Today
                   </span>
                 </label>
@@ -541,7 +563,7 @@ const MenuItems = () => {
                   type="button"
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 transition-colors hover:opacity-80"
-                  style={{ color: theme.textSecondary }}
+                  style={{ color: theme?.textSecondary || '#6c757d' }}
                 >
                   Cancel
                 </button>
@@ -550,7 +572,7 @@ const MenuItems = () => {
                   disabled={createLoading}
                   className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
-                    backgroundColor: theme.success,
+                    backgroundColor: theme?.success || '#28a745',
                     color: "white",
                   }}
                 >

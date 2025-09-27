@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from "react";
+import MenuItems from "./MenuItems";
+import DailyMenus from "./DailyMenus";
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
   const getVendorAuthHeaders = () => {
-  const token = localStorage.getItem('vendor_token');
-  console.log("Vendor Token:", token); // Debugging line
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+    const token = localStorage.getItem('vendor_token');
+    console.log("Vendor Token:", token ? "exists" : "missing");
+    return token ? { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {};
+  };
 
   useEffect(() => {
     fetchDashboardData();
@@ -18,19 +24,20 @@ const VendorMenuManager = () => {
   const fetchDashboardData = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
+        `${import.meta.env.VITE_API_URL}/api/vendor/dashboard`,
         { headers: getVendorAuthHeaders() }
       );
       
+      console.log("Dashboard response status:", response.status);
+      
       if (response.status === 401) {
         setError("Please login to access the dashboard");
-        // You might want to redirect to login page here
-        // window.location.href = '/vendor/login';
         return;
       }
       
       if (response.ok) {
         const data = await response.json();
+        console.log("Dashboard data:", data);
         if (data.success) {
           setDashboardData(data.dashboard_data);
         } else {
@@ -109,8 +116,8 @@ const VendorMenuManager = () => {
           <div style={{ marginTop: "20px" }}>
             <h3>Kitchen Information</h3>
             <p>
-              <strong>Kitchen Name:</strong>{" "}
-              {dashboardData.vendor_info.kitchen_name}
+              <strong>Business Name:</strong>{" "}
+              {dashboardData.vendor_info.business_name}
             </p>
             <p>
               <strong>Verification Status:</strong>
@@ -197,8 +204,8 @@ const VendorMenuManager = () => {
 
       {/* Tab Content */}
       <div>
-        {activeTab === "menu-items" && <div>Menu Items Component</div>}
-        {activeTab === "daily-menus" && <div>Daily Menus Component</div>}
+        {activeTab === "menu-items" && <MenuItems />}
+        {activeTab === "daily-menus" && <DailyMenus />}
       </div>
     </div>
   );
