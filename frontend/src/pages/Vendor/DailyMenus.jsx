@@ -17,9 +17,13 @@ const DailyMenus = () => {
   const [createForm, setCreateForm] = useState({
     name: '',
     date: '',
-    menu_items: [],
-    special_instructions: '',
-    max_orders: 50
+    main_items: [],
+    side_items: [],
+    extras: [],
+    full_dabba_price: '',
+    max_dabbas: 30,
+    todays_special: '',
+    cooking_style: ''
   });
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -43,7 +47,7 @@ const DailyMenus = () => {
       
       if (response.ok) {
         const data = await response.json();
-        setMenus(data.menus || data.results || data || []);
+        setMenus(data.menus || []);
         setError(null);
       } else {
         const errorText = await response.text();
@@ -78,34 +82,6 @@ const DailyMenus = () => {
     setError(null);
   };
 
-  const toggleMenuStatus = async (menuId, currentStatus) => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/daily-menus/${menuId}/`,
-        {
-          method: 'PATCH',
-          credentials: "include",
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            is_active: !currentStatus
-          })
-        }
-      );
-      
-      if (response.ok) {
-        fetchMenus();
-        toast.success('Menu status updated successfully');
-      } else {
-        toast.error('Failed to update menu status');
-      }
-    } catch (err) {
-      console.error("Error updating menu:", err);
-      toast.error('Error updating menu status');
-    }
-  };
-
   const handleCreateFormChange = (e) => {
     const { name, value } = e.target;
     setCreateForm(prev => ({
@@ -114,20 +90,25 @@ const DailyMenus = () => {
     }));
   };
 
-  const handleMenuItemToggle = (itemId) => {
+  const handleItemToggle = (itemId, category) => {
     setCreateForm(prev => ({
       ...prev,
-      menu_items: prev.menu_items.includes(itemId)
-        ? prev.menu_items.filter(id => id !== itemId)
-        : [...prev.menu_items, itemId]
+      [category]: prev[category].includes(itemId)
+        ? prev[category].filter(id => id !== itemId)
+        : [...prev[category], itemId]
     }));
   };
 
   const handleCreateMenu = async (e) => {
     e.preventDefault();
     
-    if (!createForm.name || !createForm.date || createForm.menu_items.length === 0) {
-      toast.error('Please fill in all required fields and select at least one menu item');
+    if (!createForm.name || !createForm.date || !createForm.full_dabba_price) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (createForm.main_items.length === 0) {
+      toast.error('Please select at least one main item for the dabba');
       return;
     }
 
@@ -147,12 +128,16 @@ const DailyMenus = () => {
         setCreateForm({
           name: '',
           date: '',
-          menu_items: [],
-          special_instructions: '',
-          max_orders: 50
+          main_items: [],
+          side_items: [],
+          extras: [],
+          full_dabba_price: '',
+          max_dabbas: 30,
+          todays_special: '',
+          cooking_style: ''
         });
         fetchMenus();
-        toast.success('Menu created successfully!');
+        toast.success('Dabba menu created successfully! 🍱');
       } else {
         const errorData = await response.json();
         toast.error(errorData.error || 'Failed to create menu');
@@ -170,6 +155,33 @@ const DailyMenus = () => {
     fetchMenuItems();
   };
 
+  const getCategoryEmoji = (category) => {
+    const emojiMap = {
+      'roti_bread': '🍞',
+      'sabzi': '🥬',
+      'dal': '🍲',
+      'rice_item': '🍚',
+      'non_veg': '🍗',
+      'pickle_papad': '🥒',
+      'sweet': '🍮',
+      'drink': '🥤',
+      'raita_salad': '🥗'
+    };
+    return emojiMap[category] || '🍽️';
+  };
+
+  const getItemsByCategory = (category) => {
+    const categoryMap = {
+      'main_items': ['roti_bread', 'sabzi', 'dal', 'rice_item', 'non_veg'],
+      'side_items': ['pickle_papad', 'raita_salad'],
+      'extras': ['sweet', 'drink']
+    };
+    
+    return menuItems.filter(item => 
+      categoryMap[category].includes(item.category)
+    );
+  };
+
   if (loading) {
     return (
       <div 
@@ -185,7 +197,7 @@ const DailyMenus = () => {
             className="text-xl font-semibold" 
             style={{ color: theme.text }}
           >
-            Loading daily menus...
+            Loading daily dabbas...
           </div>
         </div>
       </div>
@@ -208,10 +220,10 @@ const DailyMenus = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <h1 
-              className="text-2xl font-bold"
+              className="text-2xl font-bold flex items-center"
               style={{ color: theme.primary }}
             >
-              Daily Menus Management
+              🍱 Daily Dabba Management
             </h1>
             <a
               href="/vendor/dashboard"
@@ -240,7 +252,7 @@ const DailyMenus = () => {
                 className="font-medium"
                 style={{ color: theme.textSecondary }}
               >
-                Filter by date:
+                📅 Filter by date:
               </label>
               <input 
                 type="date" 
@@ -269,13 +281,14 @@ const DailyMenus = () => {
             </div>
             <button 
               onClick={openCreateModal}
-              className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105"
+              className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 flex items-center space-x-2"
               style={{ 
                 backgroundColor: theme.success,
                 color: 'white'
               }}
             >
-              + Create New Menu
+              <span>🍱</span>
+              <span>Create Today's Dabba</span>
             </button>
           </div>
         </div>
@@ -296,7 +309,7 @@ const DailyMenus = () => {
         {/* Menus Count */}
         <div className="mb-4">
           <p style={{ color: theme.textSecondary }}>
-            Total Menus: <span className="font-semibold" style={{ color: theme.text }}>{menus.length}</span>
+            Total Dabba Menus: <span className="font-semibold" style={{ color: theme.text }}>{menus.length}</span>
           </p>
         </div>
 
@@ -309,7 +322,8 @@ const DailyMenus = () => {
               borderColor: theme.border 
             }}
           >
-            <p style={{ color: theme.textSecondary }}>No menus found for the selected criteria.</p>
+            <div className="text-6xl mb-4">🍱</div>
+            <p style={{ color: theme.textSecondary }}>No dabba menus found. Create your first daily dabba!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -322,74 +336,134 @@ const DailyMenus = () => {
                   borderColor: theme.border 
                 }}
               >
+                {/* Menu Header */}
                 <div className="flex justify-between items-start mb-4">
-                  <h3 
-                    className="text-xl font-semibold"
-                    style={{ color: theme.text }}
-                  >
-                    {menu.name}
-                  </h3>
-                  <button
-                    onClick={() => toggleMenuStatus(menu.id, menu.is_active)}
-                    className="px-3 py-1 rounded-full text-sm font-medium transition-colors"
-                    style={{
-                      backgroundColor: menu.is_active 
-                        ? `${theme.success}20` 
-                        : `${theme.error}20`,
-                      color: menu.is_active ? theme.success : theme.error
-                    }}
-                  >
-                    {menu.is_active ? "Active" : "Inactive"}
-                  </button>
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>Date:</span>
-                    <span style={{ color: theme.text }}>
-                      {new Date(menu.date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>Total Price:</span>
-                    <span 
-                      className="font-semibold"
-                      style={{ color: theme.success }}
+                  <div>
+                    <h3 
+                      className="text-xl font-semibold flex items-center space-x-2"
+                      style={{ color: theme.text }}
                     >
-                      ₹{menu.total_price || "Not set"}
-                    </span>
+                      <span>🍱</span>
+                      <span>{menu.name}</span>
+                    </h3>
+                    <p style={{ color: theme.textSecondary }}>
+                      {new Date(menu.date).toLocaleDateString('en-IN', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>Available:</span>
-                    <span style={{ color: menu.is_available ? theme.success : theme.error }}>
-                      {menu.is_available ? "Yes" : "No"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>Orders:</span>
-                    <span style={{ color: theme.text }}>
-                      {menu.orders_count} / {menu.max_orders}
-                      {menu.orders_count >= menu.max_orders && (
-                        <span className="ml-2" style={{ color: theme.error }}>(Sold Out)</span>
-                      )}
-                    </span>
+                  <div className="text-right">
+                    <div
+                      className="px-3 py-1 rounded-full text-sm font-medium mb-2"
+                      style={{
+                        backgroundColor: menu.is_active 
+                          ? `${theme.success}20` 
+                          : `${theme.error}20`,
+                        color: menu.is_active ? theme.success : theme.error
+                      }}
+                    >
+                      {menu.is_active ? "🟢 Active" : "🔴 Inactive"}
+                    </div>
+                    <div
+                      className="px-3 py-1 rounded-full text-xs font-medium"
+                      style={{
+                        backgroundColor: menu.is_veg_only 
+                          ? `${theme.success}15` 
+                          : `${theme.warning}15`,
+                        color: menu.is_veg_only ? theme.success : theme.warning
+                      }}
+                    >
+                      {menu.is_veg_only ? "🌱 Pure Veg" : "🍗 Contains Non-Veg"}
+                    </div>
                   </div>
                 </div>
-                
-                {menu.special_instructions && (
+
+                {/* Menu Image */}
+                {menu.image && (
+                  <div className="mb-4">
+                    <img 
+                      src={menu.image} 
+                      alt={menu.name}
+                      className="w-full h-40 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+
+                {/* Dabba Details */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div 
-                    className="mb-4 p-3 rounded-lg"
+                    className="p-3 rounded-lg text-center"
                     style={{ backgroundColor: theme.background }}
                   >
+                    <p 
+                      className="text-2xl font-bold"
+                      style={{ color: theme.success }}
+                    >
+                      ₹{menu.full_dabba_price}
+                    </p>
                     <p 
                       className="text-sm"
                       style={{ color: theme.textSecondary }}
                     >
-                      <span className="font-medium">Special Instructions:</span> {menu.special_instructions}
+                      Per Dabba
+                    </p>
+                  </div>
+                  <div 
+                    className="p-3 rounded-lg text-center"
+                    style={{ backgroundColor: theme.background }}
+                  >
+                    <p 
+                      className="text-2xl font-bold"
+                      style={{ color: theme.text }}
+                    >
+                      {menu.dabbas_remaining}
+                    </p>
+                    <p 
+                      className="text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      Dabbas Left
+                    </p>
+                  </div>
+                </div>
+
+                {/* Today's Special */}
+                {menu.todays_special && (
+                  <div 
+                    className="mb-4 p-3 rounded-lg border-l-4"
+                    style={{ 
+                      backgroundColor: `${theme.warning}10`,
+                      borderLeftColor: theme.warning 
+                    }}
+                  >
+                    <p 
+                      className="text-sm font-medium"
+                      style={{ color: theme.text }}
+                    >
+                      ⭐ Today's Special: {menu.todays_special}
                     </p>
                   </div>
                 )}
 
+                {/* Cooking Style */}
+                {menu.cooking_style && (
+                  <div className="mb-4">
+                    <span 
+                      className="px-3 py-1 rounded-full text-sm"
+                      style={{ 
+                        backgroundColor: `${theme.primary}15`,
+                        color: theme.primary 
+                      }}
+                    >
+                      👨‍🍳 {menu.cooking_style}
+                    </span>
+                  </div>
+                )}
+
+                {/* Dabba Contents */}
                 <div 
                   className="border-t pt-4"
                   style={{ borderColor: theme.border }}
@@ -398,59 +472,94 @@ const DailyMenus = () => {
                     className="font-medium mb-3"
                     style={{ color: theme.text }}
                   >
-                    Menu Items ({menu.menu_items?.length || 0}):
+                    🍽️ What's in today's dabba:
                   </h4>
-                  <div className="space-y-2">
-                    {menu.menu_items?.map((item) => (
-                      <div 
-                        key={item.id} 
-                        className="p-3 rounded-lg"
-                        style={{ backgroundColor: theme.background }}
+
+                  {/* Main Items */}
+                  {menu.main_items.length > 0 && (
+                    <div className="mb-3">
+                      <p 
+                        className="text-sm font-medium mb-2"
+                        style={{ color: theme.textSecondary }}
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <p 
-                              className="font-medium"
-                              style={{ color: theme.text }}
-                            >
-                              {item.name}
-                            </p>
-                            {item.description && (
-                              <p 
-                                className="text-sm mt-1"
-                                style={{ color: theme.textSecondary }}
-                              >
-                                {item.description}
-                              </p>
-                            )}
-                            <div className="flex items-center space-x-2 mt-2 text-xs">
-                              <span style={{ color: theme.textSecondary }}>{item.category}</span>
-                              {item.is_vegetarian && (
-                                <span style={{ color: theme.success }}>• Veg</span>
-                              )}
-                              {!item.is_vegetarian && (
-                                <span style={{ color: theme.error }}>• Non-Veg</span>
-                              )}
-                              {item.is_vegan && (
-                                <span style={{ color: theme.success }}>• Vegan</span>
-                              )}
-                              {item.is_spicy && (
-                                <span style={{ color: theme.warning }}>• Spicy</span>
-                              )}
-                            </div>
-                          </div>
+                        Main Items:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {menu.main_items.map((item) => (
                           <span 
-                            className="font-semibold ml-4"
-                            style={{ color: theme.success }}
+                            key={item.id}
+                            className="px-2 py-1 rounded-full text-sm flex items-center space-x-1"
+                            style={{ 
+                              backgroundColor: theme.background,
+                              border: `1px solid ${theme.border}`
+                            }}
                           >
-                            ₹{item.price}
+                            <span>{getCategoryEmoji(item.category)}</span>
+                            <span style={{ color: theme.text }}>{item.name}</span>
+                            {!item.is_vegetarian && <span>🔥</span>}
+                            {item.is_spicy && <span>🌶️</span>}
                           </span>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  )}
+
+                  {/* Side Items */}
+                  {menu.side_items.length > 0 && (
+                    <div className="mb-3">
+                      <p 
+                        className="text-sm font-medium mb-2"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        Side Items:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {menu.side_items.map((item) => (
+                          <span 
+                            key={item.id}
+                            className="px-2 py-1 rounded-full text-sm flex items-center space-x-1"
+                            style={{ 
+                              backgroundColor: `${theme.success}15`,
+                              color: theme.success
+                            }}
+                          >
+                            <span>{getCategoryEmoji(item.category)}</span>
+                            <span>{item.name}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Extras */}
+                  {menu.extras.length > 0 && (
+                    <div className="mb-3">
+                      <p 
+                        className="text-sm font-medium mb-2"
+                        style={{ color: theme.textSecondary }}
+                      >
+                        Extras:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {menu.extras.map((item) => (
+                          <span 
+                            key={item.id}
+                            className="px-2 py-1 rounded-full text-sm flex items-center space-x-1"
+                            style={{ 
+                              backgroundColor: `${theme.warning}15`,
+                              color: theme.warning
+                            }}
+                          >
+                            <span>{getCategoryEmoji(item.category)}</span>
+                            <span>{item.name}</span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
+                {/* Footer */}
                 <div 
                   className="flex justify-between items-center mt-4 pt-4 border-t"
                   style={{ borderColor: theme.border }}
@@ -459,20 +568,20 @@ const DailyMenus = () => {
                     className="text-sm"
                     style={{ color: theme.textSecondary }}
                   >
-                    Created: {new Date(menu.created_at).toLocaleDateString()}
+                    Sold: {menu.dabbas_sold} / {menu.max_dabbas}
                   </p>
                   <div className="space-x-2">
                     <button 
                       className="text-sm hover:opacity-80 transition-opacity"
                       style={{ color: theme.primary }}
                     >
-                      Edit
+                      ✏️ Edit
                     </button>
                     <button 
                       className="text-sm hover:opacity-80 transition-opacity"
                       style={{ color: theme.error }}
                     >
-                      Delete
+                      🗑️ Delete
                     </button>
                   </div>
                 </div>
@@ -486,7 +595,7 @@ const DailyMenus = () => {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
           <div 
-            className="rounded-2xl border p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            className="rounded-2xl border p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto"
             style={{ 
               backgroundColor: theme.panels,
               borderColor: theme.border 
@@ -494,10 +603,11 @@ const DailyMenus = () => {
           >
             <div className="flex justify-between items-center mb-6">
               <h2 
-                className="text-2xl font-bold"
+                className="text-2xl font-bold flex items-center space-x-2"
                 style={{ color: theme.text }}
               >
-                Create New Daily Menu
+                <span>🍱</span>
+                <span>Create Today's Dabba Menu</span>
               </h2>
               <button 
                 onClick={() => setShowCreateModal(false)}
@@ -508,162 +618,196 @@ const DailyMenus = () => {
               </button>
             </div>
 
-            <form onSubmit={handleCreateMenu} className="space-y-4">
-              {/* Menu Name */}
-              <div>
-                <label 
-                  className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Menu Name *
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={createForm.name}
-                  onChange={handleCreateFormChange}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary
-                  }}
-                  placeholder="e.g., Today's Special, Weekend Feast"
-                  required
-                />
+            <form onSubmit={handleCreateMenu} className="space-y-6">
+              {/* Basic Details */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label 
+                    className="block mb-2 font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Menu Name *
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={createForm.name}
+                    onChange={handleCreateFormChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text
+                    }}
+                    placeholder="e.g., Monday Special, Gujarati Thali"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label 
+                    className="block mb-2 font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    name="date"
+                    value={createForm.date}
+                    onChange={handleCreateFormChange}
+                    min={new Date().toISOString().split('T')[0]}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text
+                    }}
+                    required
+                  />
+                </div>
               </div>
 
-              {/* Date */}
-              <div>
-                <label 
-                  className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Date *
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={createForm.date}
-                  onChange={handleCreateFormChange}
-                  min={new Date().toISOString().split('T')[0]}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary
-                  }}
-                  required
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label 
+                    className="block mb-2 font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Full Dabba Price (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    name="full_dabba_price"
+                    value={createForm.full_dabba_price}
+                    onChange={handleCreateFormChange}
+                    min="1"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text
+                    }}
+                    placeholder="e.g., 80, 120, 150"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label 
+                    className="block mb-2 font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Max Dabbas
+                  </label>
+                  <input
+                    type="number"
+                    name="max_dabbas"
+                    value={createForm.max_dabbas}
+                    onChange={handleCreateFormChange}
+                    min="1"
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text
+                    }}
+                    placeholder="e.g., 30, 50"
+                  />
+                </div>
               </div>
 
-              {/* Max Orders */}
-              <div>
-                <label 
-                  className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Maximum Orders
-                </label>
-                <input
-                  type="number"
-                  name="max_orders"
-                  value={createForm.max_orders}
-                  onChange={handleCreateFormChange}
-                  min="1"
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary
-                  }}
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label 
+                    className="block mb-2 font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Today's Special
+                  </label>
+                  <input
+                    type="text"
+                    name="todays_special"
+                    value={createForm.todays_special}
+                    onChange={handleCreateFormChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text
+                    }}
+                    placeholder="e.g., Fresh Palak Paneer, Hot Phulkas"
+                  />
+                </div>
+
+                <div>
+                  <label 
+                    className="block mb-2 font-medium"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Cooking Style
+                  </label>
+                  <input
+                    type="text"
+                    name="cooking_style"
+                    value={createForm.cooking_style}
+                    onChange={handleCreateFormChange}
+                    className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50"
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text
+                    }}
+                    placeholder="e.g., Punjabi Style, Gujarati Thali"
+                  />
+                </div>
               </div>
 
-              {/* Special Instructions */}
+              {/* Main Items */}
               <div>
                 <label 
-                  className="block mb-2 font-medium"
+                  className="block mb-3 font-medium"
                   style={{ color: theme.textSecondary }}
                 >
-                  Special Instructions
-                </label>
-                <textarea
-                  name="special_instructions"
-                  value={createForm.special_instructions}
-                  onChange={handleCreateFormChange}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary
-                  }}
-                  rows="3"
-                  placeholder="Any special notes for customers..."
-                />
-              </div>
-
-              {/* Menu Items Selection */}
-              <div>
-                <label 
-                  className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Select Menu Items * ({createForm.menu_items.length} selected)
+                  🍽️ Main Items * ({createForm.main_items.length} selected)
                 </label>
                 <div 
-                  className="max-h-60 overflow-y-auto border rounded-lg"
-                  style={{ borderColor: theme.border }}
+                  className="max-h-48 overflow-y-auto border rounded-lg p-3"
+                  style={{ borderColor: theme.border, backgroundColor: theme.background }}
                 >
-                  {menuItems.length === 0 ? (
-                    <div 
-                      className="p-4 text-center"
+                  {getItemsByCategory('main_items').length === 0 ? (
+                    <p 
+                      className="text-center text-sm"
                       style={{ color: theme.textSecondary }}
                     >
-                      No menu items available. Please create menu items first.
-                    </div>
+                      No main items available. Create some first!
+                    </p>
                   ) : (
-                    menuItems.map((item) => (
-                      <div 
-                        key={item.id} 
-                        className="p-3 border-b last:border-b-0"
-                        style={{ borderColor: theme.border }}
-                      >
-                        <label className="flex items-center cursor-pointer">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {getItemsByCategory('main_items').map((item) => (
+                        <label key={item.id} className="flex items-center cursor-pointer p-2 rounded hover:opacity-80" style={{ backgroundColor: theme.panels }}>
                           <input
                             type="checkbox"
-                            checked={createForm.menu_items.includes(item.id)}
-                            onChange={() => handleMenuItemToggle(item.id)}
+                            checked={createForm.main_items.includes(item.id)}
+                            onChange={() => handleItemToggle(item.id, 'main_items')}
                             className="mr-3"
                             style={{ accentColor: theme.primary }}
                           />
                           <div className="flex-1">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <p 
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <span>{getCategoryEmoji(item.category)}</span>
+                                <span 
                                   className="font-medium"
                                   style={{ color: theme.text }}
                                 >
                                   {item.name}
-                                </p>
-                                <p 
-                                  className="text-sm"
-                                  style={{ color: theme.textSecondary }}
-                                >
-                                  {item.description}
-                                </p>
-                                <div className="flex items-center space-x-2 mt-1 text-xs">
-                                  <span style={{ color: theme.textSecondary }}>{item.category}</span>
-                                  {item.is_vegetarian && <span style={{ color: theme.success }}>• Veg</span>}
-                                  {item.is_spicy && <span style={{ color: theme.warning }}>• Spicy</span>}
-                                </div>
+                                </span>
+                                {!item.is_vegetarian && <span>🔥</span>}
+                                {item.is_spicy && <span>🌶️</span>}
                               </div>
                               <span 
-                                className="font-semibold"
+                                className="text-sm font-medium"
                                 style={{ color: theme.success }}
                               >
                                 ₹{item.price}
@@ -671,32 +815,154 @@ const DailyMenus = () => {
                             </div>
                           </div>
                         </label>
-                      </div>
-                    ))
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Side Items */}
+              <div>
+                <label 
+                  className="block mb-3 font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  🥗 Side Items ({createForm.side_items.length} selected)
+                </label>
+                <div 
+                  className="max-h-32 overflow-y-auto border rounded-lg p-3"
+                  style={{ borderColor: theme.border, backgroundColor: theme.background }}
+                >
+                  {getItemsByCategory('side_items').length === 0 ? (
+                    <p 
+                      className="text-center text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      No side items available.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {getItemsByCategory('side_items').map((item) => (
+                        <label key={item.id} className="flex items-center cursor-pointer p-2 rounded hover:opacity-80" style={{ backgroundColor: theme.panels }}>
+                          <input
+                            type="checkbox"
+                            checked={createForm.side_items.includes(item.id)}
+                            onChange={() => handleItemToggle(item.id, 'side_items')}
+                            className="mr-3"
+                            style={{ accentColor: theme.success }}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <span>{getCategoryEmoji(item.category)}</span>
+                                <span 
+                                  className="font-medium"
+                                  style={{ color: theme.text }}
+                                >
+                                  {item.name}
+                                </span>
+                                {item.is_spicy && <span>🌶️</span>}
+                              </div>
+                              <span 
+                                className="text-sm font-medium"
+                                style={{ color: theme.success }}
+                              >
+                                ₹{item.price}
+                              </span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Extras */}
+              <div>
+                <label 
+                  className="block mb-3 font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  🍮 Extras ({createForm.extras.length} selected)
+                </label>
+                <div 
+                  className="max-h-32 overflow-y-auto border rounded-lg p-3"
+                  style={{ borderColor: theme.border, backgroundColor: theme.background }}
+                >
+                  {getItemsByCategory('extras').length === 0 ? (
+                    <p 
+                      className="text-center text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      No extras available.
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {getItemsByCategory('extras').map((item) => (
+                        <label key={item.id} className="flex items-center cursor-pointer p-2 rounded hover:opacity-80" style={{ backgroundColor: theme.panels }}>
+                          <input
+                            type="checkbox"
+                            checked={createForm.extras.includes(item.id)}
+                            onChange={() => handleItemToggle(item.id, 'extras')}
+                            className="mr-3"
+                            style={{ accentColor: theme.warning }}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <span>{getCategoryEmoji(item.category)}</span>
+                                <span 
+                                  className="font-medium"
+                                  style={{ color: theme.text }}
+                                >
+                                  {item.name}
+                                </span>
+                              </div>
+                              <span 
+                                className="text-sm font-medium"
+                                style={{ color: theme.success }}
+                              >
+                                ₹{item.price}
+                              </span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
 
               {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-4">
+              <div className="flex justify-end space-x-4 pt-4 border-t" style={{ borderColor: theme.border }}>
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 transition-colors hover:opacity-80"
+                  className="px-6 py-2 transition-colors hover:opacity-80"
                   style={{ color: theme.textSecondary }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={createLoading || menuItems.length === 0}
-                  className="px-6 py-2 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={createLoading}
+                  className="px-8 py-2 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
                   style={{ 
                     backgroundColor: theme.success,
                     color: 'white'
                   }}
                 >
-                  {createLoading ? 'Creating...' : 'Create Menu'}
+                  {createLoading ? (
+                    <>
+                      <span>Creating...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🍱</span>
+                      <span>Create Dabba Menu</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

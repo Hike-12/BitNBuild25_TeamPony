@@ -14,14 +14,11 @@ const MenuItems = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createForm, setCreateForm] = useState({
     name: '',
-    description: '',
-    category: 'main_course',
+    category: 'sabzi',
     price: '',
     is_vegetarian: true,
-    is_vegan: false,
     is_spicy: false,
-    preparation_time: 30,
-    is_available: true
+    is_available_today: true
   });
   const [createLoading, setCreateLoading] = useState(false);
 
@@ -40,6 +37,7 @@ const MenuItems = () => {
       if (response.ok) {
         const data = await response.json();
         setMenuItems(data.menu_items);
+        setError(null);
       } else {
         setError("Failed to fetch menu items");
       }
@@ -62,7 +60,7 @@ const MenuItems = () => {
   const handleCreateMenuItem = async (e) => {
     e.preventDefault();
     
-    if (!createForm.name || !createForm.description || !createForm.price) {
+    if (!createForm.name || !createForm.price) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -82,37 +80,52 @@ const MenuItems = () => {
         setShowCreateModal(false);
         setCreateForm({
           name: '',
-          description: '',
-          category: 'main_course',
+          category: 'sabzi',
           price: '',
           is_vegetarian: true,
-          is_vegan: false,
           is_spicy: false,
-          preparation_time: 30,
-          is_available: true
+          is_available_today: true
         });
         fetchMenuItems(); // Refresh the list
-        toast.success('Menu item created successfully!');
+        toast.success('Food item created successfully!');
       } else {
         const errorData = await response.json();
-        toast.error(errorData.error || 'Failed to create menu item');
+        toast.error(errorData.error || 'Failed to create food item');
       }
     } catch (err) {
       console.error("Error creating menu item:", err);
-      toast.error('Error creating menu item');
+      toast.error('Error creating food item');
     } finally {
       setCreateLoading(false);
     }
   };
 
   const categories = [
-    { value: 'main_course', label: 'Main Course' },
-    { value: 'side_dish', label: 'Side Dish' },
-    { value: 'bread', label: 'Bread' },
-    { value: 'dessert', label: 'Dessert' },
-    { value: 'beverage', label: 'Beverage' },
-    { value: 'snack', label: 'Snack' }
+    { value: 'roti_bread', label: 'Roti/Bread' },
+    { value: 'sabzi', label: 'Sabzi' },
+    { value: 'dal', label: 'Dal' },
+    { value: 'rice_item', label: 'Rice Items' },
+    { value: 'non_veg', label: 'Non-Veg' },
+    { value: 'pickle_papad', label: 'Pickle/Papad' },
+    { value: 'sweet', label: 'Sweet' },
+    { value: 'drink', label: 'Drink' },
+    { value: 'raita_salad', label: 'Raita/Salad' }
   ];
+
+  const getCategoryEmoji = (category) => {
+    const emojiMap = {
+      'roti_bread': '🍞',
+      'sabzi': '🥬',
+      'dal': '🍲',
+      'rice_item': '🍚',
+      'non_veg': '🍖',
+      'pickle_papad': '🥒',
+      'sweet': '🍮',
+      'drink': '🥤',
+      'raita_salad': '🥗'
+    };
+    return emojiMap[category] || '🍽️';
+  };
 
   if (loading) {
     return (
@@ -129,7 +142,7 @@ const MenuItems = () => {
             className="text-xl font-semibold" 
             style={{ color: theme.text }}
           >
-            Loading menu items...
+            Loading food items...
           </div>
         </div>
       </div>
@@ -183,7 +196,7 @@ const MenuItems = () => {
               className="text-2xl font-bold"
               style={{ color: theme.primary }}
             >
-              Menu Items Management
+              🍽️ Food Items Management
             </h1>
             <a
               href="/vendor/dashboard"
@@ -212,7 +225,7 @@ const MenuItems = () => {
                 className="text-xl font-semibold mb-2"
                 style={{ color: theme.text }}
               >
-                Your Menu Items
+                Your Food Items
               </h2>
               <p 
                 style={{ color: theme.textSecondary }}
@@ -228,7 +241,7 @@ const MenuItems = () => {
                 color: 'white'
               }}
             >
-              + Add New Item
+              + Add New Food Item
             </button>
           </div>
         </div>
@@ -242,11 +255,12 @@ const MenuItems = () => {
               borderColor: theme.border 
             }}
           >
+            <div className="text-6xl mb-4">🍽️</div>
             <p 
               className="text-lg mb-4"
               style={{ color: theme.textSecondary }}
             >
-              No menu items found. Create your first menu item to get started.
+              No food items found. Create your first food item to get started.
             </p>
             <button 
               onClick={() => setShowCreateModal(true)}
@@ -271,31 +285,27 @@ const MenuItems = () => {
                 }}
               >
                 <div className="flex justify-between items-start mb-4">
-                  <h3 
-                    className="text-xl font-semibold"
-                    style={{ color: theme.text }}
-                  >
-                    {item.name}
-                  </h3>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-2xl">{getCategoryEmoji(item.category)}</span>
+                    <h3 
+                      className="text-xl font-semibold"
+                      style={{ color: theme.text }}
+                    >
+                      {item.name}
+                    </h3>
+                  </div>
                   <div
                     className="px-3 py-1 rounded-full text-sm font-medium"
                     style={{
-                      backgroundColor: item.is_available 
+                      backgroundColor: item.is_available_today 
                         ? `${theme.success}20` 
                         : `${theme.error}20`,
-                      color: item.is_available ? theme.success : theme.error
+                      color: item.is_available_today ? theme.success : theme.error
                     }}
                   >
-                    {item.is_available ? "Available" : "Unavailable"}
+                    {item.is_available_today ? "Available" : "Not Available"}
                   </div>
                 </div>
-
-                <p 
-                  className="mb-4 text-sm"
-                  style={{ color: theme.textSecondary }}
-                >
-                  {item.description}
-                </p>
 
                 <div className="space-y-2 mb-4">
                   <div className="flex justify-between">
@@ -310,21 +320,17 @@ const MenuItems = () => {
                   <div className="flex justify-between">
                     <span style={{ color: theme.textSecondary }}>Price:</span>
                     <span 
-                      className="font-semibold"
+                      className="font-semibold text-lg"
                       style={{ color: theme.success }}
                     >
                       ₹{item.price}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span style={{ color: theme.textSecondary }}>Prep Time:</span>
-                    <span style={{ color: theme.text }}>{item.preparation_time} mins</span>
-                  </div>
                 </div>
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {item.is_vegetarian && (
+                  {item.is_vegetarian ? (
                     <span 
                       className="px-2 py-1 rounded-full text-xs font-medium"
                       style={{ 
@@ -332,18 +338,17 @@ const MenuItems = () => {
                         color: theme.success 
                       }}
                     >
-                      Vegetarian
+                      🌱 Veg
                     </span>
-                  )}
-                  {item.is_vegan && (
+                  ) : (
                     <span 
                       className="px-2 py-1 rounded-full text-xs font-medium"
                       style={{ 
-                        backgroundColor: `${theme.success}20`,
-                        color: theme.success 
+                        backgroundColor: `${theme.error}20`,
+                        color: theme.error 
                       }}
                     >
-                      Vegan
+                      🍖 Non-Veg
                     </span>
                   )}
                   {item.is_spicy && (
@@ -354,7 +359,7 @@ const MenuItems = () => {
                         color: theme.warning 
                       }}
                     >
-                      Spicy
+                      🌶️ Spicy
                     </span>
                   )}
                 </div>
@@ -405,7 +410,7 @@ const MenuItems = () => {
                 className="text-2xl font-bold"
                 style={{ color: theme.text }}
               >
-                Add New Menu Item
+                🍽️ Add New Food Item
               </h2>
               <button 
                 onClick={() => setShowCreateModal(false)}
@@ -423,7 +428,7 @@ const MenuItems = () => {
                   className="block mb-2 font-medium"
                   style={{ color: theme.textSecondary }}
                 >
-                  Item Name *
+                  Food Item Name *
                 </label>
                 <input
                   type="text"
@@ -437,32 +442,7 @@ const MenuItems = () => {
                     color: theme.text,
                     focusRingColor: theme.primary
                   }}
-                  placeholder="e.g., Butter Chicken, Biryani"
-                  required
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label 
-                  className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Description *
-                </label>
-                <textarea
-                  name="description"
-                  value={createForm.description}
-                  onChange={handleCreateFormChange}
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary
-                  }}
-                  rows="3"
-                  placeholder="Describe your dish..."
+                  placeholder="e.g., Aloo Gobi, Chicken Curry, Jeera Rice"
                   required
                 />
               </div>
@@ -501,7 +481,7 @@ const MenuItems = () => {
                     className="block mb-2 font-medium"
                     style={{ color: theme.textSecondary }}
                   >
-                    Price (₹) *
+                    Price per portion (₹) *
                   </label>
                   <input
                     type="number"
@@ -517,38 +497,14 @@ const MenuItems = () => {
                       color: theme.text,
                       focusRingColor: theme.primary
                     }}
-                    placeholder="0.00"
+                    placeholder="e.g., 25, 30, 40"
                     required
                   />
                 </div>
               </div>
 
-              {/* Preparation Time */}
-              <div>
-                <label 
-                  className="block mb-2 font-medium"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Preparation Time (minutes)
-                </label>
-                <input
-                  type="number"
-                  name="preparation_time"
-                  value={createForm.preparation_time}
-                  onChange={handleCreateFormChange}
-                  min="1"
-                  className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
-                  style={{
-                    backgroundColor: theme.background,
-                    borderColor: theme.border,
-                    color: theme.text,
-                    focusRingColor: theme.primary
-                  }}
-                />
-              </div>
-
               {/* Checkboxes */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
@@ -558,19 +514,7 @@ const MenuItems = () => {
                     className="mr-2"
                     style={{ accentColor: theme.primary }}
                   />
-                  <span style={{ color: theme.textSecondary }}>Vegetarian</span>
-                </label>
-
-                <label className="flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    name="is_vegan"
-                    checked={createForm.is_vegan}
-                    onChange={handleCreateFormChange}
-                    className="mr-2"
-                    style={{ accentColor: theme.primary }}
-                  />
-                  <span style={{ color: theme.textSecondary }}>Vegan</span>
+                  <span style={{ color: theme.textSecondary }}>🌱 Vegetarian</span>
                 </label>
 
                 <label className="flex items-center cursor-pointer">
@@ -582,19 +526,19 @@ const MenuItems = () => {
                     className="mr-2"
                     style={{ accentColor: theme.primary }}
                   />
-                  <span style={{ color: theme.textSecondary }}>Spicy</span>
+                  <span style={{ color: theme.textSecondary }}>🌶️ Spicy</span>
                 </label>
 
                 <label className="flex items-center cursor-pointer">
                   <input
                     type="checkbox"
-                    name="is_available"
-                    checked={createForm.is_available}
+                    name="is_available_today"
+                    checked={createForm.is_available_today}
                     onChange={handleCreateFormChange}
                     className="mr-2"
                     style={{ accentColor: theme.primary }}
                   />
-                  <span style={{ color: theme.textSecondary }}>Available</span>
+                  <span style={{ color: theme.textSecondary }}>Available Today</span>
                 </label>
               </div>
 
@@ -617,7 +561,7 @@ const MenuItems = () => {
                     color: 'white'
                   }}
                 >
-                  {createLoading ? 'Creating...' : 'Create Item'}
+                  {createLoading ? 'Creating...' : 'Create Food Item'}
                 </button>
               </div>
             </form>

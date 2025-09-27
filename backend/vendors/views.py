@@ -265,251 +265,235 @@ def check_vendor_auth(request):
 def menu_items(request):
     """Get all menu items for a vendor or create a new menu item"""
     try:
-        # Get TiffinVendor
-        try:
-            tiffin_vendor = TiffinVendor.objects.get(user=request.user)
-        except TiffinVendor.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'error': 'Tiffin vendor profile not found'
-            }, status=404)
+        tiffin_vendor = TiffinVendor.objects.get(user=request.user)
+    except TiffinVendor.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Vendor profile not found'
+        }, status=404)
 
-        if request.method == 'GET':
-            # Get all menu items for this vendor
-            menu_items = MenuItem.objects.filter(vendor=tiffin_vendor)
-            
-            items_data = []
-            for item in menu_items:
-                items_data.append({
-                    'id': item.id,
-                    'name': item.name,
-                    'description': item.description,
-                    'category': item.category,
-                    'price': str(item.price),
-                    'is_vegetarian': item.is_vegetarian,
-                    'is_vegan': item.is_vegan,
-                    'is_spicy': item.is_spicy,
-                    'preparation_time': item.preparation_time,
-                    'is_available': item.is_available,
-                    'image': item.image.url if item.image else None,
-                    'created_at': item.created_at.isoformat(),
-                })
-
-            return JsonResponse({
-                'success': True,
-                'menu_items': items_data,
-                'total_count': len(items_data)
+    if request.method == 'GET':
+        items = MenuItem.objects.filter(vendor=tiffin_vendor).order_by('category', 'name')
+        
+        items_data = []
+        for item in items:
+            items_data.append({
+                'id': item.id,
+                'name': item.name,
+                'category': item.category,
+                'category_display': item.get_category_display(),
+                'price': str(item.price),
+                'is_vegetarian': item.is_vegetarian,
+                'is_spicy': item.is_spicy,
+                'is_available_today': item.is_available_today,
+                'created_at': item.created_at.isoformat(),
+                'updated_at': item.updated_at.isoformat(),
             })
 
-        elif request.method == 'POST':
-            # Create new menu item
-            data = json.loads(request.body)
-            
-            required_fields = ['name', 'description', 'category', 'price']
-            for field in required_fields:
-                if not data.get(field):
-                    return JsonResponse({
-                        'success': False,
-                        'error': f'{field} is required'
-                    }, status=400)
-
-            # Check if menu item with same name exists for this vendor
-            if MenuItem.objects.filter(vendor=tiffin_vendor, name=data['name']).exists():
+        return JsonResponse({
+            'success': True,
+            'menu_items': items_data
+        })
+        
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        
+        required_fields = ['name', 'category', 'price']
+        for field in required_fields:
+            if not data.get(field):
                 return JsonResponse({
                     'success': False,
-                    'error': 'Menu item with this name already exists'
+                    'error': f'{field} is required'
                 }, status=400)
 
-            menu_item = MenuItem.objects.create(
+        # Check if item already exists for this vendor
+        if MenuItem.objects.filter(vendor=tiffin_vendor, name=data['name']).exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'Item with this name already exists'
+            }, status=400)
+
+        try:
+            item = MenuItem.objects.create(
                 vendor=tiffin_vendor,
                 name=data['name'],
-                description=data['description'],
                 category=data['category'],
-                price=data['price'],
+                price=float(data['price']),
                 is_vegetarian=data.get('is_vegetarian', True),
-                is_vegan=data.get('is_vegan', False),
                 is_spicy=data.get('is_spicy', False),
-                preparation_time=data.get('preparation_time', 30),
-                is_available=data.get('is_available', True)
+                is_available_today=data.get('is_available_today', True)
             )
 
             return JsonResponse({
                 'success': True,
                 'message': 'Menu item created successfully',
-                'menu_item': {
-                    'id': menu_item.id,
-                    'name': menu_item.name,
-                    'description': menu_item.description,
-                    'category': menu_item.category,
-                    'price': str(menu_item.price),
-                    'is_vegetarian': menu_item.is_vegetarian,
-                    'is_vegan': menu_item.is_vegan,
-                    'is_spicy': menu_item.is_spicy,
-                    'preparation_time': menu_item.preparation_time,
-                    'is_available': menu_item.is_available,
-                }
+                'item_id': item.id
             }, status=201)
-
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Invalid JSON data'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+            
 
 
 @login_required
-@csrf_exempt
+@csrf_exempt  
 @require_http_methods(["GET", "POST"])
 def daily_menus(request):
     """Get all daily menus for a vendor or create a new daily menu"""
     try:
-        # Get TiffinVendor
-        try:
-            tiffin_vendor = TiffinVendor.objects.get(user=request.user)
-        except TiffinVendor.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'error': 'Tiffin vendor profile not found'
-            }, status=404)
+        tiffin_vendor = TiffinVendor.objects.get(user=request.user)
+    except TiffinVendor.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'error': 'Vendor profile not found'
+        }, status=404)
 
-        if request.method == 'GET':
-            # Get date filter from query params
-            date_filter = request.GET.get('date')
+    if request.method == 'GET':
+        # Get menus with optional date filter
+        date_filter = request.GET.get('date')
+        menus = Menu.objects.filter(vendor=tiffin_vendor)
+        
+        if date_filter:
+            menus = menus.filter(date=date_filter)
             
-            menus = Menu.objects.filter(vendor=tiffin_vendor)
-            
-            if date_filter:
-                try:
-                    filter_date = datetime.strptime(date_filter, '%Y-%m-%d').date()
-                    menus = menus.filter(date=filter_date)
-                except ValueError:
-                    return JsonResponse({
-                        'success': False,
-                        'error': 'Invalid date format. Use YYYY-MM-DD'
-                    }, status=400)
-
-            menus_data = []
-            for menu in menus:
-                menu_items = []
-                for item in menu.menu_items.all():
-                    menu_items.append({
-                        'id': item.id,
-                        'name': item.name,
-                        'description': item.description,
-                        'category': item.category,
-                        'price': str(item.price),
-                        'is_vegetarian': item.is_vegetarian,
-                        'is_vegan': item.is_vegan,
-                        'is_spicy': item.is_spicy,
-                    })
-
-                menus_data.append({
-                    'id': menu.id,
-                    'name': menu.name,
-                    'date': menu.date.isoformat(),
-                    'menu_items': menu_items,
-                    'is_active': menu.is_active,
-                    'is_available': menu.is_available,
-                    'special_instructions': menu.special_instructions,
-                    'total_price': str(menu.total_price) if menu.total_price else None,
-                    'max_orders': menu.max_orders,
-                    'orders_count': menu.orders_count,
-                    'created_at': menu.created_at.isoformat(),
+        menus = menus.order_by('-date')
+        
+        menus_data = []
+        for menu in menus:
+            # Get all items by category
+            main_items = []
+            for item in menu.main_items.all():
+                main_items.append({
+                    'id': item.id,
+                    'name': item.name,
+                    'category': item.category,
+                    'category_display': item.get_category_display(),
+                    'price': str(item.price),
+                    'is_vegetarian': item.is_vegetarian,
+                    'is_spicy': item.is_spicy,
                 })
-
-            return JsonResponse({
-                'success': True,
-                'menus': menus_data,
-                'total_count': len(menus_data)
+            
+            side_items = []
+            for item in menu.side_items.all():
+                side_items.append({
+                    'id': item.id,
+                    'name': item.name,
+                    'category': item.category,
+                    'category_display': item.get_category_display(),
+                    'price': str(item.price),
+                    'is_vegetarian': item.is_vegetarian,
+                    'is_spicy': item.is_spicy,
+                })
+            
+            extras = []
+            for item in menu.extras.all():
+                extras.append({
+                    'id': item.id,
+                    'name': item.name,
+                    'category': item.category,
+                    'category_display': item.get_category_display(),
+                    'price': str(item.price),
+                    'is_vegetarian': item.is_vegetarian,
+                    'is_spicy': item.is_spicy,
+                })
+            
+            menus_data.append({
+                'id': menu.id,
+                'name': menu.name,
+                'date': menu.date.isoformat(),
+                'image': menu.image.url if menu.image else None,
+                'main_items': main_items,
+                'side_items': side_items,
+                'extras': extras,
+                'is_veg_only': menu.is_veg_only,
+                'full_dabba_price': str(menu.full_dabba_price),
+                'max_dabbas': menu.max_dabbas,
+                'dabbas_sold': menu.dabbas_sold,
+                'dabbas_remaining': menu.dabbas_remaining,
+                'todays_special': menu.todays_special,
+                'cooking_style': menu.cooking_style,
+                'is_active': menu.is_active,
+                'is_available': menu.is_available,
+                'created_at': menu.created_at.isoformat(),
             })
 
-        elif request.method == 'POST':
-            # Create new daily menu
-            data = json.loads(request.body)
-            
-            required_fields = ['name', 'date', 'menu_items']
-            for field in required_fields:
-                if not data.get(field):
-                    return JsonResponse({
-                        'success': False,
-                        'error': f'{field} is required'
-                    }, status=400)
-
-            # Parse and validate date
-            try:
-                menu_date = datetime.strptime(data['date'], '%Y-%m-%d').date()
-            except ValueError:
+        return JsonResponse({
+            'success': True,
+            'menus': menus_data
+        })
+        
+    elif request.method == 'POST':
+        # Create new daily menu
+        data = json.loads(request.body)
+        
+        required_fields = ['name', 'date', 'full_dabba_price']
+        for field in required_fields:
+            if not data.get(field):
                 return JsonResponse({
                     'success': False,
-                    'error': 'Invalid date format. Use YYYY-MM-DD'
+                    'error': f'{field} is required'
                 }, status=400)
 
-            # Check if menu with same name and date exists
-            if Menu.objects.filter(vendor=tiffin_vendor, name=data['name'], date=menu_date).exists():
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Menu with this name and date already exists'
-                }, status=400)
+        # Check if menu already exists for this date and name
+        if Menu.objects.filter(vendor=tiffin_vendor, date=data['date'], name=data['name']).exists():
+            return JsonResponse({
+                'success': False,
+                'error': 'A menu with this name already exists for this date'
+            }, status=400)
 
-            # Validate menu items exist and belong to this vendor
-            menu_item_ids = data['menu_items']
-            menu_items = MenuItem.objects.filter(
-                id__in=menu_item_ids,
-                vendor=tiffin_vendor
-            )
-            
-            if len(menu_items) != len(menu_item_ids):
-                return JsonResponse({
-                    'success': False,
-                    'error': 'Some menu items do not exist or do not belong to this vendor'
-                }, status=400)
-
-            # Create menu
+        try:
+            # Create the menu
             menu = Menu.objects.create(
                 vendor=tiffin_vendor,
                 name=data['name'],
-                date=menu_date,
-                is_active=data.get('is_active', True),
-                special_instructions=data.get('special_instructions', ''),
-                max_orders=data.get('max_orders', 50)
+                date=data['date'],
+                full_dabba_price=float(data['full_dabba_price']),
+                max_dabbas=data.get('max_dabbas', 30),
+                todays_special=data.get('todays_special', ''),
+                cooking_style=data.get('cooking_style', '')
             )
-
-            # Add menu items
-            menu.menu_items.set(menu_items)
-
-            # Calculate total price
-            total_price = sum(item.price for item in menu_items)
-            menu.total_price = total_price
-            menu.save()
+            
+            # Add main items
+            if data.get('main_items'):
+                main_items = MenuItem.objects.filter(
+                    vendor=tiffin_vendor,
+                    id__in=data['main_items']
+                )
+                menu.main_items.set(main_items)
+            
+            # Add side items
+            if data.get('side_items'):
+                side_items = MenuItem.objects.filter(
+                    vendor=tiffin_vendor,
+                    id__in=data['side_items']
+                )
+                menu.side_items.set(side_items)
+            
+            # Add extras
+            if data.get('extras'):
+                extras = MenuItem.objects.filter(
+                    vendor=tiffin_vendor,
+                    id__in=data['extras']
+                )
+                menu.extras.set(extras)
+            
+            menu.save()  # This will trigger the is_veg_only calculation
 
             return JsonResponse({
                 'success': True,
                 'message': 'Daily menu created successfully',
-                'menu': {
-                    'id': menu.id,
-                    'name': menu.name,
-                    'date': menu.date.isoformat(),
-                    'total_price': str(menu.total_price),
-                    'is_active': menu.is_active,
-                    'max_orders': menu.max_orders,
-                }
+                'menu_id': menu.id
             }, status=201)
-
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'error': 'Invalid JSON data'
-        }, status=400)
-    except Exception as e:
-        return JsonResponse({
-            'success': False,
-            'error': str(e)
-        }, status=500)
+            
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=500)
+        
 
 
 @login_required
@@ -525,24 +509,35 @@ def vendor_dashboard_data(request):
                 'error': 'Tiffin vendor profile not found'
             }, status=404)
 
-        # Get statistics
+        # Get statistics - FIXED field names
         total_menu_items = MenuItem.objects.filter(vendor=tiffin_vendor).count()
-        active_menu_items = MenuItem.objects.filter(vendor=tiffin_vendor, is_available=True).count()
+        active_menu_items = MenuItem.objects.filter(vendor=tiffin_vendor, is_available_today=True).count()  # Changed from is_available
         total_menus = Menu.objects.filter(vendor=tiffin_vendor).count()
         active_menus = Menu.objects.filter(vendor=tiffin_vendor, is_active=True).count()
 
-        # Get recent menus
+        # Get recent menus - FIXED field references
         recent_menus = Menu.objects.filter(vendor=tiffin_vendor).order_by('-date')[:5]
         recent_menus_data = []
         for menu in recent_menus:
+            # Calculate total items across all categories
+            total_items = (
+                menu.main_items.count() + 
+                menu.side_items.count() + 
+                menu.extras.count()
+            )
+            
             recent_menus_data.append({
                 'id': menu.id,
                 'name': menu.name,
                 'date': menu.date.isoformat(),
-                'items_count': menu.menu_items.count(),
-                'total_price': str(menu.total_price) if menu.total_price else '0',
-                'orders_count': menu.orders_count,
+                'items_count': total_items,  # Fixed - now counts all item categories
+                'full_dabba_price': str(menu.full_dabba_price),  # Changed from total_price
+                'dabbas_sold': menu.dabbas_sold,  # Changed from orders_count
+                'max_dabbas': menu.max_dabbas,  # New field
+                'dabbas_remaining': menu.dabbas_remaining,  # New property
                 'is_active': menu.is_active,
+                'is_veg_only': menu.is_veg_only,  # New field
+                'todays_special': menu.todays_special or '',  # New field
             })
 
         return JsonResponse({
