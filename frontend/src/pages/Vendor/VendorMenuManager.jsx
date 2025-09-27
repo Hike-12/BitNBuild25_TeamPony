@@ -5,6 +5,11 @@ const VendorMenuManager = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const getVendorAuthHeaders = () => {
+  const token = localStorage.getItem('vendor_token');
+  console.log("Vendor Token:", token); // Debugging line
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
   useEffect(() => {
     fetchDashboardData();
@@ -14,13 +19,7 @@ const VendorMenuManager = () => {
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
-        {
-          credentials: "include",
-          headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-          }
-        }
+        { headers: getVendorAuthHeaders() }
       );
       
       if (response.status === 401) {

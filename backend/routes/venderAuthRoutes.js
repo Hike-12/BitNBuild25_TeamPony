@@ -48,7 +48,7 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 });
-router.get('/check-auth/', auth, async (req, res) => {
+router.get('/check-auth', auth, async (req, res) => {
   try {
     const vendor = await TiffinVendor.findById(req.vendor._id).select('-password');
     if (!vendor) return res.json({ success: true, authenticated: false });
@@ -59,7 +59,7 @@ router.get('/check-auth/', auth, async (req, res) => {
 });
 
 // Logout (just a frontend token clear, but for API completeness)
-router.get('/logout/', (req, res) => {
+router.get('/logout', (req, res) => {
   res.json({ success: true, message: 'Logged out' });
 });
 

@@ -7,6 +7,10 @@ const VendorDashboard = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState(null);
+  const getVendorAuthHeaders = () => {
+  const token = localStorage.getItem('vendor_token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
   useEffect(() => {
     fetchProfile();
@@ -16,11 +20,11 @@ const VendorDashboard = () => {
   const fetchProfile = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/profile/`,
-        {
-          credentials: "include",
-        }
-      );
+  `${import.meta.env.VITE_API_URL}/api/vendor/profile/`,
+  {
+    headers: getVendorAuthHeaders(),
+  }
+);
       if (response.ok) {
         const data = await response.json();
         setProfile(data.user);
@@ -37,7 +41,7 @@ const VendorDashboard = () => {
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
         {
-          headers: getAuthHeaders(),
+          headers: getVendorAuthHeaders(),
         }
       );
 

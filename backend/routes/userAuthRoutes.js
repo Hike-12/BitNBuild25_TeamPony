@@ -98,7 +98,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.get("/check-auth/", auth, async (req, res) => {
+router.get("/check-auth", auth, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select("-password");
     if (!user) return res.json({ success: true, authenticated: false });
@@ -109,7 +109,7 @@ router.get("/check-auth/", auth, async (req, res) => {
 });
 
 // Logout (just a frontend token clear, but for API completeness)
-router.get("/logout/", (req, res) => {
+router.get("/logout", (req, res) => {
   res.json({ success: true, message: "Logged out" });
 });
 
