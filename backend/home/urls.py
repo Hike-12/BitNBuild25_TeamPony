@@ -8,4 +8,6 @@ urlpatterns = [
     path('logout/', views.logout_user, name='logout'),
     path('profile/', views.get_profile, name='profile'),
     path('check-auth/', views.check_auth, name='check_auth'),
+    path('menus/', views.get_all_vendor_menus, name='consumer_menus'),
+    path('vendor/<int:vendor_id>/menus/', views.get_vendor_menu_by_id, name='vendor_menus'),
 ]

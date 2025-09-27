@@ -11,6 +11,7 @@ import Dashboard from './pages/Consumer/Dashboard'; // Changed path
 import VendorLogin from './components/VendorLogin';
 import VendorDashboard from './pages/Vendor/VendorDashboard'; // Changed path
 import LandingPage from './pages/Landing/LandingPage';
+import Menu from './pages/Consumer/Menu'; // Changed path
 
 function App() {
   return (
@@ -30,6 +31,14 @@ function App() {
                   element={
                     <ProtectedRoute>
                       <Dashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/menus"
+                  element={
+                    <ProtectedRoute>
+                      <Menu />
                     </ProtectedRoute>
                   }
                 />
