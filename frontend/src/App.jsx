@@ -7,10 +7,10 @@ import { ThemeProvider } from './context/ThemeContext';
 import ProtectedRoute from './ProtectedRoute';
 import VendorProtectedRoute from './VendorProtectedRoute';
 import Login from './components/Login';
-import Dashboard from './components/Dashboard';
+import Dashboard from './pages/Consumer/Dashboard'; // Changed path
 import VendorLogin from './components/VendorLogin';
-import VendorDashboard from './components/VendorDashboard';
-import LandingPage from './pages/Landing/LandingPage'
+import VendorDashboard from './pages/Vendor/VendorDashboard'; // Changed path
+import LandingPage from './pages/Landing/LandingPage';
 
 function App() {
   return (
@@ -20,6 +20,9 @@ function App() {
           <Router>
             <div className="App">
               <Routes>
+                {/* Landing Page Route */}
+                <Route path="/" element={<LandingPage />} />
+                
                 {/* Consumer Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route
@@ -41,9 +44,6 @@ function App() {
                     </VendorProtectedRoute>
                   }
                 />
-
-                {/* Landing Page Route */}
-                <Route path="/" element={<LandingPage />} />
               </Routes>
               
               {/* Toast Container */}
