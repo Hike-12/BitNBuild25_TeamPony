@@ -1,14 +1,19 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { VendorAuthProvider } from './context/VendorAuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import ProtectedRoute from './ProtectedRoute';
-import VendorProtectedRoute from './VendorProtectedRoute';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import VendorLogin from './components/VendorLogin';
-import VendorDashboard from './components/VendorDashboard';
+import React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { VendorAuthProvider } from "./context/VendorAuthContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import ProtectedRoute from "./ProtectedRoute";
+import VendorProtectedRoute from "./VendorProtectedRoute";
+import Login from "./components/Login";
+import Dashboard from "./pages/Consumer/Dashboard";
+import VendorLogin from "./components/VendorLogin";
+import VendorDashboard from "./pages/Vendor/VendorDashboard";
 
 function App() {
   return (
@@ -28,7 +33,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                
+
                 {/* Vendor Routes */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
                 <Route
@@ -39,7 +44,7 @@ function App() {
                     </VendorProtectedRoute>
                   }
                 />
-                
+
                 {/* Default redirect */}
                 <Route path="/" element={<Navigate to="/dashboard" />} />
               </Routes>
