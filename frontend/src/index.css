@@ -179,3 +179,63 @@ html {
     font-size: 5rem;
   }
 }
+
+/* Premium Login Page Enhancements */
+@keyframes luxuryPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 40px rgba(168, 85, 247, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes luxuryGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+  }
+}
+
+.luxury-gradient {
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.1) 0%,
+    rgba(59, 130, 246, 0.1) 50%,
+    rgba(16, 185, 129, 0.1) 100%
+  );
+}
+
+.premium-text-shadow {
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+}
+
+.premium-input-focus:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Luxury hover effects */
+.luxury-hover:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium glass effect */
+.glass-effect {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}

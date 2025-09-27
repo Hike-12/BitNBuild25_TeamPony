@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import { AuthProvider } from './context/AuthContext';
-import { VendorAuthProvider } from './context/VendorAuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import ProtectedRoute from './ProtectedRoute';
-import VendorProtectedRoute from './VendorProtectedRoute';
-import Login from './components/Login';
-import Dashboard from './pages/Consumer/Dashboard'; // Changed path
-import VendorLogin from './components/VendorLogin';
-import VendorDashboard from './pages/Vendor/VendorDashboard'; // Changed path
-import LandingPage from './pages/Landing/LandingPage_new';
-import Menu from './pages/Consumer/Menu'; // Changed path
-=======
 import React from "react";
 import {
   BrowserRouter as Router,
@@ -31,11 +15,10 @@ import Login from "./components/Login";
 import Dashboard from "./pages/Consumer/Dashboard";
 import VendorLogin from "./components/VendorLogin";
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
-import LandingPage from "./pages/Landing/LandingPage";
+import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
 
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
->>>>>>> 63d55cddf3cf0d0383fa5630b220864e8b15eaa1
 
 function App() {
   return (
