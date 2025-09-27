@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/check-auth/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/check-auth/`, {
         credentials: 'include',
       });
       const data = await response.json();
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/login/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/register/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/register/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +89,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/logout/`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/api/user/logout/`, {
         method: 'GET',
         credentials: 'include',
       });
