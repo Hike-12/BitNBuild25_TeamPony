@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import Footer from '../../components/Footer';
 import { 
   FiSun, 
   FiMoon, 
@@ -210,6 +211,7 @@ const Dashboard = () => {
   ];
 
   return (
+    <>
     <div 
       className="min-h-screen transition-all duration-300"
       style={{ backgroundColor: theme.background }}
@@ -770,6 +772,10 @@ const Dashboard = () => {
       {/* Chatbot Component */}
       <ConsumerChatbot />
     </div>
+    
+    {/* Premium Footer */}
+    <Footer />
+    </>
   );
 };
 

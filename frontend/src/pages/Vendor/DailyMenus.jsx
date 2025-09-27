@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { FaCalendarAlt, FaLeaf, FaCheckCircle, FaTimesCircle, FaStar, FaFire, FaUtensils, FaFireAlt } from "react-icons/fa";
 import { MdFoodBank } from "react-icons/md";
 import { GiCookingPot } from "react-icons/gi";
+import Footer from "../../components/Footer";
 
 const DailyMenus = () => {
   const voiceRoutes = [
@@ -284,8 +285,10 @@ const DailyMenus = () => {
           </div>
         )}
       </main>
+      {/* Premium Footer */}
+      <Footer variant="simple" />
     </div>
   );
-};
+}
 
 export default DailyMenus;

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import { getAuthHeaders, handleApiError } from "../../utils/api";
 import { FaGem, FaUsers, FaRupeeSign, FaUtensils } from "react-icons/fa";
+import Footer from "../../components/Footer";
 
 const VendorDashboard = () => {
   // const { isDarkMode, theme } = useTheme();
@@ -99,6 +100,7 @@ const VendorDashboard = () => {
   }
 
   return (
+    <>
     <div className="min-h-screen" style={{ background: theme.background }}>
       {/* Floating Info Icon */}
       <button
@@ -405,6 +407,10 @@ const VendorDashboard = () => {
         </div>
       </main>
     </div>
+    
+    {/* Premium Footer */}
+    <Footer variant="simple" />
+    </>
   );
 };
 

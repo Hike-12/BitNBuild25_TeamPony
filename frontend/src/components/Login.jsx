@@ -16,6 +16,7 @@ import {
   Star,
   Gem,
 } from "lucide-react";
+import Footer from "./Footer";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -153,6 +154,7 @@ const Login = () => {
   };
 
   return (
+    <>
     <div
       className="min-h-screen relative flex items-center justify-center px-4 transition-all duration-500"
       style={{
@@ -385,7 +387,7 @@ const Login = () => {
           {/* Premium Form Header */}
           <div className="text-center mb-8 relative z-10">
             <div
-              className="inline-flex items-center gap-2 px-6 py-2 rounded-full backdrop-blur-md border shadow-lg mb-4"
+              className="inline-flex items-center gap-2 px-6 py-2  rounded-full backdrop-blur-md border shadow-lg mb-4"
               style={{
                 backgroundColor: isDarkMode
                   ? `${theme.primary}25`
@@ -799,39 +801,11 @@ const Login = () => {
             </button>
           </div>
         </form>
-
-        {/* Footer Space */}
-        <div className="mt-12 mb-8 text-center space-y-4 relative z-10">
-          <div
-            className="flex items-center justify-center gap-4 text-sm"
-            style={{ color: theme.textSecondary }}
-          >
-            <span className="flex items-center gap-2">
-              <Utensils size={14} />
-              Premium Dining
-            </span>
-            <span
-              className="w-1 h-1 rounded-full"
-              style={{ backgroundColor: theme.border }}
-            ></span>
-            <span className="flex items-center gap-2">
-              <Crown size={14} />
-              Curated Experience
-            </span>
-          </div>
-          <div
-            className="text-xs tracking-wide opacity-75"
-            style={{
-              color: theme.textSecondary,
-              fontFamily: "Merriweather, serif",
-            }}
-          >
-            NourishNet • Elevating Culinary Experiences • Connecting Food
-            Enthusiasts • Est. 2024
-          </div>
-        </div>
       </div>
     </div>
+    {/* Premium Footer with more space */}
+    <Footer variant="simple" style={{ marginTop: '32px' }} />
+    </>
   );
 };
 

@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { useVendorAuth } from '../context/VendorAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Sun, Moon, Store, User, Mail, Lock, Phone, FileText, MapPin, Eye, EyeOff, Crown, Building2, Shield, Briefcase } from 'lucide-react';
+import Footer from './Footer';
 
 const VendorLogin = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -143,6 +144,7 @@ const VendorLogin = () => {
   };
 
   return (
+    <>
     <div 
       className="min-h-screen relative flex items-center justify-center px-4 py-8 transition-all duration-500"
       style={{ 
@@ -962,34 +964,12 @@ const VendorLogin = () => {
           </div>
         </form>
 
-        {/* Footer Space */}
-        <div className="mt-12 mb-8 text-center space-y-4 relative z-10">
-          <div 
-            className="flex items-center justify-center gap-4 text-sm"
-            style={{ color: theme.textSecondary }}
-          >
-            <span className="flex items-center gap-2">
-              <Shield size={14} />
-              Secure Business Portal
-            </span>
-            <span className="w-1 h-1 rounded-full" style={{ backgroundColor: theme.border }}></span>
-            <span className="flex items-center gap-2">
-              <Crown size={14} />
-              Premium Partnership
-            </span>
-          </div>
-          <div 
-            className="text-xs tracking-wide opacity-75"
-            style={{ 
-              color: theme.textSecondary,
-              fontFamily: 'Merriweather, serif'
-            }}
-          >
-            NourishNet Business • Connecting Premium Culinary Establishments • Est. 2024
-          </div>
-        </div>
       </div>
     </div>
+    
+    {/* Premium Footer */}
+    <Footer variant="simple" />
+    </>
   );
 }
 

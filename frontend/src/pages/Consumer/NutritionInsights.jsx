@@ -1,5 +1,6 @@
 import VoiceRouter from '../../components/VoiceRouter';
-import React from 'react'
+import React from 'react';
+import Footer from '../../components/Footer';
 
 const NutritionInsights = () => {
   const voiceRoutes = [
@@ -9,6 +10,7 @@ const NutritionInsights = () => {
     { keyword: 'login', path: '/login' },
   ];
   return (
+    <>
     <div className="min-h-screen p-6" style={{ backgroundColor: '#f8f9fa' }}>
       {/* Page Content */}
       <div className="max-w-7xl mx-auto">
@@ -46,7 +48,11 @@ const NutritionInsights = () => {
         </div>
       </div>
     </div>
-  )
+    
+    {/* Premium Footer */}
+    <Footer />
+    </>
+  );
 }
 
-export default NutritionInsights
+export default NutritionInsights;

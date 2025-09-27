@@ -3,6 +3,7 @@ import { useVendorAuth } from "../../context/VendorAuthContext";
 import toast from "react-hot-toast";
 import { FaUtensils, FaLeaf, FaFire, FaPepperHot, FaEdit, FaTrash } from "react-icons/fa";
 import { MdRestaurant } from "react-icons/md";
+import Footer from "../../components/Footer";
 
 const MenuItems = () => {
   const { vendor } = useVendorAuth();
@@ -181,9 +182,9 @@ const MenuItems = () => {
   }
 
   return (
-    <div>
+    <><div>
       {/* Header Section */}
-      <div className="rounded-sm shadow-md p-6 mb-6" 
+      <div className="rounded-sm shadow-md p-6 mb-6"
         style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
         <div className="flex justify-between items-center">
           <div>
@@ -206,7 +207,7 @@ const MenuItems = () => {
 
       {/* Menu Items Grid */}
       {menuItems.length === 0 ? (
-        <div className="rounded-sm shadow-md p-12 text-center" 
+        <div className="rounded-sm shadow-md p-12 text-center"
           style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
           <MdRestaurant className="text-6xl mx-auto mb-4 opacity-30" style={{ color: theme.primary }} />
           <p className="text-lg mb-4" style={{ color: theme.textSecondary }}>
@@ -222,8 +223,10 @@ const MenuItems = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuItems.map((item) => (
             <div key={item.id || item._id} className="rounded-sm shadow-md p-6 hover:scale-[1.02] transition-all"
-              style={{ background: theme.panels, border: `1px solid ${theme.border}`,
-                borderLeft: `5px solid ${item.is_available_today ? theme.success : theme.error}` }}>
+              style={{
+                background: theme.panels, border: `1px solid ${theme.border}`,
+                borderLeft: `5px solid ${item.is_available_today ? theme.success : theme.error}`
+              }}>
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-xl font-semibold" style={{ color: theme.text }}>{item.name}</h3>
@@ -264,7 +267,7 @@ const MenuItems = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center pt-4" 
+              <div className="flex justify-between items-center pt-4"
                 style={{ borderTop: `1px solid ${theme.border}` }}>
                 <p className="text-xs" style={{ color: theme.textSecondary }}>
                   Added: {new Date(item.created_at).toLocaleDateString()}
@@ -373,7 +376,8 @@ const MenuItems = () => {
           </div>
         </div>
       )}
-    </div>
+      {/* Premium Footer */}
+    </div><Footer variant="simple" /></>
   );
 };
 

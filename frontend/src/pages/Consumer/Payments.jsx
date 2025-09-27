@@ -1,5 +1,6 @@
 import VoiceRouter from '../../components/VoiceRouter';
 import React from 'react';
+import Footer from '../../components/Footer';
 
 const Payments = () => {
   const voiceRoutes = [
@@ -10,6 +11,7 @@ const Payments = () => {
   ];
   
   return (
+    <>
     <div className="min-h-screen p-6" style={{ backgroundColor: '#f8f9fa' }}>
       {/* Page Content */}
       <div className="max-w-7xl mx-auto">
@@ -47,6 +49,10 @@ const Payments = () => {
         </div>
       </div>
     </div>
+    
+    {/* Premium Footer */}
+    <Footer />
+    </>
   );
 };
 

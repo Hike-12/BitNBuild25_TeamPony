@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import OrderForm from '../../components/OrderForm';
 import SubscriptionForm from '../../components/SuscriptionForm';
 import toast from 'react-hot-toast'; // ADD THIS IMPORT
+import Footer from '../../components/Footer';
 import { 
   FiSun, 
   FiMoon, 
@@ -453,6 +454,8 @@ const Menu = () => {
           }}
         />
       )}
+      {/* Premium Footer */}
+      <Footer />
     </div>
   );
 };
