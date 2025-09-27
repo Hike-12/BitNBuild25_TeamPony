@@ -102,6 +102,26 @@ const LandingPage = () => {
     return () => clearInterval(interval);
   }, []);
 
+
+  // Typewriter effect hook
+  function useTypewriter(text, speed = 1000) {
+    const [displayed, setDisplayed] = useState("");
+    useEffect(() => {
+      setDisplayed("");
+      let i = 0;
+      const interval = setInterval(() => {
+        setDisplayed((prev) => text.slice(0, i));
+        i++;
+        if (i > text.length) clearInterval(interval);
+      }, speed);
+      return () => clearInterval(interval);
+    }, [text, speed]);
+    return displayed;
+  }
+
+  const typeTitle = useTypewriter(heroTexts[currentHero].title, 80);
+  const typeSubtitle = useTypewriter(heroTexts[currentHero].subtitle, 36);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveFeature((prev) => (prev + 1) % gameFeatures.length);
@@ -112,7 +132,7 @@ const LandingPage = () => {
   const handleFeatureClick = (index, points) => {
     setGameScore(prev => prev + points);
     setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 2000);
+    setTimeout(() => setShowConfetti(false), 4000);
   };
 
   return (
@@ -212,19 +232,23 @@ const LandingPage = () => {
               textShadow: `0 4px 20px ${theme.primary}30`,
               letterSpacing: '-0.02em',
               lineHeight: 1.1,
+              minHeight: '3.5em',
             }}
           >
-            {heroTexts[currentHero].title}
+            {typeTitle}
+            <span className="animate-pulse" style={{ color: theme.primary }}>|</span>
           </h1>
           <p 
             className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto leading-relaxed"
             style={{ 
               color: theme.textSecondary,
               fontWeight: '300',
-              letterSpacing: '0.5px'
+              letterSpacing: '0.5px',
+              minHeight: '2.5em',
             }}
           >
-            {heroTexts[currentHero].subtitle}
+            {typeSubtitle}
+            <span className="animate-pulse" style={{ color: theme.secondary }}>|</span>
           </p>
           <div className="flex flex-col sm:flex-row gap-8 justify-center items-center mt-12">
             <Link

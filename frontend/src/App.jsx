@@ -41,6 +41,14 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/menus"
+                  element={
+                    <ProtectedRoute>
+                      <Menu />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Vendor Routes */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
