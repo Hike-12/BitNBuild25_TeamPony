@@ -48,25 +48,26 @@ export const VendorAuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (license_number, password) => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ license_number, password }),
-      });
-      const data = await response.json();
-      if (data.success && data.token) {
-        localStorage.setItem('vendor_token', data.token);
-        setVendor(data.vendor);
-        return { success: true };
-      } else {
-        return { success: false, error: data.error };
-      }
-    } catch (error) {
-      return { success: false, error: 'Network error occurred' };
+  // in VendorAuthContext.jsx
+const login = async (identifier, password) => {
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier, password }),
+    });
+    const data = await response.json();
+    if (data.success && data.token) {
+      localStorage.setItem('vendor_token', data.token);
+      setVendor(data.vendor);
+      return { success: true };
+    } else {
+      return { success: false, error: data.error };
     }
-  };
+  } catch (error) {
+    return { success: false, error: 'Network error occurred' };
+  }
+};
 
   const register = async (vendorData) => {
     try {

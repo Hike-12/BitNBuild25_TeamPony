@@ -44,7 +44,7 @@ const Dashboard = () => {
 
   const fetchProfile = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile/`, {
         credentials: 'include',
       });
       if (response.ok) {

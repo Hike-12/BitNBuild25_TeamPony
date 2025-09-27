@@ -108,7 +108,7 @@ const VendorLogin = () => {
         first_name: formData.first_name,
         last_name: formData.last_name,
         business_name: formData.business_name,
-        business_address: formData.business_address,
+        address: formData.business_address,
         phone_number: formData.phone_number,
         license_number: formData.license_number,
       });
