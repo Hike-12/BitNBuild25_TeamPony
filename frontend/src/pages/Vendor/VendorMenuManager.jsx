@@ -7,7 +7,7 @@ const VendorMenuManager = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { theme, isDarkMode, toggleTheme } = useTheme();
+
   const getVendorAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
     console.log("Vendor Token:", token ? "exists" : "missing");
@@ -74,158 +74,106 @@ const VendorMenuManager = () => {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="min-h-screen relative" style={{ minHeight: "100vh", overflow: "hidden" }}>
-      {/* Background Image + Overlay */}
-      <div style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: 0,
-        background: `url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat`,
-        filter: isDarkMode ? "brightness(0.5) blur(1px)" : "brightness(0.8) blur(1px)",
-      }} />
-      <div style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        zIndex: 1,
-        background: isDarkMode ? `linear-gradient(135deg, ${theme.background}ee 60%, ${theme.panels}ee 100%)` : `linear-gradient(135deg, ${theme.background}cc 60%, ${theme.panels}cc 100%)`,
-        pointerEvents: "none",
-      }} />
+    <div style={{ padding: "20px" }}>
+      <h1>Vendor Menu Management</h1>
 
-      {/* Light/Dark Mode Toggle Floating Button */}
-      <button
-        onClick={toggleTheme}
-        style={{
-          position: "fixed",
-          top: 32,
-          right: 32,
-          zIndex: 100,
-          background: theme.panels,
-          color: theme.text,
-          border: `2.5px solid ${theme.primary}`,
-          borderRadius: "50%",
-          width: "56px",
-          height: "56px",
-          boxShadow: `0 6px 24px 0 ${theme.border}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          transition: "background 0.2s, color 0.2s, border 0.2s",
-        }}
-        aria-label="Toggle light/dark mode"
-      >
-        {isDarkMode ? <FaSun style={{ fontSize: "1.7rem", color: theme.primary }} /> : <FaMoon style={{ fontSize: "1.7rem", color: theme.primary }} />}
-      </button>
-
-      <div className="relative" style={{ zIndex: 10, minHeight: "100vh", padding: "56px 0 64px 0" }}>
-        <div className="w-full max-w-5xl mx-auto px-2 sm:px-6 lg:px-8">
-          {/* Header Section */}
-          <div className="flex items-center gap-8 mb-12 justify-center">
-            <div className="rounded-2xl p-6 flex items-center justify-center shadow-lg border-2" style={{ backgroundColor: theme.panels, borderColor: theme.primary }}>
-              <FaUtensils style={{ color: theme.primary, fontSize: "3.2rem" }} />
+      {/* Dashboard Overview */}
+      {dashboardData && (
+        <div
+          style={{
+            marginBottom: "30px",
+            padding: "20px",
+            backgroundColor: "#f8f9fa",
+            borderRadius: "5px",
+          }}
+        >
+          <h2>Dashboard Overview</h2>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+              gap: "15px",
+            }}
+          >
+            <div style={{ textAlign: "center" }}>
+              <h3>{dashboardData.statistics.total_menu_items}</h3>
+              <p>Total Menu Items</p>
             </div>
-            <div>
-              <h1 className="text-5xl font-extrabold tracking-tight" style={{ color: theme.primary, letterSpacing: "0.03em", marginBottom: "0.5rem" }}>
-                Vendor Menu Management
-              </h1>
-              <p className="text-xl font-medium" style={{ color: theme.textSecondary, marginTop: "0.5rem" }}>
-                Manage your kitchen, menu items, and daily menus in style.
-              </p>
+            <div style={{ textAlign: "center" }}>
+              <h3>{dashboardData.statistics.active_menu_items}</h3>
+              <p>Active Menu Items</p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <h3>{dashboardData.statistics.total_menus}</h3>
+              <p>Total Menus</p>
+            </div>
+            <div style={{ textAlign: "center" }}>
+              <h3>{dashboardData.statistics.active_menus}</h3>
+              <p>Active Daily Menus</p>
             </div>
           </div>
 
-          {/* Dashboard Overview */}
-          {dashboardData && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-14">
-              {/* Stats Card */}
-              <div className="rounded-3xl border-2 shadow-xl p-10 flex flex-col gap-8" style={{ background: theme.panels, borderColor: theme.primary }}>
-                <h2 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: theme.text }}>
-                  <FaClipboardList style={{ color: theme.primary }} /> Stats
-                </h2>
-                <div className="grid grid-cols-2 gap-8">
-                  <div className="flex flex-col items-center">
-                    <FaUtensils style={{ color: theme.primary, fontSize: "2rem" }} />
-                    <span className="text-2xl font-extrabold mt-2" style={{ color: theme.primary }}>{dashboardData.statistics.total_menu_items}</span>
-                    <span className="text-base font-medium" style={{ color: theme.textSecondary }}>Total Items</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <FaCheckCircle style={{ color: theme.success, fontSize: "2rem" }} />
-                    <span className="text-2xl font-extrabold mt-2" style={{ color: theme.success }}>{dashboardData.statistics.active_menu_items}</span>
-                    <span className="text-base font-medium" style={{ color: theme.textSecondary }}>Active Items</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <FaCalendarAlt style={{ color: theme.primary, fontSize: "2rem" }} />
-                    <span className="text-2xl font-extrabold mt-2" style={{ color: theme.primary }}>{dashboardData.statistics.total_menus}</span>
-                    <span className="text-base font-medium" style={{ color: theme.textSecondary }}>Total Menus</span>
-                  </div>
-                  <div className="flex flex-col items-center">
-                    <FaCheckCircle style={{ color: theme.success, fontSize: "2rem" }} />
-                    <span className="text-2xl font-extrabold mt-2" style={{ color: theme.success }}>{dashboardData.statistics.active_menus}</span>
-                    <span className="text-base font-medium" style={{ color: theme.textSecondary }}>Active Menus</span>
-                  </div>
-                </div>
-              </div>
+          <div style={{ marginTop: "20px" }}>
+            <h3>Kitchen Information</h3>
+            <p>
+              <strong>Business Name:</strong>{" "}
+              {dashboardData.vendor_info.business_name}
+            </p>
+            <p>
+              <strong>Verification Status:</strong>
+              <span
+                style={{
+                  color: dashboardData.vendor_info.is_verified
+                    ? "green"
+                    : "orange",
+                }}
+              >
+                {dashboardData.vendor_info.is_verified
+                  ? " Verified"
+                  : " Pending Verification"}
+              </span>
+            </p>
+            <p>
+              <strong>Status:</strong>
+              <span
+                style={{
+                  color: dashboardData.vendor_info.is_active ? "green" : "red",
+                }}
+              >
+                {dashboardData.vendor_info.is_active ? " Active" : " Inactive"}
+              </span>
+            </p>
+          </div>
 
-              {/* Kitchen Info Card */}
-              <div className="rounded-3xl border-2 shadow-xl p-10 flex flex-col gap-6" style={{ background: theme.panels, borderColor: theme.primary }}>
-                <h2 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: theme.text }}>
-                  <FaUserCheck style={{ color: theme.primary }} /> Kitchen Info
-                </h2>
-                <div className="mb-1 text-lg" style={{ color: theme.textSecondary }}>
-                  <span className="font-semibold" style={{ color: theme.primary }}>Name:</span> {dashboardData.vendor_info.kitchen_name}
-                </div>
-                <div className="mb-1 text-lg" style={{ color: theme.textSecondary }}>
-                  <span className="font-semibold" style={{ color: theme.primary }}>Verification:</span>
-                  <span style={{ color: dashboardData.vendor_info.is_verified ? theme.success : theme.warning, fontWeight: 700 }}>
-                    {dashboardData.vendor_info.is_verified ? " Verified" : " Pending"}
-                  </span>
-                </div>
-                <div className="mb-1 text-lg" style={{ color: theme.textSecondary }}>
-                  <span className="font-semibold" style={{ color: theme.primary }}>Status:</span>
-                  <span style={{ color: dashboardData.vendor_info.is_active ? theme.success : theme.error, fontWeight: 700 }}>
-                    {dashboardData.vendor_info.is_active ? " Active" : " Inactive"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Recent Menus Card */}
-              <div className="rounded-3xl border-2 shadow-xl p-10 flex flex-col gap-6" style={{ background: theme.panels, borderColor: theme.primary }}>
-                <h2 className="text-xl font-bold mb-2 flex items-center gap-2" style={{ color: theme.text }}>
-                  <FaClipboardList style={{ color: theme.primary }} /> Recent Menus
-                </h2>
-                {dashboardData.recent_menus.length > 0 ? (
-                  <div className="flex flex-col gap-4">
-                    {dashboardData.recent_menus.map((menu) => (
-                      <div
-                        key={menu.id}
-                        className="rounded-xl border p-4 flex flex-col gap-2 shadow"
-                        style={{ backgroundColor: theme.background, borderColor: theme.border }}
-                      >
-                        <div className="flex items-center gap-2">
-                          <strong className="text-lg font-bold" style={{ color: theme.primary }}>{menu.name}</strong>
-                          <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: menu.is_active ? theme.success : theme.error, color: theme.background }}>
-                            {menu.is_active ? "Active" : "Inactive"}
-                          </span>
-                          {menu.is_veg_only ? <FaLeaf style={{ color: theme.success }} title="Veg Only" /> : <FaDrumstickBite style={{ color: theme.error }} title="Non-Veg" />}
-                          {menu.todays_special && <FaFireAlt style={{ color: theme.warning }} title="Special" />}
-                        </div>
-                        <div className="flex flex-wrap gap-4 text-sm" style={{ color: theme.textSecondary }}>
-                          <span>Items: {menu.items_count}</span>
-                          <span>Price: ₹{menu.full_dabba_price}</span>
-                          <span>Dabbas Sold: {menu.dabbas_sold}/{menu.max_dabbas}</span>
-                          {menu.todays_special && (
-                            <span className="italic" style={{ color: theme.warning }}>
-                              Today's Special: {menu.todays_special}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-xs" style={{ color: theme.textSecondary }}>{new Date(menu.date).toLocaleDateString()}</span>
+          {/* Recent Menus */}
+          <div style={{ marginTop: "20px" }}>
+            <h3>Recent Menus</h3>
+            {dashboardData.recent_menus.length > 0 ? (
+              <div style={{ display: "grid", gap: "10px" }}>
+                {dashboardData.recent_menus.map((menu) => (
+                  <div
+                    key={menu.id}
+                    style={{
+                      padding: "10px",
+                      backgroundColor: "white",
+                      borderRadius: "3px",
+                      border: "1px solid #ddd",
+                    }}
+                  >
+                    <strong>{menu.name}</strong> -{" "}
+                    {new Date(menu.date).toLocaleDateString()}
+                    <br />
+                    <small>
+                      Items: {menu.items_count} | Price: ₹{menu.full_dabba_price} |
+                      Dabbas Sold: {menu.dabbas_sold}/{menu.max_dabbas} |
+                      {menu.is_veg_only && <span style={{ color: "green" }}> Veg Only |</span>}
+                      <span style={{ color: menu.is_active ? "green" : "red" }}>
+                        {menu.is_active ? " Active" : " Inactive"}
+                      </span>
+                    </small>
+                    {menu.todays_special && (
+                      <div style={{ marginTop: "5px", fontStyle: "italic" }}>
+                        Today's Special: {menu.todays_special}
                       </div>
                     )}
                   </div>
@@ -238,28 +186,26 @@ const VendorMenuManager = () => {
         </div>
       )}
 
-          {/* Tab Navigation */}
-          <div className="flex items-end mb-10" style={{ borderBottom: `2.5px solid ${theme.primary}` }}>
-            <div
-              style={activeTab === "menu-items" ? activeTabStyle : tabStyle}
-              onClick={() => setActiveTab("menu-items")}
-            >
-              <FaUtensils style={{ marginRight: "8px" }} /> Menu Items
-            </div>
-            <div
-              style={activeTab === "daily-menus" ? activeTabStyle : tabStyle}
-              onClick={() => setActiveTab("daily-menus")}
-            >
-              <FaCalendarAlt style={{ marginRight: "8px" }} /> Daily Menus
-            </div>
-          </div>
-
-          {/* Tab Content */}
-          <div className="rounded-3xl border-2 p-10 shadow-xl" style={{ background: theme.panels, borderColor: theme.primary, minHeight: "320px" }}>
-            {activeTab === "menu-items" && <div className="text-xl font-medium flex items-center gap-2" style={{ color: theme.textSecondary }}><FaUtensils /> Menu Items Component</div>}
-            {activeTab === "daily-menus" && <div className="text-xl font-medium flex items-center gap-2" style={{ color: theme.textSecondary }}><FaCalendarAlt /> Daily Menus Component</div>}
-          </div>
+      {/* Tab Navigation */}
+      <div style={{ borderBottom: "1px solid #ddd", marginBottom: "20px" }}>
+        <div
+          style={activeTab === "menu-items" ? activeTabStyle : tabStyle}
+          onClick={() => setActiveTab("menu-items")}
+        >
+          Menu Items
         </div>
+        <div
+          style={activeTab === "daily-menus" ? activeTabStyle : tabStyle}
+          onClick={() => setActiveTab("daily-menus")}
+        >
+          Daily Menus
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div>
+        {activeTab === "menu-items" && <MenuItems />}
+        {activeTab === "daily-menus" && <DailyMenus />}
       </div>
     </div>
   );
