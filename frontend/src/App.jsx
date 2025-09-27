@@ -18,13 +18,15 @@ import VendorDashboard from "./pages/Vendor/VendorDashboard";
 import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
-import Menu from "./pages/Consumer/Menu"
+import Menu from "./pages/Consumer/Menu";
+import ConsumerChatbot from "./components/ConsumerChatbot";
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <VendorAuthProvider>
           <Router>
+            <ConsumerChatbot />
             <div className="App">
               <Routes>
                 {/* Landing Page Route */}
@@ -40,7 +42,6 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-
                 {/* Vendor Routes */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
                 <Route
@@ -53,11 +54,7 @@ function App() {
                 />
                 <Route
                   path="/vendor/menu"
-                  element={
-                   
-                      <VendorMenuManager />
-                
-                  }
+                  element={<VendorMenuManager />}
                 />
                 <Route
                   path="/vendor/daily-menus"
@@ -67,11 +64,9 @@ function App() {
                     </VendorProtectedRoute>
                   }
                 />
-
                 {/* Catch all route - redirect to landing page */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-
               {/* Toast Container */}
               <Toaster
                 position="top-right"

@@ -2,9 +2,16 @@ import React, { useState, useEffect } from "react";
 import { FaGem } from "react-icons/fa";
 import { useTheme } from "../../context/ThemeContext";
 import { useVendorAuth } from "../../context/VendorAuthContext";
+import VoiceRouter from '../../components/VoiceRouter';
 import { getAuthHeaders, handleApiError } from "../../utils/api";
 
 const VendorDashboard = () => {
+  const voiceRoutes = [
+    { keyword: 'menu', path: '/vendor/menu' },
+    { keyword: 'dashboard', path: '/vendor/dashboard' },
+    { keyword: 'daily', path: '/vendor/daily-menus' },
+    { keyword: 'login', path: '/vendor/login' },
+  ];
   const { isDarkMode, theme } = useTheme();
   const [showOverview, setShowOverview] = useState(false);
   const { vendor, logout } = useVendorAuth();
@@ -168,7 +175,6 @@ const VendorDashboard = () => {
                 <li>Enjoy a premium UI in both light and dark mode</li>
               </ul>
             </div>
-            {/* Glowing border effect */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -184,7 +190,7 @@ const VendorDashboard = () => {
           </div>
         </div>
       )}
-      {/* Header */}
+
       <header className="bg-[#161B22] border-b border-[#21262D]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -211,9 +217,7 @@ const VendorDashboard = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
             <h3 className="text-sm font-medium text-[#8B949E] mb-2">
@@ -262,9 +266,7 @@ const VendorDashboard = () => {
           </div>
         </div>
 
-        {/* Business Info */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Business Details */}
           <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
             <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
               Business Information
@@ -303,7 +305,6 @@ const VendorDashboard = () => {
             </div>
           </div>
 
-          {/* Recent Orders */}
           <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
             <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
               Recent Orders
@@ -340,7 +341,6 @@ const VendorDashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="mt-8 bg-[#161B22] border border-[#21262D] rounded-lg p-6">
           <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
             Quick Actions
@@ -361,7 +361,163 @@ const VendorDashboard = () => {
           </div>
         </div>
       </main>
-    </div>
+                      <button
+                        onClick={() => setShowOverview(true)}
+                        className="fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-lg border-2 flex items-center justify-center backdrop-blur-md hover:scale-110 transition-all"
+                        style={{
+                          backgroundColor: `${theme.panels}95`,
+                          borderColor: theme.primary,
+                          color: theme.primary,
+                        }}
+                        aria-label="Show Page Overview"
+                      >
+                        <FaGem style={{ fontSize: '2rem' }} />
+                      </button>
+
+                      {showOverview && (
+                        <div
+                          id="overview-modal-bg"
+                          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-lg"
+                          style={{
+                            background: isDarkMode
+                              ? 'rgba(20, 20, 20, 0.25)'
+                              : 'rgba(255, 255, 255, 0.25)',
+                            transition: 'background 0.3s',
+                          }}
+                          onClick={e => {/* ...existing code... */}}
+                        >
+                          <div
+                            className="relative max-w-lg w-full mx-4 rounded-2xl border-2 shadow-2xl overflow-hidden"
+                            style={{
+                              borderColor: theme.primary,
+                              fontFamily: 'Merriweather, serif',
+                              background: isDarkMode
+                                ? 'linear-gradient(135deg, #18181b 0%, #23272f 100%)'
+                                : 'linear-gradient(135deg, #f8fafc 0%, #f3f4f6 100%)',
+                              boxShadow: isDarkMode
+                                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30`
+                                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60`,
+                              transition: 'background 0.3s, box-shadow 0.3s',
+                            }}
+                            onMouseMove={e => {/* ...existing code... */}}
+                            onMouseLeave={e => {/* ...existing code... */}}
+                          >
+                            <div style={{
+                              position: 'absolute',
+                              inset: 0,
+                              pointerEvents: 'none',
+                              zIndex: 0,
+                              background: isDarkMode
+                                ? `radial-gradient(circle at 80% 20%, ${theme.primary}30 0%, transparent 60%), radial-gradient(circle at 20% 80%, ${theme.secondary}20 0%, transparent 60%)`
+                                : `radial-gradient(circle at 80% 20%, ${theme.primary}40 0%, transparent 60%), radial-gradient(circle at 20% 80%, ${theme.secondary}30 0%, transparent 60%)`
+                            }} />
+                            <button
+                              onClick={() => setShowOverview(false)}
+                              className="absolute top-4 right-4 text-2xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all z-10"
+                              style={{ color: theme.primary }}
+                              aria-label="Close Overview"
+                            >
+                              &times;
+                            </button>
+                            <div className="flex items-center gap-3 mb-2 pt-8 px-8 z-10">
+                              <FaGem style={{ color: theme.primary, fontSize: '1.5rem' }} />
+                              <h2 className="text-2xl font-bold" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif', letterSpacing: '0.5px' }}>Page Overview</h2>
+                            </div>
+                            <div className="px-8 pb-8 z-10">
+                              <p className="text-base mb-2" style={{ color: theme.text, fontFamily: 'Merriweather, serif' }}>
+                                Welcome to your Vendor Dashboard! Here you can view business stats, manage menu items, track orders, and access quick actions. All features are designed for a premium, efficient vendor experience.
+                              </p>
+                              <ul className="list-disc pl-6" style={{ color: theme.textSecondary, fontFamily: 'Merriweather, serif' }}>
+                                <li>Monitor orders, customers, and revenue at a glance</li>
+                                <li>Access business information and recent orders</li>
+                                <li>Use quick actions for fast management</li>
+                                <li>Enjoy a premium UI in both light and dark mode</li>
+                              </ul>
+                            </div>
+                            {/* ...existing code... */}
+                            <div style={{
+                              position: 'absolute',
+                              inset: 0,
+                              borderRadius: '1.25rem',
+                              pointerEvents: 'none',
+                              zIndex: 1,
+                              boxShadow: isDarkMode
+                                ? `0 0 32px 8px ${theme.primary}60`
+                                : `0 0 32px 8px ${theme.primary}80`,
+                              border: `2px solid ${theme.primary}`,
+                              opacity: 0.7,
+                            }} />
+                          </div>
+                        </div>
+                      )}
+                      {/* ...existing code... */}
+                      <header className="bg-[#161B22] border-b border-[#21262D]">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                          <div className="flex justify-between items-center h-16">
+                            <div className="flex items-center">
+                              <h1 className="text-2xl font-bold text-[#F97316]">
+                                NourishNet Vendor
+                              </h1>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                              <span className="text-[#8B949E]">
+                                Welcome, {vendor?.first_name || vendor?.username}!
+                              </span>
+                              <span className="text-[#10B981] text-sm px-2 py-1 rounded-full bg-[#10B981] bg-opacity-10">
+                                {vendor?.is_verified ? "Verified" : "Pending Verification"}
+                              </span>
+                              <button
+                                onClick={handleLogout}
+                                className="bg-[#EF4444] text-white px-4 py-2 rounded-md hover:bg-[#DC2626] transition-colors"
+                              >
+                                Logout
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </header>
+
+                      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+                        {/* ...existing code... */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                          {/* ...existing code... */}
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                          {/* ...existing code... */}
+                        </div>
+
+                        <div className="mt-8 bg-[#161B22] border border-[#21262D] rounded-lg p-6">
+                          {/* ...existing code... */}
+                        </div>
+                      </main>
+
+                      {/* Page Overview & Voice Commands */}
+                      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6">
+                        <div className="p-4 rounded-xl border flex flex-col lg:flex-row items-center justify-between gap-4" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-2" style={{ color: theme.text }}>Page Overview</h3>
+                            <ul className="list-disc ml-6 text-sm" style={{ color: theme.textSecondary }}>
+                              <li>Monitor your vendor dashboard metrics and sales</li>
+                              <li>Track daily orders and customer feedback</li>
+                              <li>Manage your business performance analytics</li>
+                              <li>Use voice commands for quick navigation</li>
+                            </ul>
+                          </div>
+                          <div className="flex flex-col items-center">
+                            <h4 className="text-sm font-semibold mb-1" style={{ color: theme.primary }}>Voice Commands</h4>
+                            <ul className="text-xs mb-2" style={{ color: theme.textSecondary }}>
+                              <li><b>"Go to menu"</b> – Menu Management</li>
+                              <li><b>"Go to daily"</b> – Daily Menus</li>
+                              <li><b>"Go to login"</b> – Login Page</li>
+                            </ul>
+                            <div className="mt-2">
+                              <VoiceRouter routes={voiceRoutes} />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
   );
 };
 

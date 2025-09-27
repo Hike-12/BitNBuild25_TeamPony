@@ -17,8 +17,12 @@ import {
   FiHeart,
   FiMapPin,
   FiBell,
-  FiStar
+  FiStar,
+  FiRotateCcw
 } from 'react-icons/fi';
+import { FaMicrophone } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import ConsumerChatbot from '../../components/ConsumerChatbot';
 import { 
   MdRestaurant, 
   MdDeliveryDining,
@@ -34,12 +38,33 @@ import {
 const Dashboard = () => {
   const { user, logout } = useAuth();
   const { isDarkMode, toggleTheme, theme } = useTheme();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [listening, setListening] = useState(false);
+  const recognitionRef = React.useRef(null);
 
   useEffect(() => {
     fetchProfile();
+    
+    // Setup voice recognition
+    if ('webkitSpeechRecognition' in window) {
+      recognitionRef.current = new window.webkitSpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.lang = 'en-US';
+      
+      recognitionRef.current.onresult = (event) => {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        handleVoiceCommand(transcript);
+      };
+      
+      recognitionRef.current.onend = () => {
+        setListening(false);
+      };
+    }
   }, []);
 
   const fetchProfile = async () => {
@@ -60,6 +85,25 @@ const Dashboard = () => {
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleVoiceCommand = (transcript) => {
+    if (transcript.includes('menu')) {
+      navigate('/consumer/menu');
+    } else if (transcript.includes('dashboard')) {
+      navigate('/consumer/dashboard');
+    } else if (transcript.includes('payments')) {
+      navigate('/consumer/payments');
+    } else if (transcript.includes('nutrition')) {
+      navigate('/consumer/nutritioninsights');
+    }
+  };
+
+  const handleVoiceStart = () => {
+    if (recognitionRef.current && !listening) {
+      setListening(true);
+      recognitionRef.current.start();
+    }
   };
 
   if (loading) {
@@ -291,7 +335,7 @@ const Dashboard = () => {
         {/* Main Content */}
         <main className="flex-1 p-6">
           {activeTab === 'overview' && (
-            <div className="space-y-6">
+            <div className="space-y-6 relative">
               {/* Welcome Section */}
               <div>
                 <h2 
@@ -306,6 +350,62 @@ const Dashboard = () => {
                 >
                   Here's what's happening with your tiffin subscriptions today.
                 </p>
+              </div>
+
+              {/* Flippable Page Overview Card */}
+              <div className="mt-4 mb-2 relative h-32 perspective-1000">
+                <div 
+                  className={`absolute inset-0 w-full h-full transition-transform duration-700 transform-style-preserve-3d ${
+                    isCardFlipped ? 'rotate-y-180' : ''
+                  }`}
+                >
+                  {/* Front Side - Page Overview */}
+                  <div 
+                    className="absolute inset-0 w-full h-full p-4 rounded-xl border backface-hidden flex items-center justify-between"
+                    style={{ backgroundColor: theme.panels, borderColor: theme.border }}
+                  >
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-2" style={{ color: theme.text }}>Page Overview</h3>
+                      <ul className="list-disc ml-6 text-sm" style={{ color: theme.textSecondary }}>
+                        <li>Quick stats about your orders, savings, and favorite meals</li>
+                        <li>Recent orders and upcoming deliveries</li>
+                        <li>Use the voice icon at bottom for hands-free navigation</li>
+                      </ul>
+                    </div>
+                    <button
+                      onClick={() => setIsCardFlipped(!isCardFlipped)}
+                      className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+                      style={{ backgroundColor: theme.primary, color: 'white' }}
+                      title="Flip to see routing info"
+                    >
+                      <FiRotateCcw size={20} />
+                    </button>
+                  </div>
+
+                  {/* Back Side - Voice Commands */}
+                  <div 
+                    className="absolute inset-0 w-full h-full p-4 rounded-xl border backface-hidden rotate-y-180 flex items-center justify-between"
+                    style={{ backgroundColor: theme.panels, borderColor: theme.border }}
+                  >
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-2" style={{ color: theme.primary }}>Voice Navigation Commands</h3>
+                      <div className="grid grid-cols-2 gap-2 text-sm" style={{ color: theme.textSecondary }}>
+                        <div><span className="font-semibold">"Go to menu"</span> - Navigate to Menu</div>
+                        <div><span className="font-semibold">"Go to dashboard"</span> - Back to Dashboard</div>
+                        <div><span className="font-semibold">"Go to payments"</span> - Open Payments</div>
+                        <div><span className="font-semibold">"Go to nutrition"</span> - Nutrition Insights</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setIsCardFlipped(!isCardFlipped)}
+                      className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+                      style={{ backgroundColor: theme.primary, color: 'white' }}
+                      title="Flip to see overview"
+                    >
+                      <FiRotateCcw size={20} />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Quick Stats */}
@@ -649,6 +749,26 @@ const Dashboard = () => {
           )}
         </main>
       </div>
+
+      {/* Fixed Voice Router Icon at Bottom */}
+      <button
+        onClick={handleVoiceStart}
+        className={`fixed bottom-8 left-8 z-40 p-4 rounded-full shadow-lg border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
+          listening ? 'animate-pulse scale-110' : 'hover:scale-110'
+        }`}
+        style={{ 
+          backgroundColor: listening ? theme.secondary : `${theme.panels}95`, 
+          borderColor: listening ? theme.secondary : theme.primary, 
+          color: listening ? 'white' : theme.primary 
+        }}
+        title={listening ? 'Listening...' : 'Voice Navigation'}
+        aria-label="Voice Navigation"
+      >
+        <FaMicrophone size={24} />
+      </button>
+
+      {/* Chatbot Component */}
+      <ConsumerChatbot />
     </div>
   );
 };

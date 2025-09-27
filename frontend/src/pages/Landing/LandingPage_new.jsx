@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import Carousel3D from '../../components/Carousel3D';
+import VoiceRouter from '../../components/VoiceRouter';
 import { 
   FaSun, 
   FaMoon, 
@@ -224,6 +225,14 @@ const RestaurantCarousel = ({ theme }) => {
 };
 
 const LandingPage = () => {
+  const voiceRoutes = [
+    { keyword: 'menu', path: '/menu' },
+    { keyword: 'dashboard', path: '/dashboard' },
+    { keyword: 'payments', path: '/payments' },
+    { keyword: 'nutrition', path: '/nutritioninsights' },
+    { keyword: 'login', path: '/login' },
+    { keyword: 'partner', path: '/vendor/login' },
+  ];
   const { isDarkMode, toggleTheme, theme } = useTheme();
   const [currentHero, setCurrentHero] = useState(0);
   const [gameScore, setGameScore] = useState(0);
@@ -331,7 +340,9 @@ const LandingPage = () => {
   };
 
   return (
-    <div
+    <>
+      <VoiceRouter routes={voiceRoutes} />
+      <div
       className="min-h-screen w-full flex flex-col justify-between relative"
       style={{
         fontFamily: 'Merriweather, serif',
@@ -844,7 +855,8 @@ const LandingPage = () => {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 
