@@ -15,7 +15,7 @@ import Login from "./components/Login";
 import Dashboard from "./pages/Consumer/Dashboard";
 import VendorLogin from "./components/VendorLogin";
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
-import LandingPage from "./pages/Landing/LandingPage";
+import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
 
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
