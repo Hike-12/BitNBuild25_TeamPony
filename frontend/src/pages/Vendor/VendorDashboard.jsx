@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
+import { getAuthHeaders, handleApiError } from "../../utils/api";
 
 const VendorDashboard = () => {
   const { vendor, logout } = useVendorAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
 
   useEffect(() => {
     fetchProfile();
+    fetchDashboardData();
   }, []);
 
   const fetchProfile = async () => {
@@ -24,6 +27,26 @@ const VendorDashboard = () => {
       }
     } catch (error) {
       console.error("Failed to fetch vendor profile:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
+        {
+          headers: getAuthHeaders(),
+        }
+      );
+
+      const data = await response.json();
+      if (data.success) {
+        setDashboardData(data);
+      }
+    } catch (error) {
+      handleApiError(error);
     } finally {
       setLoading(false);
     }
@@ -78,30 +101,46 @@ const VendorDashboard = () => {
             <h3 className="text-sm font-medium text-[#8B949E] mb-2">
               Total Orders
             </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">156</p>
-            <p className="text-sm text-[#10B981] mt-1">+12% from last month</p>
+            <p className="text-3xl font-bold text-[#F0F6FC]">
+              {dashboardData?.totalOrders || 0}
+            </p>
+            <p className="text-sm text-[#10B981] mt-1">
+              {dashboardData?.orderChange} from last month
+            </p>
           </div>
 
           <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
             <h3 className="text-sm font-medium text-[#8B949E] mb-2">
               Active Customers
             </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">89</p>
-            <p className="text-sm text-[#10B981] mt-1">+8% from last month</p>
+            <p className="text-3xl font-bold text-[#F0F6FC]">
+              {dashboardData?.activeCustomers || 0}
+            </p>
+            <p className="text-sm text-[#10B981] mt-1">
+              {dashboardData?.customerChange} from last month
+            </p>
           </div>
 
           <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
             <h3 className="text-sm font-medium text-[#8B949E] mb-2">Revenue</h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">₹24,580</p>
-            <p className="text-sm text-[#10B981] mt-1">+15% from last month</p>
+            <p className="text-3xl font-bold text-[#F0F6FC]">
+              ₹{dashboardData?.revenue?.toLocaleString() || 0}
+            </p>
+            <p className="text-sm text-[#10B981] mt-1">
+              {dashboardData?.revenueChange} from last month
+            </p>
           </div>
 
           <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
             <h3 className="text-sm font-medium text-[#8B949E] mb-2">
               Menu Items
             </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">12</p>
-            <p className="text-sm text-[#F97316] mt-1">2 out of stock</p>
+            <p className="text-3xl font-bold text-[#F0F6FC]">
+              {dashboardData?.totalMenuItems || 0}
+            </p>
+            <p className="text-sm text-[#F97316] mt-1">
+              {dashboardData?.outOfStockItems} out of stock
+            </p>
           </div>
         </div>
 
@@ -115,7 +154,9 @@ const VendorDashboard = () => {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-[#8B949E]">Kitchen Name</span>
-                <span className="text-[#F0F6FC] font-medium">{vendor?.kitchen_name}</span>
+                <span className="text-[#F0F6FC] font-medium">
+                  {vendor?.kitchen_name}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#8B949E]">Owner</span>
@@ -137,7 +178,9 @@ const VendorDashboard = () => {
               </div>
               <div className="flex items-start justify-between">
                 <span className="text-[#8B949E]">Address</span>
-                <span className="text-[#F0F6FC] text-right max-w-xs">{vendor?.address}</span>
+                <span className="text-[#F0F6FC] text-right max-w-xs">
+                  {vendor?.address}
+                </span>
               </div>
             </div>
           </div>
@@ -148,40 +191,33 @@ const VendorDashboard = () => {
               Recent Orders
             </h2>
             <div className="space-y-3">
-              <div className="flex items-center justify-between py-2 border-b border-[#21262D]">
-                <div>
-                  <p className="text-[#F0F6FC] text-sm">
-                    #ORD001 - Rajesh Kumar
-                  </p>
-                  <p className="text-[#8B949E] text-xs">Today, 11:30 AM</p>
+              {dashboardData?.recentOrders?.length > 0 ? (
+                dashboardData.recentOrders.map((order) => (
+                  <div
+                    key={order.id}
+                    className="flex items-center justify-between py-2 border-b border-[#21262D]"
+                  >
+                    <div>
+                      <p className="text-[#F0F6FC] text-sm">
+                        {order.order_id} - {order.customer_name}
+                      </p>
+                      <p className="text-[#8B949E] text-xs">
+                        {new Date(order.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[#10B981] text-sm">
+                        ₹{order.total_amount}
+                      </span>
+                      <p className="text-[#F97316] text-xs">{order.status}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-4 text-center text-[#8B949E]">
+                  No recent orders found.
                 </div>
-                <div className="text-right">
-                  <span className="text-[#10B981] text-sm">₹180</span>
-                  <p className="text-[#F97316] text-xs">Preparing</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between py-2 border-b border-[#21262D]">
-                <div>
-                  <p className="text-[#F0F6FC] text-sm">
-                    #ORD002 - Priya Sharma
-                  </p>
-                  <p className="text-[#8B949E] text-xs">Today, 10:45 AM</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-[#10B981] text-sm">₹150</span>
-                  <p className="text-[#10B981] text-xs">Delivered</p>
-                </div>
-              </div>
-              <div className="flex items-center justify-between py-2">
-                <div>
-                  <p className="text-[#F0F6FC] text-sm">#ORD003 - Amit Singh</p>
-                  <p className="text-[#8B949E] text-xs">Yesterday, 1:15 PM</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-[#10B981] text-sm">₹200</span>
-                  <p className="text-[#10B981] text-xs">Delivered</p>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
