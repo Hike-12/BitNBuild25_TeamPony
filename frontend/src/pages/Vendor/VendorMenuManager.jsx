@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
+<<<<<<< HEAD
 import { useTheme } from "../../context/ThemeContext";
 import { FaUtensils, FaCheckCircle, FaTimesCircle, FaLeaf, FaDrumstickBite, FaFireAlt, FaIceCream, FaSeedling, FaCarrot, FaGlassWhiskey, FaUserCheck, FaUserClock, FaUserSlash, FaClipboardList, FaCalendarAlt, FaMoon, FaSun } from "react-icons/fa";
+=======
+import { useVendorAuth } from "../../context/VendorAuthContext";
+import DailyMenus from "./DailyMenus";
+import MenuItems from "./MenuItems";
+>>>>>>> caa65a4fa44d94f5953db6b7a18e5b80c78620d3
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
@@ -96,6 +102,7 @@ const VendorMenuManager = () => {
     </div>
   );
 
+<<<<<<< HEAD
   return (
     <div className="min-h-screen relative" style={{ minHeight: "100vh", overflow: "hidden" }}>
       {/* Background Image + Overlay */}
@@ -281,6 +288,12 @@ const VendorMenuManager = () => {
             {activeTab === "daily-menus" && <div className="text-xl font-medium flex items-center gap-2" style={{ color: theme.textSecondary }}><FaCalendarAlt /> Daily Menus Component</div>}
           </div>
         </div>
+=======
+      {/* Tab Content */}
+      <div>
+        {activeTab === "menu-items" && <div><MenuItems /></div>}
+        {activeTab === "daily-menus" && <div><DailyMenus /></div>}
+>>>>>>> caa65a4fa44d94f5953db6b7a18e5b80c78620d3
       </div>
     </div>
   );
