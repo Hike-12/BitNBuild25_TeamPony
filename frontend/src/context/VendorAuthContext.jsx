@@ -19,7 +19,6 @@ export const VendorAuthProvider = ({ children }) => {
   }, []);
 
   const getToken = () => localStorage.getItem('vendor_token');
-  console.log("Vendor Token from getToken:", getToken()); // Debugging line
 
   const checkVendorAuth = async () => {
     const token = getToken();

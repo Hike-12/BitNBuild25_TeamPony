@@ -1,5 +1,3 @@
-const API_URL = import.meta.env.VITE_API_URL;
-
 // API utility functions for consistent request handling
 
 export const getAuthHeaders = () => {
