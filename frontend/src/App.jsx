@@ -17,7 +17,7 @@ import VendorLogin from "./components/VendorLogin";
 import VendorDashboard from "./pages/Vendor/VendorDashboard";
 import LandingPage from "./pages/Landing/LandingPage";
 import DailyMenus from "./pages/Vendor/DailyMenus";
-import Customers from "./pages/Vendor/Customers";
+
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
 
 function App() {
@@ -41,14 +41,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/menus"
-                  element={
-                    <ProtectedRoute>
-                      <Menu />
-                    </ProtectedRoute>
-                  }
-                />
+               
 
                 {/* Vendor Routes */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
@@ -63,9 +56,8 @@ function App() {
                 <Route
                   path="/vendor/menu"
                   element={
-                    <VendorProtectedRoute>
+
                       <DailyMenus />
-                    </VendorProtectedRoute>
                   }
                 />
                 <Route
