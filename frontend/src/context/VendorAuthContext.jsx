@@ -14,46 +14,51 @@ export const VendorAuthProvider = ({ children }) => {
   const [vendor, setVendor] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check authentication status on app load
   useEffect(() => {
     checkVendorAuth();
   }, []);
 
+  const getToken = () => localStorage.getItem('vendor_token');
+
   const checkVendorAuth = async () => {
+    const token = getToken();
+    if (!token) {
+      setVendor(null);
+      setLoading(false);
+      return;
+    }
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/check-auth/`, {
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       const data = await response.json();
-      
       if (data.success && data.authenticated) {
-        setVendor(data.user);
+        setVendor(data.vendor);
       } else {
         setVendor(null);
+        localStorage.removeItem('vendor_token');
       }
     } catch (error) {
-      console.error('Vendor auth check failed:', error);
       setVendor(null);
+      localStorage.removeItem('vendor_token');
     } finally {
       setLoading(false);
     }
   };
 
-  const login = async (username, password) => {
+  const login = async (license_number, password) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/login/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ username, password }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ license_number, password }),
       });
-
       const data = await response.json();
-
-      if (data.success) {
-        setVendor(data.user);
+      if (data.success && data.token) {
+        localStorage.setItem('vendor_token', data.token);
+        setVendor(data.vendor);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -65,19 +70,15 @@ export const VendorAuthProvider = ({ children }) => {
 
   const register = async (vendorData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/register/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(vendorData),
       });
-
       const data = await response.json();
-
-      if (data.success) {
-        setVendor(data.user);
+      if (data.success && data.token) {
+        localStorage.setItem('vendor_token', data.token);
+        setVendor(data.vendor);
         return { success: true };
       } else {
         return { success: false, error: data.error };
@@ -87,17 +88,9 @@ export const VendorAuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/logout/`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Vendor logout error:', error);
-    } finally {
-      setVendor(null);
-    }
+  const logout = () => {
+    localStorage.removeItem('vendor_token');
+    setVendor(null);
   };
 
   const value = {
@@ -107,6 +100,7 @@ export const VendorAuthProvider = ({ children }) => {
     register,
     logout,
     checkVendorAuth,
+    getToken,
   };
 
   return <VendorAuthContext.Provider value={value}>{children}</VendorAuthContext.Provider>;

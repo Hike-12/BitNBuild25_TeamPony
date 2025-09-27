@@ -14,26 +14,36 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check authentication status on app load
+  // On mount, check for token and user
   useEffect(() => {
     checkAuth();
   }, []);
 
+  const getToken = () => localStorage.getItem('user_token');
+
   const checkAuth = async () => {
+    const token = getToken();
+    if (!token) {
+      setUser(null);
+      setLoading(false);
+      return;
+    }
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/check-auth/`, {
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
       });
       const data = await response.json();
-      
       if (data.success && data.authenticated) {
         setUser(data.user);
       } else {
         setUser(null);
+        localStorage.removeItem('user_token');
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
       setUser(null);
+      localStorage.removeItem('user_token');
     } finally {
       setLoading(false);
     }
@@ -43,16 +53,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/login/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-
       const data = await response.json();
-
-      if (data.success) {
+      if (data.success && data.token) {
+        localStorage.setItem('user_token', data.token);
         setUser(data.user);
         return { success: true };
       } else {
@@ -67,16 +73,12 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/register/`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(userData),
       });
-
       const data = await response.json();
-
-      if (data.success) {
+      if (data.success && data.token) {
+        localStorage.setItem('user_token', data.token);
         setUser(data.user);
         return { success: true };
       } else {
@@ -87,17 +89,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = async () => {
-    try {
-      await fetch(`${import.meta.env.VITE_API_URL}/api/user/logout/`, {
-        method: 'GET',
-        credentials: 'include',
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setUser(null);
-    }
+  const logout = () => {
+    localStorage.removeItem('user_token');
+    setUser(null);
   };
 
   const value = {
@@ -107,6 +101,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     checkAuth,
+    getToken,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // Register
 router.post('/register', async (req, res) => {
@@ -39,6 +40,21 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+router.get('/check-auth/', auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    if (!user) return res.json({ success: true, authenticated: false });
+    res.json({ success: true, authenticated: true, user });
+  } catch (err) {
+    res.json({ success: true, authenticated: false });
+  }
+});
+
+// Logout (just a frontend token clear, but for API completeness)
+router.get('/logout/', (req, res) => {
+  res.json({ success: true, message: 'Logged out' });
 });
 
 module.exports = router;
