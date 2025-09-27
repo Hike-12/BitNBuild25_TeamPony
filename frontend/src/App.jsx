@@ -10,7 +10,7 @@ import Login from './components/Login';
 import Dashboard from './pages/Consumer/Dashboard'; // Changed path
 import VendorLogin from './components/VendorLogin';
 import VendorDashboard from './pages/Vendor/VendorDashboard'; // Changed path
-import LandingPage from './pages/Landing/LandingPage';
+import LandingPage from './pages/Landing/LandingPage_new';
 import Menu from './pages/Consumer/Menu'; // Changed path
 
 function App() {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
+import Carousel3D from '../../components/Carousel3D';
 import { 
   FaSun, 
   FaMoon, 
@@ -19,7 +20,10 @@ import {
   FaUtensils,
   FaAward,
   FaMedal,
-  FaCrown
+  FaCrown,
+  FaChevronLeft,
+  FaClock,
+  FaPhone
 } from 'react-icons/fa';
 
 // Add Google Fonts for premium typography
@@ -29,6 +33,8 @@ if (!document.querySelector('link[href*="Playfair+Display"]')) {
   link.rel = 'stylesheet';
   document.head.appendChild(link);
 }
+
+
 
 const LandingPage = () => {
   const { isDarkMode, toggleTheme, theme } = useTheme();
@@ -86,13 +92,6 @@ const LandingPage = () => {
       points: 75,
       color: theme.primary
     }
-  ];
-
-  const vendors = [
-    { name: "Saffron & Sage", rating: 4.9, cuisine: "Contemporary Indian", distance: "0.2 km", icon: <FaUtensils /> },
-    { name: "Casa Madera", rating: 4.8, cuisine: "Artisan Mexican", distance: "0.5 km", icon: <FaUtensils /> },
-    { name: "Golden Bamboo", rating: 4.7, cuisine: "Pan-Asian Fusion", distance: "0.3 km", icon: <FaUtensils /> },
-    { name: "Bella Vista", rating: 4.6, cuisine: "Authentic Italian", distance: "0.7 km", icon: <FaUtensils /> }
   ];
 
   useEffect(() => {
@@ -369,55 +368,163 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Premium Vendors Section */}
-      <section className="py-20 px-6 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <h2 
-            className="text-4xl md:text-5xl font-bold mb-8 text-center" 
-            style={{ 
-              color: theme.text,
-              fontFamily: 'Playfair Display, serif'
-            }}
-          >
-            Curated Partners
+      {/* Restaurant Carousel Section */}
+      <section className="py-10 px-4 relative z-10" style={{ backgroundColor: `${theme.panels}98` }}>
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center" style={{ color: theme.text, fontFamily: 'Playfair Display, serif' }}>
+            Featured Restaurants
           </h2>
-          <p 
-            className="text-xl text-center mb-16 max-w-3xl mx-auto"
-            style={{ color: theme.textSecondary }}
-          >
-            Handpicked establishments that share our commitment to excellence
+          <p className="text-base text-center mb-8 max-w-2xl mx-auto" style={{ color: theme.textSecondary }}>
+            Discover exceptional dining experiences from our premium restaurant partners
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {vendors.map((vendor, index) => (
-              <div
-                key={vendor.name}
-                className="p-8 rounded-3xl border shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer backdrop-blur-sm"
-                style={{
-                  backgroundColor: `${theme.panels}90`,
-                  borderColor: `${theme.primary}30`,
-                  boxShadow: `0 15px 50px ${theme.primary}20`
+          {/* Compact Restaurant Carousel */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            {[
+              {
+                id: 1,
+                name: "Le Jardin Royal",
+                cuisine: "Fine French Cuisine",
+                rating: 4.9,
+                reviews: 342,
+                image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&h=400&fit=crop",
+                description: "Exquisite French culinary artistry in an elegant setting",
+                price: "$$$",
+                time: "45-60 min"
+              },
+              {
+                id: 2,
+                name: "Sakura Premium",
+                cuisine: "Authentic Japanese",
+                rating: 4.8,
+                reviews: 289,
+                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=600&h=400&fit=crop",
+                description: "Traditional Japanese flavors with modern presentation",
+                price: "$$$",
+                time: "35-50 min"
+              },
+              {
+                id: 3,
+                name: "Villa Mediterranea",
+                cuisine: "Italian Fine Dining",
+                rating: 4.9,
+                reviews: 456,
+                image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ca4b?w=600&h=400&fit=crop",
+                description: "Authentic Italian cuisine with premium ingredients",
+                price: "$$$$",
+                time: "40-55 min"
+              },
+              {
+                id: 4,
+                name: "Golden Spice",
+                cuisine: "Contemporary Indian",
+                rating: 4.7,
+                reviews: 198,
+                image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop",
+                description: "Modern Indian cuisine with aromatic spices",
+                price: "$$",
+                time: "30-45 min"
+              },
+              {
+                id: 5,
+                name: "Ocean's Bounty",
+                cuisine: "Fresh Seafood",
+                rating: 4.8,
+                reviews: 367,
+                image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&h=400&fit=crop",
+                description: "Daily fresh catch prepared to perfection",
+                price: "$$$",
+                time: "25-40 min"
+              },
+              {
+                id: 6,
+                name: "The Steakhouse",
+                cuisine: "Premium Steaks",
+                rating: 4.9,
+                reviews: 523,
+                image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600&h=400&fit=crop",
+                description: "Premium cuts grilled to perfection",
+                price: "$$$$",
+                time: "50-65 min"
+              }
+            ].map((restaurant) => (
+              <div 
+                key={restaurant.id} 
+                className="group relative overflow-hidden rounded-2xl shadow-2xl transition-all duration-500 hover:scale-105 cursor-pointer backdrop-blur-sm border"
+                style={{ 
+                  backgroundColor: `${theme.panels}95`,
+                  borderColor: `${theme.primary}20`,
+                  boxShadow: `0 20px 60px ${theme.primary}15`
                 }}
-                onClick={() => handleFeatureClick(index, 10)}
               >
-                <div className="text-4xl mb-4 flex justify-center" style={{ color: theme.primary }}>
-                  {vendor.icon}
+                {/* Restaurant Image */}
+                <div className="relative h-64 overflow-hidden">
+                  <img 
+                    src={restaurant.image} 
+                    alt={restaurant.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  
+                  {/* Price Badge */}
+                  <div className="absolute top-4 right-4">
+                    <span 
+                      className="px-3 py-1 rounded-full text-sm font-bold text-white backdrop-blur-sm"
+                      style={{ backgroundColor: `${theme.primary}90` }}
+                    >
+                      {restaurant.price}
+                    </span>
+                  </div>
+                  
+                  {/* Rating Badge */}
+                  <div className="absolute top-4 left-4 flex items-center gap-1 px-3 py-1 rounded-full backdrop-blur-md" style={{ backgroundColor: `${theme.background}90` }}>
+                    <FaStar style={{ color: '#FFD700' }} className="text-sm" />
+                    <span className="text-sm font-bold" style={{ color: theme.text }}>{restaurant.rating}</span>
+                  </div>
                 </div>
-                <h3 
-                  style={{ color: theme.text }} 
-                  className="font-bold text-lg mb-2 text-center"
-                >
-                  {vendor.name}
-                </h3>
-                <p style={{ color: theme.textSecondary }} className="text-sm mb-3 text-center italic">
-                  {vendor.cuisine}
-                </p>
-                <div className="flex items-center justify-center gap-1 text-sm mb-2">
-                  <FaStar style={{ color: theme.primary }} />
-                  <span style={{ color: theme.textSecondary }}>{vendor.rating}</span>
+                
+                {/* Restaurant Details */}
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h3 
+                        className="text-xl font-bold mb-1"
+                        style={{ 
+                          color: theme.text,
+                          fontFamily: 'Playfair Display, serif'
+                        }}
+                      >
+                        {restaurant.name}
+                      </h3>
+                      <p className="text-sm font-medium" style={{ color: theme.primary }}>
+                        {restaurant.cuisine}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-sm mb-4 leading-relaxed" style={{ color: theme.textSecondary }}>
+                    {restaurant.description}
+                  </p>
+                  
+                  {/* Bottom Info */}
+                  <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: `${theme.primary}20` }}>
+                    <div className="flex items-center gap-1 text-sm" style={{ color: theme.textSecondary }}>
+                      <FaClock className="text-xs" />
+                      <span>{restaurant.time}</span>
+                    </div>
+                    <div className="text-xs" style={{ color: theme.textSecondary }}>
+                      {restaurant.reviews} reviews
+                    </div>
+                  </div>
                 </div>
-                <div style={{ color: theme.textSecondary }} className="text-sm text-center">
-                  <FaMapMarkerAlt className="inline mr-1" />
-                  {vendor.distance}
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-transparent group-hover:from-black/20 group-hover:via-transparent group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100 flex items-center justify-center">
+                  <button 
+                    className="px-6 py-2 rounded-full font-semibold text-white backdrop-blur-sm transform translate-y-4 group-hover:translate-y-0 transition-all duration-500"
+                    style={{ backgroundColor: `${theme.primary}90` }}
+                  >
+                    View Menu
+                  </button>
                 </div>
               </div>
             ))}
@@ -446,30 +553,16 @@ const LandingPage = () => {
             ].map((stat, index) => (
               <div 
                 key={stat.label} 
-                className="text-center p-10 rounded-3xl border shadow-2xl backdrop-blur-sm hover:scale-105 transition-all duration-500 cursor-pointer" 
-                style={{ 
-                  borderColor: `${theme.primary}30`, 
-                  backgroundColor: `${theme.background}90`, 
-                  boxShadow: `0 15px 50px ${theme.primary}20` 
-                }} 
-                onClick={() => handleFeatureClick(index, 5)}
+                className="text-center p-6 rounded-xl border shadow-md bg-white" 
+                style={{ borderColor: `${theme.primary}20` }}
               >
-                <div className="text-4xl mb-6" style={{ color: theme.primary }}>
+                <div className="text-2xl mb-3" style={{ color: theme.primary }}>
                   {stat.icon}
                 </div>
-                <div 
-                  className="text-4xl font-bold mb-3" 
-                  style={{ 
-                    color: theme.primary,
-                    fontFamily: 'Playfair Display, serif'
-                  }}
-                >
+                <div className="text-xl font-bold mb-1" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif' }}>
                   {stat.number}
                 </div>
-                <div 
-                  className="font-medium" 
-                  style={{ color: theme.textSecondary }}
-                >
+                <div className="font-medium text-xs" style={{ color: theme.textSecondary }}>
                   {stat.label}
                 </div>
               </div>
@@ -479,59 +572,25 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-20 px-6 relative z-10">
-        <div className="max-w-6xl mx-auto">
-          <h2 
-            className="text-4xl md:text-5xl font-bold mb-8 text-center" 
-            style={{ 
-              color: theme.text,
-              fontFamily: 'Playfair Display, serif'
-            }}
-          >
+      <section className="py-10 px-4 relative z-10">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center" style={{ color: theme.text, fontFamily: 'Playfair Display, serif' }}>
             Distinguished Voices
           </h2>
-          <p 
-            className="text-xl text-center mb-16 max-w-3xl mx-auto"
-            style={{ color: theme.textSecondary }}
-          >
+          <p className="text-base text-center mb-8 max-w-2xl mx-auto" style={{ color: theme.textSecondary }}>
             Testimonials from culinary experts and discerning patrons
           </p>
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((testimonial, idx) => (
-              <div 
-                key={testimonial.name} 
-                className="p-10 rounded-3xl border shadow-2xl flex flex-col items-center text-center backdrop-blur-sm" 
-                style={{ 
-                  borderColor: `${theme.primary}30`, 
-                  backgroundColor: `${theme.panels}90`,
-                  boxShadow: `0 20px 60px ${theme.primary}15`
-                }}
-              >
-                <img 
-                  src={testimonial.avatar} 
-                  alt={testimonial.name} 
-                  className="w-20 h-20 rounded-full mb-6 shadow-lg object-cover" 
-                  style={{ border: `3px solid ${theme.primary}` }} 
-                />
-                <p 
-                  className="mb-6 text-base leading-relaxed italic" 
-                  style={{ color: theme.textSecondary }}
-                >
+              <div key={testimonial.name} className="p-6 rounded-xl border shadow-md flex flex-col items-center text-center bg-white" style={{ borderColor: `${theme.primary}20` }}>
+                <img src={testimonial.avatar} alt={testimonial.name} className="w-14 h-14 rounded-full mb-4 shadow-sm object-cover" style={{ border: `2px solid ${theme.primary}` }} />
+                <p className="mb-4 text-sm leading-relaxed italic" style={{ color: theme.textSecondary }}>
                   "{testimonial.text}"
                 </p>
-                <div 
-                  className="font-bold text-xl mb-2" 
-                  style={{ 
-                    color: theme.primary,
-                    fontFamily: 'Playfair Display, serif'
-                  }}
-                >
+                <div className="font-bold text-base mb-1" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif' }}>
                   {testimonial.name}
                 </div>
-                <div 
-                  className="text-sm font-medium" 
-                  style={{ color: theme.textSecondary }}
-                >
+                <div className="text-xs font-medium" style={{ color: theme.textSecondary }}>
                   {testimonial.role}
                 </div>
               </div>
