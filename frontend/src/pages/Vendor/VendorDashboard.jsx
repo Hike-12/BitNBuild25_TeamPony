@@ -114,10 +114,8 @@ const VendorDashboard = () => {
             </h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[#8B949E]">Business Name</span>
-                <span className="text-[#F0F6FC] font-medium">
-                  {vendor?.business_name}
-                </span>
+                <span className="text-[#8B949E]">Kitchen Name</span>
+                <span className="text-[#F0F6FC] font-medium">{vendor?.kitchen_name}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-[#8B949E]">Owner</span>
@@ -139,9 +137,7 @@ const VendorDashboard = () => {
               </div>
               <div className="flex items-start justify-between">
                 <span className="text-[#8B949E]">Address</span>
-                <span className="text-[#F0F6FC] text-right max-w-xs">
-                  {vendor?.business_address}
-                </span>
+                <span className="text-[#F0F6FC] text-right max-w-xs">{vendor?.address}</span>
               </div>
             </div>
           </div>
