@@ -98,7 +98,7 @@ def register_user(request):
 @csrf_exempt
 @require_http_methods(["POST"])
 def login_user(request):
-    """Login user"""
+    """Login user - only for consumers, not vendors"""
     try:
         data = json.loads(request.body)
         username = data.get('username', '').strip()
@@ -114,6 +114,18 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         
         if user is not None:
+            # Check if user is a vendor - prevent vendor login through consumer portal
+            from vendors.models import Vendor
+            try:
+                vendor = Vendor.objects.get(user=user)
+                return JsonResponse({
+                    'success': False,
+                    'error': 'This is a vendor account. Please use the vendor login portal.'
+                }, status=401)
+            except Vendor.DoesNotExist:
+                # User is not a vendor, proceed with normal login
+                pass
+
             if user.is_active:
                 login(request, user)
                 return JsonResponse({
@@ -176,19 +188,29 @@ def get_profile(request):
     })
 
 def check_auth(request):
-    """Check if user is authenticated"""
+    """Check if user is authenticated - only for consumers"""
     if request.user.is_authenticated:
-        return JsonResponse({
-            'success': True,
-            'authenticated': True,
-            'user': {
-                'id': request.user.id,
-                'username': request.user.username,
-                'email': request.user.email,
-                'first_name': request.user.first_name,
-                'last_name': request.user.last_name,
-            }
-        })
+        # Check if user is a vendor - prevent vendor access through consumer portal
+        from vendors.models import Vendor
+        try:
+            vendor = Vendor.objects.get(user=request.user)
+            return JsonResponse({
+                'success': True,
+                'authenticated': False
+            })
+        except Vendor.DoesNotExist:
+            # User is not a vendor, return user info
+            return JsonResponse({
+                'success': True,
+                'authenticated': True,
+                'user': {
+                    'id': request.user.id,
+                    'username': request.user.username,
+                    'email': request.user.email,
+                    'first_name': request.user.first_name,
+                    'last_name': request.user.last_name,
+                }
+            })
     else:
         return JsonResponse({
             'success': True,
