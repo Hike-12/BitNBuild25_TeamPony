@@ -26,7 +26,7 @@ export const ThemeProvider = ({ children }) => {
 
   const theme = {
     dark: {
-      background: '#0A0F0C',   // very deep muted green/charcoal
+      background: '#030303',   // deeper black as requested
       panels: '#172922',       // darker green slate for cards/panels
       primary: '#E5A64A',      // warm gold accent
       secondary: '#38B174',    // fresh but muted green

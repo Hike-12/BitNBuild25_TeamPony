@@ -10,6 +10,7 @@ import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import VendorLogin from './components/VendorLogin';
 import VendorDashboard from './components/VendorDashboard';
+import LandingPage from './pages/Landing/LandingPage'
 
 function App() {
   return (
@@ -41,8 +42,8 @@ function App() {
                   }
                 />
 
-                {/* Default redirect */}
-                <Route path="/" element={<Navigate to="/dashboard" />} />
+                {/* Landing Page Route */}
+                <Route path="/" element={<LandingPage />} />
               </Routes>
               
               {/* Toast Container */}
