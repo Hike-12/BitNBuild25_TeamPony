@@ -1,21 +1,31 @@
-import { useEffect, useState } from 'react'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './ProtectedRoute';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
 
 function App() {
-  const [message, setMessage] = useState('')
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/hello/`)
-      .then((response) => response.json())
-      .then((data) => setMessage(data.message))
-  }, [])
-
   return (
-    <>
-    <h1 className="text-3xl font-bold underline bg-red-200">
-      message from backend: {message}
-    </h1>
-    </>
-  )
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/" element={<Navigate to="/dashboard" />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
