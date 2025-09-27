@@ -321,6 +321,15 @@ const LandingPage = () => {
     setTimeout(() => setShowConfetti(false), 4000);
   };
 
+  const [showOverview, setShowOverview] = useState(false);
+
+  // Handler for closing modal when clicking outside
+  const handleModalClick = (e) => {
+    if (e.target.id === 'overview-modal-bg') {
+      setShowOverview(false);
+    }
+  };
+
   return (
     <div
       className="min-h-screen w-full flex flex-col justify-between relative"
@@ -329,6 +338,7 @@ const LandingPage = () => {
         minHeight: '100vh',
         background: theme.background,
         position: 'relative',
+        overflow: showOverview ? 'hidden' : 'auto',
       }}
     >
       {/* Premium Background Image Overlay */}
@@ -391,6 +401,117 @@ const LandingPage = () => {
           {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
         </button>
       </header>
+
+      {/* Floating Info Icon */}
+      <button
+        onClick={() => setShowOverview(true)}
+        className="fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-lg border-2 flex items-center justify-center backdrop-blur-md hover:scale-110 transition-all"
+        style={{
+          backgroundColor: `${theme.panels}95`,
+          borderColor: theme.primary,
+          color: theme.primary,
+        }}
+        aria-label="Show Page Overview"
+      >
+        <FaGem style={{ fontSize: '2rem' }} />
+      </button>
+
+      {/* Page Overview Modal */}
+      {showOverview && (
+        <div
+          id="overview-modal-bg"
+          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-lg"
+          style={{
+            background: isDarkMode
+              ? 'rgba(20, 20, 20, 0.25)'
+              : 'rgba(255, 255, 255, 0.25)',
+            transition: 'background 0.3s',
+          }}
+          onClick={handleModalClick}
+        >
+          <div
+            className="relative max-w-lg w-full mx-4 rounded-2xl border-2 shadow-2xl overflow-hidden"
+            style={{
+              borderColor: theme.primary,
+              fontFamily: 'Merriweather, serif',
+              background: isDarkMode
+                ? 'linear-gradient(135deg, #18181b 0%, #23272f 100%)'
+                : 'linear-gradient(135deg, #f8fafc 0%, #f3f4f6 100%)',
+              boxShadow: isDarkMode
+                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30`
+                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60`,
+              transition: 'background 0.3s, box-shadow 0.3s',
+            }}
+            onMouseMove={e => {
+              const card = e.currentTarget;
+              const rect = card.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              const centerX = rect.width / 2;
+              const centerY = rect.height / 2;
+              const rotateX = ((y - centerY) / centerY) * 10;
+              const rotateY = ((x - centerX) / centerX) * -10;
+              card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+              card.style.boxShadow = isDarkMode
+                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30, 0 0 32px 8px ${theme.primary}60`
+                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60, 0 0 32px 8px ${theme.primary}80`;
+            }}
+            onMouseLeave={e => {
+              const card = e.currentTarget;
+              card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
+              card.style.boxShadow = isDarkMode
+                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30`
+                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60`;
+            }}
+          >
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              pointerEvents: 'none',
+              zIndex: 0,
+              background: isDarkMode
+                ? `radial-gradient(circle at 80% 20%, ${theme.primary}30 0%, transparent 60%), radial-gradient(circle at 20% 80%, ${theme.secondary}20 0%, transparent 60%)`
+                : `radial-gradient(circle at 80% 20%, ${theme.primary}40 0%, transparent 60%), radial-gradient(circle at 20% 80%, ${theme.secondary}30 0%, transparent 60%)`
+            }} />
+            <button
+              onClick={() => setShowOverview(false)}
+              className="absolute top-4 right-4 text-2xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all z-10"
+              style={{ color: theme.primary }}
+              aria-label="Close Overview"
+            >
+              &times;
+            </button>
+            <div className="flex items-center gap-3 mb-2 pt-8 px-8 z-10">
+              <FaGem style={{ color: theme.primary, fontSize: '1.5rem' }} />
+              <h2 className="text-2xl font-bold" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif', letterSpacing: '0.5px' }}>Page Overview</h2>
+            </div>
+            <div className="px-8 pb-8 z-10">
+              <p className="text-base mb-2" style={{ color: theme.text, fontFamily: 'Merriweather, serif' }}>
+                Welcome to NourishNet! This page is your gateway to curated culinary excellence, premium local gastronomy, and sophisticated dining experiences. Easily explore featured restaurants, unlock elite rewards, and discover distinguished voices from the culinary world.
+              </p>
+              <ul className="list-disc pl-6" style={{ color: theme.textSecondary, fontFamily: 'Merriweather, serif' }}>
+                <li>Browse premium restaurant partners and their menus</li>
+                <li>Earn rewards and achievements for your culinary journey</li>
+                <li>Read testimonials from top chefs and food critics</li>
+                <li>Switch between light and dark mode for your comfort</li>
+              </ul>
+            </div>
+            {/* Glowing border effect */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              borderRadius: '1.25rem',
+              pointerEvents: 'none',
+              zIndex: 1,
+              boxShadow: isDarkMode
+                ? `0 0 32px 8px ${theme.primary}60`
+                : `0 0 32px 8px ${theme.primary}80`,
+              border: `2px solid ${theme.primary}`,
+              opacity: 0.7,
+            }} />
+          </div>
+        </div>
+      )}
 
       {/* Luxury Hero Section */}
       <section className="flex flex-col items-center justify-center text-center py-12 px-4 relative z-10">
@@ -496,7 +617,7 @@ const LandingPage = () => {
                   borderColor: activeFeature === index ? feature.color : `${theme.border}30`,
                   boxShadow: activeFeature === index ? `0 10px 30px ${feature.color}20` : `0 4px 16px ${theme.primary}10`
                 }}
-                onClick={() => handleFeatureClick(index, feature.points)}
+                // onClick={() => handleFeatureClick(index, feature.points)}
               >
                 {activeFeature === index && (
                   <div 

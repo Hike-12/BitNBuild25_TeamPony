@@ -22,7 +22,7 @@ export const VendorAuthProvider = ({ children }) => {
 
   const checkVendorAuth = async () => {
     const token = getToken();
-    console.log("Checking auth with token:", token ? "exists" : "missing");
+    // console.log("Checking auth with token:", token ? "exists" : "missing");
     
     if (!token) {
       setVendor(null);

@@ -64,10 +64,13 @@ export const AuthProvider = ({ children }) => {
       });
 
       const data = await response.json();
+      console.log(data);
 
       if (data.success && data.token) {
         // Store the token
         localStorage.setItem('userToken', data.token);
+        localStorage.setItem('vendor_token', data.token);
+        console.log(data.token);
         
         // Set the user data
         setUser(data.user);
