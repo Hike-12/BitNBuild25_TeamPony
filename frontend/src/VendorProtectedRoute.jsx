@@ -5,11 +5,27 @@ import { useVendorAuth } from "./context/VendorAuthContext";
 const VendorProtectedRoute = ({ children }) => {
   const { vendor, loading } = useVendorAuth();
 
+  console.log("ProtectedRoute - vendor:", vendor, "loading:", loading);
+
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh' 
+      }}>
+        <div>Loading authentication...</div>
+      </div>
+    );
   }
 
-  return vendor ? children : <Navigate to="/vendor/login" />;
+  if (!vendor) {
+    console.log("No vendor found, redirecting to login");
+    return <Navigate to="/vendor/login" replace />;
+  }
+
+  return children;
 };
 
 export default VendorProtectedRoute;

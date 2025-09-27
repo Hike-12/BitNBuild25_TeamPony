@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { useTheme } from "../../context/ThemeContext";
-import { FaUtensils, FaCheckCircle, FaTimesCircle, FaLeaf, FaDrumstickBite, FaFireAlt, FaIceCream, FaSeedling, FaCarrot, FaGlassWhiskey, FaUserCheck, FaUserClock, FaUserSlash, FaClipboardList, FaCalendarAlt, FaMoon, FaSun } from "react-icons/fa";
+import MenuItems from "./MenuItems";
+import DailyMenus from "./DailyMenus";
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
@@ -10,7 +10,11 @@ const VendorMenuManager = () => {
   const { theme, isDarkMode, toggleTheme } = useTheme();
   const getVendorAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    console.log("Vendor Token:", token ? "exists" : "missing");
+    return token ? { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {};
   };
 
   useEffect(() => {
@@ -20,19 +24,20 @@ const VendorMenuManager = () => {
   const fetchDashboardData = async () => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
+        `${import.meta.env.VITE_API_URL}/api/vendor/dashboard`,
         { headers: getVendorAuthHeaders() }
       );
       
+      console.log("Dashboard response status:", response.status);
+      
       if (response.status === 401) {
         setError("Please login to access the dashboard");
-        // You might want to redirect to login page here
-        // window.location.href = '/vendor/login';
         return;
       }
       
       if (response.ok) {
         const data = await response.json();
+        console.log("Dashboard data:", data);
         if (data.success) {
           setDashboardData(data.dashboard_data);
         } else {
@@ -49,52 +54,24 @@ const VendorMenuManager = () => {
     }
   };
 
-  // Tab styles using theme
   const tabStyle = {
     display: "inline-block",
-    padding: "14px 32px",
-    margin: "0 8px",
-    backgroundColor: theme.panels,
-    border: `2px solid ${theme.border}`,
+    padding: "10px 20px",
+    margin: "0 5px",
+    backgroundColor: "#f8f9fa",
+    border: "1px solid #ddd",
     cursor: "pointer",
-    borderRadius: "18px 18px 0 0",
-    color: theme.textSecondary,
-    fontWeight: 600,
-    fontSize: "1.1rem",
-    boxShadow: "0 2px 8px 0 rgba(0,0,0,0.04)",
-    transition: "all 0.2s",
+    borderRadius: "5px 5px 0 0",
   };
 
   const activeTabStyle = {
     ...tabStyle,
-    backgroundColor: theme.primary,
-    color: theme.background,
-    borderColor: theme.primary,
-    boxShadow: `0 4px 16px 0 ${theme.primary}22`,
-    fontWeight: 700,
-    fontSize: "1.15rem",
-    letterSpacing: "0.02em",
+    backgroundColor: "#007bff",
+    color: "white",
   };
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${theme.background} 60%, ${theme.panels} 100%)` }}>
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-20 w-20 border-8 border-t-transparent mx-auto mb-6 shadow-lg" style={{ borderColor: `${theme.primary} transparent transparent transparent` }}></div>
-        <div className="text-2xl font-bold tracking-wide" style={{ color: theme.primary }}>
-          Loading vendor menu data...
-        </div>
-      </div>
-    </div>
-  );
-  if (error) return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${theme.background} 60%, ${theme.panels} 100%)` }}>
-      <div className="text-center rounded-2xl shadow-xl p-8" style={{ backgroundColor: theme.panels }}>
-        <p className="text-2xl mb-6 font-semibold" style={{ color: theme.error }}>
-          Error: {error}
-        </p>
-      </div>
-    </div>
-  );
+  if (loading) return <div>Loading vendor menu data...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen relative" style={{ minHeight: "100vh", overflow: "hidden" }}>
@@ -250,14 +227,16 @@ const VendorMenuManager = () => {
                         </div>
                         <span className="text-xs" style={{ color: theme.textSecondary }}>{new Date(menu.date).toLocaleDateString()}</span>
                       </div>
-                    ))}
+                    )}
                   </div>
-                ) : (
-                  <p className="text-base" style={{ color: theme.textSecondary }}>No menus created yet.</p>
-                )}
+                ))}
               </div>
-            </div>
-          )}
+            ) : (
+              <p>No menus created yet.</p>
+            )}
+          </div>
+        </div>
+      )}
 
           {/* Tab Navigation */}
           <div className="flex items-end mb-10" style={{ borderBottom: `2.5px solid ${theme.primary}` }}>

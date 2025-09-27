@@ -19,22 +19,33 @@ export const VendorAuthProvider = ({ children }) => {
   }, []);
 
   const getToken = () => localStorage.getItem('vendor_token');
-  console.log("Vendor Token from getToken:", getToken()); // Debugging line
 
   const checkVendorAuth = async () => {
     const token = getToken();
+    console.log("Checking auth with token:", token ? "exists" : "missing");
+    
     if (!token) {
       setVendor(null);
       setLoading(false);
       return;
     }
+    
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/check-auth/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/check-auth`, {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
+      
+      console.log("Auth check response status:", response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
       const data = await response.json();
+      console.log("Auth response:", data);
+      
       if (data.success && data.authenticated) {
         setVendor(data.vendor);
       } else {
@@ -42,6 +53,7 @@ export const VendorAuthProvider = ({ children }) => {
         localStorage.removeItem('vendor_token');
       }
     } catch (error) {
+      console.error('Auth check failed:', error);
       setVendor(null);
       localStorage.removeItem('vendor_token');
     } finally {
@@ -49,33 +61,40 @@ export const VendorAuthProvider = ({ children }) => {
     }
   };
 
-  // in VendorAuthContext.jsx
-const login = async (identifier, password) => {
-  try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, password }),
-    });
-    const data = await response.json();
-    if (data.success && data.token) {
-      localStorage.setItem('vendor_token', data.token);
-      setVendor(data.vendor);
-      return { success: true };
-    } else {
-      return { success: false, error: data.error };
+  const login = async (identifier, password) => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+      });
+      const data = await response.json();
+      if (data.success && data.token) {
+        localStorage.setItem('vendor_token', data.token);
+        setVendor(data.vendor);
+        return { success: true };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (error) {
+      return { success: false, error: 'Network error occurred' };
     }
-  } catch (error) {
-    return { success: false, error: 'Network error occurred' };
-  }
-};
+  };
 
   const register = async (vendorData) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register/`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(vendorData),
+        body: JSON.stringify({
+          username: vendorData.username,
+          email: vendorData.email,
+          business_name: vendorData.business_name,
+          address: vendorData.address,
+          phone_number: vendorData.phone_number,
+          license_number: vendorData.license_number,
+          password: vendorData.password,
+        }),
       });
       const data = await response.json();
       if (data.success && data.token) {
