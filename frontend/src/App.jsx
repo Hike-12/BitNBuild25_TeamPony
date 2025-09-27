@@ -55,18 +55,7 @@ function App() {
                 />
                 <Route
                   path="/vendor/menu"
-                  element={
-
-                      <DailyMenus />
-                  }
-                />
-                <Route
-                  path="/vendor/menuManager"
                   element={<VendorMenuManager></VendorMenuManager>}
-                />
-                <Route
-                  path="/vendor/menuItems"
-                  element={<menuItems></menuItems>}
                 />
               </Routes>
 
