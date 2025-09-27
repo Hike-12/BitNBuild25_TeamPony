@@ -115,14 +115,14 @@ def login_user(request):
         
         if user is not None:
             # Check if user is a vendor - prevent vendor login through consumer portal
-            from vendors.models import Vendor
+            from vendors.models import TiffinVendor
             try:
-                vendor = Vendor.objects.get(user=user)
+                vendor = TiffinVendor.objects.get(user=user)
                 return JsonResponse({
                     'success': False,
                     'error': 'This is a vendor account. Please use the vendor login portal.'
                 }, status=401)
-            except Vendor.DoesNotExist:
+            except TiffinVendor.DoesNotExist:
                 # User is not a vendor, proceed with normal login
                 pass
 
@@ -191,14 +191,14 @@ def check_auth(request):
     """Check if user is authenticated - only for consumers"""
     if request.user.is_authenticated:
         # Check if user is a vendor - prevent vendor access through consumer portal
-        from vendors.models import Vendor
+        from vendors.models import TiffinVendor
         try:
-            vendor = Vendor.objects.get(user=request.user)
+            vendor = TiffinVendor.objects.get(user=request.user)
             return JsonResponse({
                 'success': True,
                 'authenticated': False
             })
-        except Vendor.DoesNotExist:
+        except TiffinVendor.DoesNotExist:
             # User is not a vendor, return user info
             return JsonResponse({
                 'success': True,

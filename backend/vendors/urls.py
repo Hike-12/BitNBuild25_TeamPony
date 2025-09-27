@@ -7,4 +7,13 @@ urlpatterns = [
     path('logout/', views.logout_vendor, name='vendor_logout'),
     path('profile/', views.get_vendor_profile, name='vendor_profile'),
     path('check-auth/', views.check_vendor_auth, name='vendor_check_auth'),
+    
+    # Menu Items endpoints
+    path('menu-items/', views.menu_items, name='vendor_menu_items'),
+    
+    # Daily Menus endpoints
+    path('daily-menus/', views.daily_menus, name='vendor_daily_menus'),
+    
+    # Dashboard data
+    path('dashboard/', views.vendor_dashboard_data, name='vendor_dashboard'),
 ]
