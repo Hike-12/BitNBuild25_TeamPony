@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useVendorAuth } from '../context/VendorAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Sun, Moon, Store, User, Mail, Lock, Phone, FileText, MapPin, Eye, EyeOff } from 'lucide-react';
@@ -93,10 +94,17 @@ const VendorLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
+      return;
+    }
 
     setLoading(true);
     let result;
+
+    const loadingToast = toast.loading(
+      isLogin ? 'Signing you in...' : 'Registering your business...'
+    );
 
     if (isLogin) {
       result = await login(formData.username, formData.password);
@@ -113,10 +121,20 @@ const VendorLogin = () => {
         license_number: formData.license_number,
       });
     }
+
+    toast.dismiss(loadingToast);
     
-    if (!result.success) {
+    if (result.success) {
+      toast.success(
+        isLogin 
+          ? `Welcome back, ${formData.username}! 🏪` 
+          : 'Business registered successfully! Welcome to NourishNet! 🎉'
+      );
+    } else {
+      toast.error(result.error);
       setErrors({ form: result.error });
     }
+    
     setLoading(false);
   };
 
@@ -134,6 +152,10 @@ const VendorLogin = () => {
       phone_number: '',
       license_number: '',
     });
+
+    toast.success(
+      isLogin ? 'Switched to business registration' : 'Switched to vendor login'
+    );
   };
 
   return (
@@ -153,6 +175,18 @@ const VendorLogin = () => {
       >
         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
       </button>
+
+      {/* Consumer Login Link */}
+      <Link
+        to="/login"
+        className="fixed top-6 left-6 px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-10 text-sm font-semibold"
+        style={{ 
+          backgroundColor: theme.primary,
+          color: 'white'
+        }}
+      >
+        ← Consumer Login
+      </Link>
 
       <div className="max-w-2xl w-full space-y-8">
         <div className="text-center">
@@ -186,19 +220,6 @@ const VendorLogin = () => {
           }}
           onSubmit={handleSubmit}
         >
-          {errors.form && (
-            <div 
-              className="px-6 py-4 rounded-xl border text-sm font-semibold"
-              style={{ 
-                backgroundColor: `${theme.error}15`,
-                borderColor: theme.error,
-                color: theme.error
-              }}
-            >
-              {errors.form}
-            </div>
-          )}
-          
           <div className="space-y-5">
             {/* Username Field */}
             <div>

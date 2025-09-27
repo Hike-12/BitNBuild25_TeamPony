@@ -26,28 +26,28 @@ export const ThemeProvider = ({ children }) => {
 
   const theme = {
     dark: {
-      background: '#121212',
-      panels: '#1E2A24',
-      primary: '#FFB347',
-      secondary: '#4ADE80',
-      text: '#F5F5F5',
-      textSecondary: '#B0B0B0',
-      border: '#2A3F2A',
-      error: '#FF6B6B',
-      success: '#4ADE80',
-      warning: '#FFB347'
+      background: '#0A0F0C',   // very deep muted green/charcoal
+      panels: '#172922',       // darker green slate for cards/panels
+      primary: '#E5A64A',      // warm gold accent
+      secondary: '#38B174',    // fresh but muted green
+      text: '#ECEFF1',         // soft off-white
+      textSecondary: '#A3B1A3',
+      border: '#22352A',
+      error: '#FF5C5C',
+      success: '#38B174',
+      warning: '#E5A64A'
     },
     light: {
-      background: '#FFFFFF',
-      panels: '#F9FAF5',
-      primary: '#FF7F50',
-      secondary: '#2E8B57',
+      background: '#FDFDF7',   // very slight off-white, soft on eyes
+      panels: '#F5F8F2',       // subtle green-white card background
+      primary: '#FF8C4B',      // muted coral/orange accent
+      secondary: '#2F9E63',    // natural leafy green
       text: '#1A1A1A',
-      textSecondary: '#4A4A4A',
-      border: '#E0E8E0',
-      error: '#E53E3E',
-      success: '#2E8B57',
-      warning: '#FF7F50'
+      textSecondary: '#555F55',
+      border: '#E0E7DE',
+      error: '#E53935',
+      success: '#2F9E63',
+      warning: '#FF8C4B'
     }
   };
 

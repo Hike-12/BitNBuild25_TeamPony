@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Sun, Moon, User, Mail, Lock, Eye, EyeOff } from 'lucide-react';
@@ -73,10 +74,17 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      toast.error('Please fix the form errors');
+      return;
+    }
 
     setLoading(true);
     let result;
+
+    const loadingToast = toast.loading(
+      isLogin ? 'Signing you in...' : 'Creating your account...'
+    );
 
     if (isLogin) {
       result = await login(formData.username, formData.password);
@@ -89,10 +97,20 @@ const Login = () => {
         last_name: formData.last_name,
       });
     }
+
+    toast.dismiss(loadingToast);
     
-    if (!result.success) {
+    if (result.success) {
+      toast.success(
+        isLogin 
+          ? `Welcome back, ${formData.username}! 🍽️` 
+          : 'Account created successfully! Welcome to NourishNet! 🎉'
+      );
+    } else {
+      toast.error(result.error);
       setErrors({ form: result.error });
     }
+    
     setLoading(false);
   };
 
@@ -106,6 +124,10 @@ const Login = () => {
       first_name: '',
       last_name: '',
     });
+    
+    toast.success(
+      isLogin ? 'Switched to registration mode' : 'Switched to login mode'
+    );
   };
 
   return (
@@ -125,6 +147,18 @@ const Login = () => {
       >
         {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
       </button>
+
+      {/* Vendor Login Link */}
+      <Link
+        to="/vendor/login"
+        className="fixed top-6 left-6 px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-10 text-sm font-semibold"
+        style={{ 
+          backgroundColor: theme.secondary,
+          color: 'white'
+        }}
+      >
+        Vendor Portal →
+      </Link>
 
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
@@ -158,19 +192,6 @@ const Login = () => {
           }}
           onSubmit={handleSubmit}
         >
-          {errors.form && (
-            <div 
-              className="px-4 py-3 rounded-lg border text-sm font-medium"
-              style={{ 
-                backgroundColor: `${theme.error}15`,
-                borderColor: theme.error,
-                color: theme.error
-              }}
-            >
-              {errors.form}
-            </div>
-          )}
-          
           <div className="space-y-4">
             {/* Username Field */}
             <div>

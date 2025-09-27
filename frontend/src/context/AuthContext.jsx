@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/api/logout/`, {
-        method: 'POST',
+        method: 'GET',
         credentials: 'include',
       });
     } catch (error) {
