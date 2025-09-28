@@ -300,13 +300,17 @@ const Menu = () => {
               <div
                 key={menu._id}
                 className="rounded-3xl border overflow-hidden hover:shadow-2xl transition-all duration-500 hover:scale-105"
-                style={{ backgroundColor: theme.panels, borderColor: theme.border }}
+                style={{
+                  background: `linear-gradient(135deg, ${theme.background} 80%, ${theme.panels} 100%)`,
+                  borderColor: theme.primary,
+                  boxShadow: `0 8px 32px 0 ${theme.primary}30`
+                }}
               >
                 {/* Menu Image */}
                 {menu.image && (
                   <div className="h-48 bg-cover bg-center relative"
                        style={{ backgroundImage: `url(${menu.image})` }}>
-                    <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+                    <div className="absolute inset-0 bg-black bg-opacity-40"></div>
                     <div className="absolute top-4 right-4">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         menu.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -321,28 +325,28 @@ const Menu = () => {
                   {/* Menu Header */}
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
+                      <h3 className="text-2xl font-bold mb-1" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif' }}>
                         {menu.name}
                       </h3>
-                      <p className="flex items-center space-x-1" style={{ color: theme.textSecondary }}>
+                      <p className="flex items-center space-x-1" style={{ color: theme.secondary }}>
                         <FiMapPin size={16} />
                         <span>{menu.vendor?.business_name || 'Vendor Name'}</span>
                       </p>
                     </div>
                     <button className="p-2 hover:opacity-80 transition-opacity">
-                      <FiHeart size={20} style={{ color: theme.textSecondary }} />
+                      <FiHeart size={20} style={{ color: theme.secondary }} />
                     </button>
                   </div>
 
                   {/* Menu Tags */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {menu.is_veg_only && (
-                      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                      <span className="px-3 py-1 bg-secondary text-white rounded-full text-sm font-medium" style={{ backgroundColor: theme.secondary }}>
                         Vegetarian
                       </span>
                     )}
                     {menu.cooking_style && (
-                      <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                      <span className="px-3 py-1 bg-primary text-white rounded-full text-sm font-medium" style={{ backgroundColor: theme.primary }}>
                         {menu.cooking_style}
                       </span>
                     )}
@@ -350,7 +354,7 @@ const Menu = () => {
 
                   {/* Today's Special */}
                   {menu.todays_special && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                    <div className="bg-gradient-to-r from-primary/20 to-secondary/10 border border-yellow-200 rounded-lg p-3 mb-4">
                       <div className="flex items-start space-x-2">
                         <FiStar className="text-yellow-600 mt-0.5" size={16} />
                         <div>
@@ -371,12 +375,12 @@ const Menu = () => {
                   {/* Availability */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
-                      <FiClock size={16} style={{ color: theme.textSecondary }} />
-                      <span className="text-sm" style={{ color: theme.textSecondary }}>
+                      <FiClock size={16} style={{ color: theme.secondary }} />
+                      <span className="text-sm" style={{ color: theme.secondary }}>
                         Available today
                       </span>
                     </div>
-                    <div className="text-sm" style={{ color: theme.textSecondary }}>
+                    <div className="text-sm" style={{ color: theme.secondary }}>
                       {Math.max(0, menu.max_dabbas - (menu.dabbas_sold || 0))} left
                     </div>
                   </div>
@@ -384,11 +388,10 @@ const Menu = () => {
                   {/* Menu Footer */}
                   <div className="flex justify-between items-center">
                     <div>
-                      <div className="text-2xl font-bold" style={{ color: theme.success }}>
+                      <div className="text-2xl font-bold" style={{ color: theme.primary }}>
                         ₹{menu.full_dabba_price}
                       </div>
                     </div>
-                    
                     <div className="flex space-x-2">
                       <button 
                         onClick={(e) => {
@@ -398,14 +401,13 @@ const Menu = () => {
                         }}
                         className="px-4 py-2 border rounded-lg font-medium transition-all duration-300 hover:scale-105 text-sm"
                         style={{ 
-                          borderColor: theme.primary,
-                          color: theme.primary,
-                          backgroundColor: `${theme.primary}10`
+                          borderColor: theme.secondary,
+                          color: theme.secondary,
+                          backgroundColor: `${theme.secondary}10`
                         }}
                       >
                         Subscribe
                       </button>
-                      
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
