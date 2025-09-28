@@ -504,7 +504,7 @@ const Menu = () => {
                 {menu.image && (
                   <div className="h-48 bg-cover bg-center relative"
                        style={{ backgroundImage: `url(${menu.image})` }}>
-                    <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+                    {/* <div className="absolute inset-0 bg-black bg-opacity-30"></div> */}
                     <div className="absolute top-4 right-4">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         menu.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
