@@ -19,6 +19,8 @@ import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
 import Menu from "./pages/Consumer/Menu"
+import { Check } from "lucide-react";
+import Checkpage from "./pages/Consumer/Checkpage";
 function App() {
   return (
     <ThemeProvider>
@@ -29,6 +31,7 @@ function App() {
               <Routes>
                 {/* Landing Page Route */}
                 <Route path="/" element={<LandingPage />} />
+              
                 <Route path="/menu" element={<Menu />} />
                 {/* Consumer Routes */}
                 <Route path="/login" element={<Login />} />
@@ -59,6 +62,7 @@ function App() {
                 
                   }
                 />
+                  <Route path="/check" element={<Checkpage />} />
                 <Route
                   path="/vendor/daily-menus"
                   element={

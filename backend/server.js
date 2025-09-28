@@ -39,7 +39,7 @@ mongoose
 app.use('/api/vendor', menuRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userAuthRoutes);
-app.use('/api/orders', orderRoutes);
+  app.use('/api/orders', orderRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
 
 // Health check

@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import toast from "react-hot-toast";
-import { FaUtensils, FaLeaf, FaFire, FaPepperHot, FaEdit, FaTrash } from "react-icons/fa";
+import { FaUtensils, FaLeaf, FaFire, FaPepperHot, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { MdRestaurant } from "react-icons/md";
+import { FiTrendingUp } from "react-icons/fi";
 
 const MenuItems = () => {
   const { vendor } = useVendorAuth();
+  const { theme } = useTheme();
   const [menuItems, setMenuItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,36 +22,6 @@ const MenuItems = () => {
     is_available_today: true,
   });
   const [createLoading, setCreateLoading] = useState(false);
-
-  // Theme matching VendorMenuManager
-  const [isDarkMode] = useState(() => {
-    const saved = localStorage.getItem("darkMode");
-    return saved ? JSON.parse(saved) : false;
-  });
-
-  const theme = isDarkMode ? {
-    background: "#121212",
-    panels: "#1D1D1D",
-    primary: "#00BCD4",
-    secondary: "#64FFDA",
-    text: "#E0E0E0",
-    textSecondary: "#BDBDBD",
-    border: "#333333",
-    error: "#FF5555",
-    success: "#69F0AE",
-    warning: "#FFEA00",
-  } : {
-    background: "#FFFFFF",
-    panels: "#F2F4F7",
-    primary: "#144640",
-    secondary: "#607D8B",
-    text: "#212121",
-    textSecondary: "#757575",
-    border: "#E0E0E0",
-    error: "#D32F2F",
-    success: "#144640",
-    warning: "#FBC02D",
-  };
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
@@ -169,10 +142,10 @@ const MenuItems = () => {
   if (error) {
     return (
       <div className="min-h-[400px] flex items-center justify-center">
-        <div className="text-center p-8 rounded-sm" style={{ background: theme.panels }}>
+        <div className="text-center p-8 rounded-2xl" style={{ backgroundColor: theme.panels }}>
           <p className="text-lg mb-4" style={{ color: theme.error }}>{error}</p>
-          <button onClick={fetchMenuItems} className="px-6 py-2 rounded-sm font-medium"
-            style={{ background: theme.primary, color: '#fff' }}>
+          <button onClick={fetchMenuItems} className="px-6 py-2.5 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
+            style={{ backgroundColor: theme.primary, color: '#fff' }}>
             Try Again
           </button>
         </div>
@@ -181,49 +154,52 @@ const MenuItems = () => {
   }
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header Section */}
-      <div className="rounded-sm shadow-md p-6 mb-6" 
-        style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+      <div className="rounded-2xl border p-6" 
+        style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold flex items-center gap-2" style={{ color: theme.text }}>
+            <h2 className="text-2xl font-bold flex items-center gap-3" style={{ color: theme.text }}>
               <FaUtensils style={{ color: theme.primary }} /> Your Menu Items
             </h2>
-            <p className="mt-1" style={{ color: theme.textSecondary }}>
+            <p className="text-lg mt-1" style={{ color: theme.textSecondary }}>
               Total Items: <span className="font-bold" style={{ color: theme.text }}>{menuItems.length}</span>
             </p>
           </div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-6 py-2.5 rounded-sm font-semibold transition-all hover:scale-105"
-            style={{ background: theme.primary, color: '#fff' }}
+            className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg"
+            style={{ backgroundColor: theme.primary, color: '#fff' }}
           >
-            + Add New Item
+            <FaPlus size={16} /> Add New Item
           </button>
         </div>
       </div>
 
       {/* Menu Items Grid */}
       {menuItems.length === 0 ? (
-        <div className="rounded-sm shadow-md p-12 text-center" 
-          style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+        <div className="rounded-2xl border p-12 text-center" 
+          style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
           <MdRestaurant className="text-6xl mx-auto mb-4 opacity-30" style={{ color: theme.primary }} />
-          <p className="text-lg mb-4" style={{ color: theme.textSecondary }}>
+          <p className="text-lg mb-6" style={{ color: theme.textSecondary }}>
             No food items found. Create your first food item to get started.
           </p>
           <button onClick={() => setShowCreateModal(true)}
-            className="px-6 py-3 rounded-sm font-semibold"
-            style={{ background: theme.primary, color: '#fff' }}>
+            className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:transform hover:scale-105"
+            style={{ backgroundColor: theme.primary, color: '#fff' }}>
             Create First Item
           </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menuItems.map((item) => (
-            <div key={item.id || item._id} className="rounded-sm shadow-md p-6 hover:scale-[1.02] transition-all"
-              style={{ background: theme.panels, border: `1px solid ${theme.border}`,
-                borderLeft: `5px solid ${item.is_available_today ? theme.success : theme.error}` }}>
+            <div key={item.id || item._id} className="rounded-2xl border p-6 transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg"
+              style={{ 
+                backgroundColor: theme.panels, 
+                borderColor: theme.border,
+                borderLeft: `5px solid ${item.is_available_today ? theme.success : theme.error}` 
+              }}>
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-xl font-semibold" style={{ color: theme.text }}>{item.name}</h3>
@@ -233,32 +209,35 @@ const MenuItems = () => {
                 </div>
                 <span className="px-3 py-1 rounded-full text-xs font-semibold"
                   style={{
-                    background: item.is_available_today ? `${theme.success}15` : `${theme.error}15`,
+                    backgroundColor: item.is_available_today ? `${theme.success}15` : `${theme.error}15`,
                     color: item.is_available_today ? theme.success : theme.error
                   }}>
                   {item.is_available_today ? "Available" : "Unavailable"}
                 </span>
               </div>
 
-              <div className="text-2xl font-bold mb-4" style={{ color: theme.primary }}>
-                ₹{item.price}
+              <div className="flex items-center gap-2 mb-4">
+                <span className="text-3xl font-bold" style={{ color: theme.primary }}>
+                  ₹{item.price}
+                </span>
+                <FiTrendingUp size={16} style={{ color: theme.success }} />
               </div>
 
               <div className="flex gap-2 mb-4">
                 {item.is_vegetarian ? (
-                  <span className="px-2 py-1 rounded text-xs font-medium flex items-center gap-1"
-                    style={{ background: `${theme.success}20`, color: theme.success }}>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1"
+                    style={{ backgroundColor: `${theme.success}15`, color: theme.success }}>
                     <FaLeaf /> Veg
                   </span>
                 ) : (
-                  <span className="px-2 py-1 rounded text-xs font-medium"
-                    style={{ background: `${theme.error}20`, color: theme.error }}>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-medium"
+                    style={{ backgroundColor: `${theme.error}15`, color: theme.error }}>
                     Non-Veg
                   </span>
                 )}
                 {item.is_spicy && (
-                  <span className="px-2 py-1 rounded text-xs font-medium flex items-center gap-1"
-                    style={{ background: `${theme.warning}20`, color: theme.warning }}>
+                  <span className="px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1"
+                    style={{ backgroundColor: `${theme.warning}15`, color: theme.warning }}>
                     <FaPepperHot /> Spicy
                   </span>
                 )}
@@ -270,11 +249,13 @@ const MenuItems = () => {
                   Added: {new Date(item.created_at).toLocaleDateString()}
                 </p>
                 <div className="flex gap-2">
-                  <button className="p-1.5 hover:opacity-70 transition-opacity">
-                    <FaEdit style={{ color: theme.primary }} />
+                  <button className="p-2 rounded-lg hover:opacity-70 transition-all duration-200 hover:transform hover:scale-110"
+                    style={{ backgroundColor: `${theme.primary}15` }}>
+                    <FaEdit size={16} style={{ color: theme.primary }} />
                   </button>
-                  <button className="p-1.5 hover:opacity-70 transition-opacity">
-                    <FaTrash style={{ color: theme.error }} />
+                  <button className="p-2 rounded-lg hover:opacity-70 transition-all duration-200 hover:transform hover:scale-110"
+                    style={{ backgroundColor: `${theme.error}15` }}>
+                    <FaTrash size={16} style={{ color: theme.error }} />
                   </button>
                 </div>
               </div>
@@ -286,14 +267,14 @@ const MenuItems = () => {
       {/* Create Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="rounded-sm p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            style={{ background: theme.panels, border: `1px solid ${theme.border}` }}>
+          <div className="rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor: theme.panels, border: `1px solid ${theme.border}` }}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold" style={{ color: theme.text }}>
                 Add New Food Item
               </h2>
               <button onClick={() => setShowCreateModal(false)}
-                className="text-3xl hover:opacity-70" style={{ color: theme.textSecondary }}>
+                className="text-3xl hover:opacity-70 transition-opacity" style={{ color: theme.textSecondary }}>
                 ×
               </button>
             </div>
@@ -305,8 +286,13 @@ const MenuItems = () => {
                 </label>
                 <input type="text" name="name" value={createForm.name}
                   onChange={handleCreateFormChange}
-                  className="w-full border rounded-sm px-4 py-2.5 focus:outline-none"
-                  style={{ background: theme.background, borderColor: theme.border, color: theme.text }}
+                  className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-2 transition-all"
+                  style={{ 
+                    backgroundColor: theme.background, 
+                    borderColor: theme.border, 
+                    color: theme.text,
+                    focusBorderColor: theme.primary 
+                  }}
                   placeholder="e.g., Aloo Gobi" required />
               </div>
 
@@ -317,8 +303,13 @@ const MenuItems = () => {
                   </label>
                   <select name="category" value={createForm.category}
                     onChange={handleCreateFormChange}
-                    className="w-full border rounded-sm px-4 py-2.5 focus:outline-none"
-                    style={{ background: theme.background, borderColor: theme.border, color: theme.text }}>
+                    className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-2 transition-all"
+                    style={{ 
+                      backgroundColor: theme.background, 
+                      borderColor: theme.border, 
+                      color: theme.text,
+                      focusBorderColor: theme.primary 
+                    }}>
                     {categories.map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
                     ))}
@@ -331,41 +322,49 @@ const MenuItems = () => {
                   </label>
                   <input type="number" name="price" value={createForm.price}
                     onChange={handleCreateFormChange} min="0" step="0.01"
-                    className="w-full border rounded-sm px-4 py-2.5 focus:outline-none"
-                    style={{ background: theme.background, borderColor: theme.border, color: theme.text }}
+                    className="w-full border rounded-xl px-4 py-3 focus:outline-none focus:border-2 transition-all"
+                    style={{ 
+                      backgroundColor: theme.background, 
+                      borderColor: theme.border, 
+                      color: theme.text,
+                      focusBorderColor: theme.primary 
+                    }}
                     placeholder="30" required />
                 </div>
               </div>
 
               <div className="space-y-3">
-                <label className="flex items-center cursor-pointer">
+                <label className="flex items-center cursor-pointer p-3 rounded-xl transition-all hover:bg-opacity-50"
+                  style={{ backgroundColor: theme.background }}>
                   <input type="checkbox" name="is_vegetarian" checked={createForm.is_vegetarian}
-                    onChange={handleCreateFormChange} className="mr-3" />
+                    onChange={handleCreateFormChange} className="mr-3 w-4 h-4" />
                   <span style={{ color: theme.text }}>Vegetarian</span>
                 </label>
 
-                <label className="flex items-center cursor-pointer">
+                <label className="flex items-center cursor-pointer p-3 rounded-xl transition-all hover:bg-opacity-50"
+                  style={{ backgroundColor: theme.background }}>
                   <input type="checkbox" name="is_spicy" checked={createForm.is_spicy}
-                    onChange={handleCreateFormChange} className="mr-3" />
+                    onChange={handleCreateFormChange} className="mr-3 w-4 h-4" />
                   <span style={{ color: theme.text }}>Spicy</span>
                 </label>
 
-                <label className="flex items-center cursor-pointer">
+                <label className="flex items-center cursor-pointer p-3 rounded-xl transition-all hover:bg-opacity-50"
+                  style={{ backgroundColor: theme.background }}>
                   <input type="checkbox" name="is_available_today" checked={createForm.is_available_today}
-                    onChange={handleCreateFormChange} className="mr-3" />
+                    onChange={handleCreateFormChange} className="mr-3 w-4 h-4" />
                   <span style={{ color: theme.text }}>Available Today</span>
                 </label>
               </div>
 
               <div className="flex justify-end gap-4 pt-4">
                 <button type="button" onClick={() => setShowCreateModal(false)}
-                  className="px-6 py-2.5 rounded-sm font-medium transition-opacity hover:opacity-70"
+                  className="px-6 py-3 rounded-xl font-medium transition-all duration-200 hover:opacity-70"
                   style={{ color: theme.textSecondary }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={createLoading}
-                  className="px-6 py-2.5 rounded-sm font-semibold disabled:opacity-50"
-                  style={{ background: theme.primary, color: '#fff' }}>
+                  className="px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:transform hover:scale-105 disabled:opacity-50"
+                  style={{ backgroundColor: theme.primary, color: '#fff' }}>
                   {createLoading ? "Creating..." : "Create Item"}
                 </button>
               </div>

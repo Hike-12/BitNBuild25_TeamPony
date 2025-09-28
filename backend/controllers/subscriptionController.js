@@ -83,11 +83,15 @@ exports.createSubscription = async (req, res) => {
 
 exports.getUserSubscriptions = async (req, res) => {
   try {
+    console.log('User ID:', req.user?._id); // Debug log
+    
     const userId = req.user._id;
     const { status } = req.query;
 
     let filter = { customer: userId };
     if (status) filter.subscription_status = status;
+
+    console.log('Filter:', filter); // Debug log
 
     const subscriptions = await Subscription.find(filter)
       .populate('vendor', 'business_name phone_number address')
@@ -95,10 +99,11 @@ exports.getUserSubscriptions = async (req, res) => {
 
     res.json({
       success: true,
-      subscriptions
+      subscriptions: subscriptions || []
     });
 
   } catch (error) {
+    console.error('Get user subscriptions error:', error);
     res.status(500).json({
       success: false,
       error: error.message
