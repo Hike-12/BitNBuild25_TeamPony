@@ -39,6 +39,7 @@ const Menu = () => {
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  console.log('User in Menu component:', user); // DEBUG LOG
 
   // Modal states
   const [showOrderForm, setShowOrderForm] = useState(false);

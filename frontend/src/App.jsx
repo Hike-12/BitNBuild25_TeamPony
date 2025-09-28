@@ -20,6 +20,8 @@ import DailyMenus from "./pages/Vendor/DailyMenus";
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
 import Menu from "./pages/Consumer/Menu";
 import ConsumerChatbot from "./components/ConsumerChatbot";
+
+
 function App() {
   return (
     <ThemeProvider>
@@ -31,39 +33,15 @@ function App() {
               <Routes>
                 {/* Landing Page Route */}
                 <Route path="/" element={<LandingPage />} />
-                <Route path="/menu" element={<Menu />} />
-                {/* Consumer Routes */}
+                {/* Consumer Routes - Remove ProtectedRoute wrapper */}
                 <Route path="/login" element={<Login />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                {/* Vendor Routes */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/menu" element={<Menu />} />
+                {/* Vendor Routes - Remove VendorProtectedRoute wrapper */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
-                <Route
-                  path="/vendor/dashboard"
-                  element={
-                    <VendorProtectedRoute>
-                      <VendorDashboard />
-                    </VendorProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/vendor/menu"
-                  element={<VendorMenuManager />}
-                />
-                <Route
-                  path="/vendor/daily-menus"
-                  element={
-                    <VendorProtectedRoute>
-                      <DailyMenus />
-                    </VendorProtectedRoute>
-                  }
-                />
+                <Route path="/vendor/dashboard" element={<VendorDashboard />} />
+                <Route path="/vendor/menu" element={<VendorMenuManager />} />
+                <Route path="/vendor/daily-menus" element={<DailyMenus />} />
                 {/* Catch all route - redirect to landing page */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
@@ -101,5 +79,4 @@ function App() {
     </ThemeProvider>
   );
 }
-
 export default App;
