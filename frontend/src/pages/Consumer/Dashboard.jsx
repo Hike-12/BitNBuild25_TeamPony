@@ -32,6 +32,7 @@ import {
   BsCreditCard,
   BsPiggyBank
 } from 'react-icons/bs';
+import CustomerOrders from './CustomerOrders';
 
 // Dummy Components - Replace these with your actual components
 const OverviewComponent = ({ profile, user, theme }) => {
@@ -540,6 +541,7 @@ const Dashboard = () => {
  const sidebarItems = [
   { id: 'overview', label: 'Overview', icon: FiHome, component: <OverviewComponent profile={profile} user={user} theme={theme} /> },
   { id: 'orders', label: 'My Orders', icon: BsBoxSeam, component: <OrderForm user={user} theme={theme} /> },
+  { id: 'placeorders', label: 'place Orders', icon: BsBoxSeam, component: <CustomerOrders></CustomerOrders> },
   { id: 'subscriptions', label: 'Subscriptions', icon: MdRestaurant, component: <SubscriptionManagement user={user} theme={theme} /> },
   { id: 'payments', label: 'Payments', icon: BsCreditCard, component: <PaymentsComponent /> },
   { id: 'profile', label: 'Profile', icon: FiUser, component: <ProfileComponent profile={profile} theme={theme} /> },

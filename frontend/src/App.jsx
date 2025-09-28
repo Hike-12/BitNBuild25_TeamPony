@@ -43,9 +43,9 @@ function App() {
                 <Route
                   path="/vendor/dashboard"
                   element={
-                    <VendorProtectedRoute>
+                   
                       <VendorDashboard />
-                    </VendorProtectedRoute>
+             
                   }
                 />
                 <Route
@@ -60,9 +60,9 @@ function App() {
                 <Route
                   path="/vendor/daily-menus"
                   element={
-                    <VendorProtectedRoute>
+                
                       <DailyMenus />
-                    </VendorProtectedRoute>
+                
                   }
                 />
 

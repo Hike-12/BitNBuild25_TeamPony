@@ -101,6 +101,44 @@ exports.createOrder = async (req, res) => {
   }
 };
 
+
+
+// Add to orderController.js
+exports.getVendorOrders = async (req, res) => {
+  try {
+    const vendorId = req.vendor._id;
+    const { status, limit = 10, page = 1 } = req.query;
+
+    let filter = { vendor: vendorId };
+    if (status && status !== 'all') filter.order_status = status;
+
+    const orders = await Order.find(filter)
+      .populate('customer', 'name email phone')
+      .populate('menu', 'name full_dabba_price date')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Order.countDocuments(filter);
+
+    res.json({
+      success: true,
+      orders,
+      pagination: {
+        current_page: parseInt(page),
+        total_pages: Math.ceil(total / limit),
+        total_orders: total
+      }
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
 exports.getUserOrders = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -166,3 +204,4 @@ exports.updateOrderStatus = async (req, res) => {
     });
   }
 };
+

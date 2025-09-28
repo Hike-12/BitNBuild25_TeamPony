@@ -3,6 +3,8 @@ import { useVendorAuth } from "../../context/VendorAuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import MenuItems from "./MenuItems";
 import DailyMenus from "./DailyMenus";
+import Orders from './Orders';
+import Analytics from './Analytics';
 import { 
   FaSun, 
   FaMoon, 
@@ -39,7 +41,7 @@ import { FiUser, FiStar, FiTrendingUp } from "react-icons/fi";
 import { BsBoxSeam } from "react-icons/bs";
 
 // Dashboard Overview Component
-const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
+const DashboardOverview = ({ theme, dashboardData }) => {
   const quickStats = [
     {
       title: 'Total Orders',
@@ -68,7 +70,7 @@ const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
     {
       title: 'Menu Items',
       value: dashboardData?.totalMenuItems || 0,
-      change: `${dashboardData?.outOfStockItems || 0} out`,
+      change: `${dashboardData?.activeMenuItems || 0} active`,
       icon: FaUtensils,
       color: theme.secondary,
       bg: `${theme.secondary}15`
@@ -80,7 +82,7 @@ const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
       {/* Welcome Section */}
       <div>
         <h2 className="text-3xl font-bold mb-2" style={{ color: theme.text }}>
-          Welcome back, {vendorInfo?.first_name || vendorInfo?.username}! 👨‍🍳
+          Welcome back, {dashboardData?.vendorInfo?.kitchen_name || 'Chef'}! 👨‍🍳
         </h2>
         <p className="text-lg" style={{ color: theme.textSecondary }}>
           Here's your kitchen overview for today
@@ -149,21 +151,21 @@ const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
               style={{ backgroundColor: theme.background }}>
               <span className="font-medium" style={{ color: theme.textSecondary }}>Business</span>
               <span className="font-semibold" style={{ color: theme.text }}>
-                {vendorInfo?.kitchen_name || "Not Set"}
+                {dashboardData?.vendorInfo?.kitchen_name || "Not Set"}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 rounded-xl transition-all duration-200" 
               style={{ backgroundColor: theme.background }}>
-              <span className="font-medium" style={{ color: theme.textSecondary }}>Owner</span>
+              <span className="font-medium" style={{ color: theme.textSecondary }}>Active Menus</span>
               <span className="font-semibold" style={{ color: theme.text }}>
-                {vendorInfo?.first_name} {vendorInfo?.last_name}
+                {dashboardData?.activeMenus || 0}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 rounded-xl transition-all duration-200" 
               style={{ backgroundColor: theme.background }}>
               <span className="font-medium" style={{ color: theme.textSecondary }}>Verification</span>
               <div className="flex items-center gap-2">
-                {vendorInfo?.is_verified ? (
+                {dashboardData?.vendorInfo?.is_verified ? (
                   <>
                     <FaCheckCircle style={{ color: theme.success }} />
                     <span style={{ color: theme.success }}>Verified</span>
@@ -203,10 +205,10 @@ const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
                       {order.customer_name}
                     </h4>
                     <p className="text-sm" style={{ color: theme.textSecondary }}>
-                      Order #{order.id}
+                      Order #{order.id.slice(-6)}
                     </p>
                     <p className="text-xs" style={{ color: theme.textSecondary }}>
-                      {new Date(order.created_at).toLocaleString()}
+                      {new Date(order.created_at).toLocaleString('en-IN')}
                     </p>
                   </div>
                   <div className="text-right">
@@ -215,8 +217,8 @@ const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
                     </p>
                     <span className="text-xs px-2 py-1 rounded-full"
                       style={{
-                        backgroundColor: `${theme.warning}15`,
-                        color: theme.warning
+                        backgroundColor: order.status === 'delivered' ? `${theme.success}15` : `${theme.warning}15`,
+                        color: order.status === 'delivered' ? theme.success : theme.warning
                       }}>
                       {order.status}
                     </span>
@@ -231,25 +233,67 @@ const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
           </div>
         </div>
       </div>
+
+      {/* Recent Menus */}
+      <div className="rounded-2xl border p-6"
+        style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+        <h3 className="text-xl font-bold mb-6 flex items-center" style={{ color: theme.text }}>
+          <MdFoodBank className="mr-3" style={{ color: theme.primary }} /> 
+          Recent Menus
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {dashboardData?.recentMenus?.length > 0 ? (
+            dashboardData.recentMenus.map((menu) => (
+              <div key={menu._id} 
+                className="p-4 rounded-xl border transition-all duration-200 hover:transform hover:scale-102"
+                style={{ 
+                  backgroundColor: theme.background,
+                  borderColor: theme.border 
+                }}>
+                <div className="flex justify-between items-start mb-2">
+                  <h4 className="font-semibold" style={{ color: theme.text }}>
+                    {menu.name}
+                  </h4>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium`}
+                    style={{
+                      backgroundColor: menu.is_active ? `${theme.success}15` : `${theme.error}15`,
+                      color: menu.is_active ? theme.success : theme.error
+                    }}>
+                    {menu.is_active ? 'Active' : 'Inactive'}
+                  </span>
+                </div>
+                <p className="text-sm mb-2" style={{ color: theme.textSecondary }}>
+                  {menu.date}
+                </p>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm" style={{ color: theme.textSecondary }}>
+                    Price: ₹{menu.full_dabba_price}
+                  </span>
+                  <span className="text-sm font-medium" style={{ color: theme.primary }}>
+                    {menu.dabbas_sold}/{menu.max_dabbas}
+                  </span>
+                </div>
+                {menu.dabbas_remaining > 0 && (
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div className="h-2 rounded-full" 
+                      style={{
+                        backgroundColor: theme.primary,
+                        width: `${(menu.dabbas_sold / menu.max_dabbas) * 100}%`
+                      }}></div>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="col-span-3 text-center py-8" style={{ color: theme.textSecondary }}>
+              No menus found. Create your first menu!
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
-
-// Orders Component (placeholder)
-const OrdersComponent = ({ theme }) => (
-  <div className="p-6 rounded-2xl border" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
-    <h2 style={{ color: theme.text }}>Orders Management</h2>
-    <p style={{ color: theme.textSecondary }}>This is where you'll manage all your orders. Coming soon!</p>
-  </div>
-);
-
-// Analytics Component (placeholder)
-const AnalyticsComponent = ({ theme }) => (
-  <div className="p-6 rounded-2xl border" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
-    <h2 style={{ color: theme.text }}>Analytics Dashboard</h2>
-    <p style={{ color: theme.textSecondary }}>View your business analytics and insights here. Coming soon!</p>
-  </div>
-);
 
 // Settings Component (placeholder)
 const SettingsComponent = ({ theme }) => (
@@ -266,40 +310,61 @@ const VendorDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const getVendorAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    return { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
   };
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
-  const fetchDashboardData = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/dashboard/`,
-        { headers: getVendorAuthHeaders() }
-      );
+ const fetchDashboardData = async () => {
+  try {
+    console.log('Fetching dashboard data...');
+    const response = await fetch(
+      `${API_URL}/api/vendor/dashboard`,
+      { headers: getVendorAuthHeaders() }
+    );
 
-      const data = await response.json();
-      if (data.success) {
-        setDashboardData(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-    } finally {
-      setLoading(false);
+    console.log('Response status:', response.status);
+    const data = await response.json();
+    console.log('Response data:', data);
+
+    if (data.success && data.dashboard_data) {
+      const dashboard = data.dashboard_data;
+      const processedData = {
+        totalOrders: dashboard.statistics?.total_orders || 0,
+        activeCustomers: dashboard.statistics?.active_customers || 0,
+        revenue: dashboard.statistics?.total_revenue || 0,
+        totalMenuItems: dashboard.statistics?.total_menu_items || 0,
+        activeMenuItems: dashboard.statistics?.active_menu_items || 0,
+        activeMenus: dashboard.statistics?.active_menus || 0,
+        vendorInfo: dashboard.vendor_info || {},
+        recentOrders: dashboard.recent_orders || [],
+        recentMenus: dashboard.recent_menus || []
+      };
+      console.log('Processed data:', processedData);
+      setDashboardData(processedData);
     }
-  };
+  } catch (error) {
+    console.error("Failed to fetch dashboard data:", error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const sidebarItems = [
-    { id: 'overview', label: 'Dashboard', icon: FaHome, component: <DashboardOverview theme={theme} dashboardData={dashboardData} vendorInfo={vendor} /> },
+    { id: 'overview', label: 'Dashboard', icon: FaHome, component: <DashboardOverview theme={theme} dashboardData={dashboardData} /> },
     { id: 'menu-items', label: 'Manage Dishes', icon: IoFastFood, component: <MenuItems /> },
     { id: 'daily-menus', label: 'Daily Tiffins', icon: MdFoodBank, component: <DailyMenus /> },
-    { id: 'orders', label: 'Orders', icon: FaBoxes, component: <OrdersComponent theme={theme} /> },
-    { id: 'analytics', label: 'Analytics', icon: FaChartLine, component: <AnalyticsComponent theme={theme} /> },
+    { id: 'orders', label: 'Orders', icon: FaBoxes, component: <Orders /> },
+    { id: 'analytics', label: 'Analytics', icon: FaChartLine, component: <Analytics /> },
     { id: 'settings', label: 'Settings', icon: FaCog, component: <SettingsComponent theme={theme} /> },
   ];
 
@@ -341,10 +406,10 @@ const VendorDashboard = () => {
               {/* Status Badge */}
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                 style={{
-                  backgroundColor: vendor?.is_verified ? `${theme.success}15` : `${theme.warning}15`,
-                  color: vendor?.is_verified ? theme.success : theme.warning
+                  backgroundColor: dashboardData?.vendorInfo?.is_verified ? `${theme.success}15` : `${theme.warning}15`,
+                  color: dashboardData?.vendorInfo?.is_verified ? theme.success : theme.warning
                 }}>
-                {vendor?.is_verified ? "Verified" : "Pending Verification"}
+                {dashboardData?.vendorInfo?.is_verified ? "Verified" : "Pending Verification"}
               </span>
 
               {/* Notifications */}
@@ -382,7 +447,7 @@ const VendorDashboard = () => {
                   <FiUser size={16} color="white" />
                 </div>
                 <span className="font-medium" style={{ color: theme.text }}>
-                  {vendor?.first_name || vendor?.username}
+                  {vendor?.username || 'Vendor'}
                 </span>
               </div>
 

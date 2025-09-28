@@ -145,3 +145,29 @@ exports.updateSubscriptionStatus = async (req, res) => {
     });
   }
 };
+
+exports.getVendorSubscriptions = async (req, res) => {
+  try {
+    const vendorId = req.vendor._id;
+    const { status, limit = 100 } = req.query;
+
+    let filter = { vendor: vendorId };
+    if (status) filter.subscription_status = status;
+
+    const subscriptions = await Subscription.find(filter)
+      .populate('customer', 'name email phone')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1);
+
+    res.json({
+      success: true,
+      subscriptions
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};

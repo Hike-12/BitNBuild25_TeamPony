@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const subscriptionController = require('../controllers/subscriptionController');
-const userAuth = require('../middleware/auth');
+const auth = require('../middleware/auth'); // Use the same auth middleware
 
-// All routes are user-protected
-router.use(userAuth);
+// User routes (protected)
+router.post('/', auth, subscriptionController.createSubscription);
+router.get('/', auth, subscriptionController.getUserSubscriptions);
+router.patch('/:subscriptionId/status', auth, subscriptionController.updateSubscriptionStatus);
 
-router.post('/', subscriptionController.createSubscription);
-router.get('/', subscriptionController.getUserSubscriptions);
-router.patch('/:subscriptionId/status', subscriptionController.updateSubscriptionStatus);
+// Vendor routes - if you haven't implemented getVendorSubscriptions, comment this out for now
+// router.get('/vendor', auth, subscriptionController.getVendorSubscriptions);
 
 module.exports = router;

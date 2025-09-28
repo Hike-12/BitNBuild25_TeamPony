@@ -1,4 +1,3 @@
-import VoiceRouter from "../../components/VoiceRouter";
 import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import { useTheme } from "../../context/ThemeContext";
@@ -13,11 +12,9 @@ import {
   FaFire,
   FaPlus,
   FaTimes,
-  FaMinus,
-  FaUtensils
+  FaUtensils,
 } from "react-icons/fa";
 import { MdFoodBank } from "react-icons/md";
-import { GiCookingPot } from "react-icons/gi";
 import { FiTrendingUp } from "react-icons/fi";
 
 const DailyMenus = () => {
@@ -26,26 +23,25 @@ const DailyMenus = () => {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_URL = import.meta.env.VITE_API_URL;
-  const [showMenuModal, setShowMenuModal] = useState(false);
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [menuItems, setMenuItems] = useState([]);
   const [createLoading, setCreateLoading] = useState(false);
 
   // Create Menu Form State
   const [newMenuData, setNewMenuData] = useState({
-    name: '',
-    description: '',
-    date: new Date().toISOString().split('T')[0],
-    full_dabba_price: '',
-    max_dabbas: '',
+    name: "",
+    description: "",
+    date: new Date().toISOString().split("T")[0],
+    full_dabba_price: "",
+    max_dabbas: "",
     is_veg_only: false,
-    cooking_style: '',
-    todays_special: '',
+    cooking_style: "",
+    todays_special: "",
     main_items: [],
     side_items: [],
     extras: [],
-    is_active: true
+    is_active: true,
   });
 
   const getAuthHeaders = () => {
@@ -58,7 +54,7 @@ const DailyMenus = () => {
 
   const fetchMenuItems = async () => {
     try {
-      console.log('Fetching menu items...');
+      console.log("Fetching menu items...");
       const response = await fetch(`${API_URL}/api/vendor/menu-items`, {
         headers: getAuthHeaders(),
       });
@@ -68,11 +64,11 @@ const DailyMenus = () => {
       }
 
       const data = await response.json();
-      console.log('Menu items response:', data);
-      
+      console.log("Menu items response:", data);
+
       if (data.success) {
         setMenuItems(data.menu_items || []);
-        console.log('Menu items loaded:', data.menu_items?.length || 0);
+        console.log("Menu items loaded:", data.menu_items?.length || 0);
       } else {
         throw new Error(data.error || "Failed to fetch menu items");
       }
@@ -94,7 +90,7 @@ const DailyMenus = () => {
 
       const data = await response.json();
       if (data.success) {
-        setMenus(data.menus);
+        setMenus(data.menus || []);
       } else {
         throw new Error(data.error || "Failed to fetch menus");
       }
@@ -138,33 +134,49 @@ const DailyMenus = () => {
   };
 
   const createDailyMenu = async () => {
-    if (!newMenuData.name || !newMenuData.full_dabba_price || !newMenuData.max_dabbas) {
+    if (
+      !newMenuData.name ||
+      !newMenuData.full_dabba_price ||
+      !newMenuData.max_dabbas
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     setCreateLoading(true);
     try {
-      console.log('Creating menu with data:', newMenuData);
-      
+      console.log("Creating menu with data:", newMenuData);
+
+      // Ensure we're sending the right data format
+      const menuData = {
+        name: newMenuData.name,
+        description: newMenuData.description,
+        date: newMenuData.date,
+        full_dabba_price: parseFloat(newMenuData.full_dabba_price),
+        max_dabbas: parseInt(newMenuData.max_dabbas),
+        is_veg_only: newMenuData.is_veg_only,
+        cooking_style: newMenuData.cooking_style,
+        todays_special: newMenuData.todays_special,
+        main_items: newMenuData.main_items,
+        side_items: newMenuData.side_items,
+        extras: newMenuData.extras,
+        is_active: newMenuData.is_active,
+      };
+
       const response = await fetch(`${API_URL}/api/vendor/daily-menus`, {
         method: "POST",
         headers: getAuthHeaders(),
-        body: JSON.stringify({
-          ...newMenuData,
-          full_dabba_price: parseFloat(newMenuData.full_dabba_price),
-          max_dabbas: parseInt(newMenuData.max_dabbas),
-        }),
+        body: JSON.stringify(menuData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
         throw new Error(
-          errorData.error || `HTTP ${response.status}: Failed to create menu`
+          data.error || `HTTP ${response.status}: Failed to create menu`
         );
       }
 
-      const data = await response.json();
       if (data.success) {
         toast.success("Daily menu created successfully!");
         setShowCreateModal(false);
@@ -214,9 +226,9 @@ const DailyMenus = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setNewMenuData(prev => ({
+    setNewMenuData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -280,7 +292,8 @@ const DailyMenus = () => {
               className="text-2xl font-bold flex items-center gap-3"
               style={{ color: theme.text }}
             >
-              <FaCalendarAlt style={{ color: theme.primary }} /> Daily Tiffin Plans
+              <FaCalendarAlt style={{ color: theme.primary }} /> Daily Tiffin
+              Plans
             </h2>
             <p className="text-lg mt-1" style={{ color: theme.textSecondary }}>
               Manage your daily menu schedules
@@ -299,67 +312,124 @@ const DailyMenus = () => {
       {/* Create Menu Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" style={{ backgroundColor: theme.panels }}>
-            <div className="sticky top-0 p-6 border-b" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+          <div
+            className="rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            style={{ backgroundColor: theme.panels }}
+          >
+            <div
+              className="sticky top-0 p-6 border-b"
+              style={{
+                backgroundColor: theme.panels,
+                borderColor: theme.border,
+              }}
+            >
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold" style={{ color: theme.primary }}>Create New Daily Menu</h2>
-                <button onClick={() => setShowCreateModal(false)} className="text-2xl hover:opacity-70" style={{ color: theme.error }}>
+                <h2
+                  className="text-2xl font-bold"
+                  style={{ color: theme.primary }}
+                >
+                  Create New Daily Menu
+                </h2>
+                <button
+                  onClick={() => setShowCreateModal(false)}
+                  className="text-2xl hover:opacity-70"
+                  style={{ color: theme.error }}
+                >
                   <FaTimes />
                 </button>
               </div>
               {/* Debug Info */}
-              <div className="mt-2 text-sm" style={{ color: theme.textSecondary }}>
+              <div
+                className="mt-2 text-sm"
+                style={{ color: theme.textSecondary }}
+              >
                 Menu Items Available: {menuItems.length}
               </div>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Menu Name *</label>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: theme.text }}
+                  >
+                    Menu Name *
+                  </label>
                   <input
                     type="text"
                     name="name"
                     value={newMenuData.name}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border rounded-lg"
-                    style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
                     placeholder="e.g., North Indian Thali"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Date *</label>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: theme.text }}
+                  >
+                    Date *
+                  </label>
                   <input
                     type="date"
                     name="date"
                     value={newMenuData.date}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border rounded-lg"
-                    style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Full Dabba Price *</label>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: theme.text }}
+                  >
+                    Full Dabba Price *
+                  </label>
                   <input
                     type="number"
                     name="full_dabba_price"
                     value={newMenuData.full_dabba_price}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border rounded-lg"
-                    style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
                     placeholder="120"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Max Dabbas *</label>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: theme.text }}
+                  >
+                    Max Dabbas *
+                  </label>
                   <input
                     type="number"
                     name="max_dabbas"
                     value={newMenuData.max_dabbas}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border rounded-lg"
-                    style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
                     placeholder="50"
                   />
                 </div>
@@ -367,13 +437,22 @@ const DailyMenus = () => {
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Description</label>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: theme.text }}
+                >
+                  Description
+                </label>
                 <textarea
                   name="description"
                   value={newMenuData.description}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg h-20"
-                  style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                  style={{
+                    backgroundColor: theme.background,
+                    borderColor: theme.border,
+                    color: theme.text,
+                  }}
                   placeholder="Brief description of today's menu..."
                 />
               </div>
@@ -381,13 +460,22 @@ const DailyMenus = () => {
               {/* Additional Fields */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Cooking Style</label>
+                  <label
+                    className="block text-sm font-medium mb-2"
+                    style={{ color: theme.text }}
+                  >
+                    Cooking Style
+                  </label>
                   <select
                     name="cooking_style"
                     value={newMenuData.cooking_style}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border rounded-lg"
-                    style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                    style={{
+                      backgroundColor: theme.background,
+                      borderColor: theme.border,
+                      color: theme.text,
+                    }}
                   >
                     <option value="">Select Style</option>
                     <option value="Traditional">Traditional</option>
@@ -422,14 +510,23 @@ const DailyMenus = () => {
 
               {/* Today's Special */}
               <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.text }}>Today's Special</label>
+                <label
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: theme.text }}
+                >
+                  Today's Special
+                </label>
                 <input
                   type="text"
                   name="todays_special"
                   value={newMenuData.todays_special}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border rounded-lg"
-                  style={{ backgroundColor: theme.background, borderColor: theme.border, color: theme.text }}
+                  style={{
+                    backgroundColor: theme.background,
+                    borderColor: theme.border,
+                    color: theme.text,
+                  }}
                   placeholder="What's special about today's menu?"
                 />
               </div>
@@ -437,38 +534,60 @@ const DailyMenus = () => {
               {/* Menu Items Selection */}
               {menuItems.length > 0 ? (
                 <div>
-                  <h3 className="text-lg font-semibold mb-4" style={{ color: theme.primary }}>Select Menu Items</h3>
-                  
+                  <h3
+                    className="text-lg font-semibold mb-4"
+                    style={{ color: theme.primary }}
+                  >
+                    Select Menu Items
+                  </h3>
+
                   {/* Main Items */}
                   <div className="mb-6">
-                    <h4 className="font-medium mb-3" style={{ color: theme.text }}>
+                    <h4
+                      className="font-medium mb-3"
+                      style={{ color: theme.text }}
+                    >
                       Main Items ({newMenuData.main_items.length} selected)
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {menuItems.map(item => (
-                        <label 
-                          key={item._id} 
-                          className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:opacity-80" 
-                          style={{ 
-                            backgroundColor: newMenuData.main_items.includes(item._id) ? `${theme.primary}20` : theme.background, 
-                            borderColor: theme.border 
+                      {menuItems.map((item) => (
+                        <label
+                          key={item._id}
+                          className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:opacity-80"
+                          style={{
+                            backgroundColor: newMenuData.main_items.includes(
+                              item._id
+                            )
+                              ? `${theme.primary}20`
+                              : theme.background,
+                            borderColor: theme.border,
                           }}
                         >
                           <input
                             type="checkbox"
                             checked={newMenuData.main_items.includes(item._id)}
-                            onChange={() => handleItemSelection(item._id, 'main_items')}
+                            onChange={() =>
+                              handleItemSelection(item._id, "main_items")
+                            }
                             className="rounded"
                           />
                           <div className="flex-1">
-                            <span className="text-sm font-medium" style={{ color: theme.text }}>
+                            <span
+                              className="text-sm font-medium"
+                              style={{ color: theme.text }}
+                            >
                               {item.name}
                             </span>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ₹{item.price}
                               </span>
-                              {item.is_vegetarian && <FaLeaf className="text-green-500 text-xs" />}
+                              {item.is_vegetarian && (
+                                <FaLeaf className="text-green-500 text-xs" />
+                              )}
                             </div>
                           </div>
                         </label>
@@ -478,34 +597,51 @@ const DailyMenus = () => {
 
                   {/* Side Items */}
                   <div className="mb-6">
-                    <h4 className="font-medium mb-3" style={{ color: theme.text }}>
+                    <h4
+                      className="font-medium mb-3"
+                      style={{ color: theme.text }}
+                    >
                       Side Items ({newMenuData.side_items.length} selected)
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {menuItems.map(item => (
-                        <label 
-                          key={item._id} 
-                          className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:opacity-80" 
-                          style={{ 
-                            backgroundColor: newMenuData.side_items.includes(item._id) ? `${theme.primary}20` : theme.background, 
-                            borderColor: theme.border 
+                      {menuItems.map((item) => (
+                        <label
+                          key={item._id}
+                          className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:opacity-80"
+                          style={{
+                            backgroundColor: newMenuData.side_items.includes(
+                              item._id
+                            )
+                              ? `${theme.primary}20`
+                              : theme.background,
+                            borderColor: theme.border,
                           }}
                         >
                           <input
                             type="checkbox"
                             checked={newMenuData.side_items.includes(item._id)}
-                            onChange={() => handleItemSelection(item._id, 'side_items')}
+                            onChange={() =>
+                              handleItemSelection(item._id, "side_items")
+                            }
                             className="rounded"
                           />
                           <div className="flex-1">
-                            <span className="text-sm font-medium" style={{ color: theme.text }}>
+                            <span
+                              className="text-sm font-medium"
+                              style={{ color: theme.text }}
+                            >
                               {item.name}
                             </span>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ₹{item.price}
                               </span>
-                              {item.is_vegetarian && <FaLeaf className="text-green-500 text-xs" />}
+                              {item.is_vegetarian && (
+                                <FaLeaf className="text-green-500 text-xs" />
+                              )}
                             </div>
                           </div>
                         </label>
@@ -515,34 +651,51 @@ const DailyMenus = () => {
 
                   {/* Extras */}
                   <div className="mb-6">
-                    <h4 className="font-medium mb-3" style={{ color: theme.text }}>
+                    <h4
+                      className="font-medium mb-3"
+                      style={{ color: theme.text }}
+                    >
                       Extras ({newMenuData.extras.length} selected)
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {menuItems.map(item => (
-                        <label 
-                          key={item._id} 
-                          className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:opacity-80" 
-                          style={{ 
-                            backgroundColor: newMenuData.extras.includes(item._id) ? `${theme.primary}20` : theme.background, 
-                            borderColor: theme.border 
+                      {menuItems.map((item) => (
+                        <label
+                          key={item._id}
+                          className="flex items-center space-x-2 p-2 rounded border cursor-pointer hover:opacity-80"
+                          style={{
+                            backgroundColor: newMenuData.extras.includes(
+                              item._id
+                            )
+                              ? `${theme.primary}20`
+                              : theme.background,
+                            borderColor: theme.border,
                           }}
                         >
                           <input
                             type="checkbox"
                             checked={newMenuData.extras.includes(item._id)}
-                            onChange={() => handleItemSelection(item._id, 'extras')}
+                            onChange={() =>
+                              handleItemSelection(item._id, "extras")
+                            }
                             className="rounded"
                           />
                           <div className="flex-1">
-                            <span className="text-sm font-medium" style={{ color: theme.text }}>
+                            <span
+                              className="text-sm font-medium"
+                              style={{ color: theme.text }}
+                            >
                               {item.name}
                             </span>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs" style={{ color: theme.textSecondary }}>
+                              <span
+                                className="text-xs"
+                                style={{ color: theme.textSecondary }}
+                              >
                                 ₹{item.price}
                               </span>
-                              {item.is_vegetarian && <FaLeaf className="text-green-500 text-xs" />}
+                              {item.is_vegetarian && (
+                                <FaLeaf className="text-green-500 text-xs" />
+                              )}
                             </div>
                           </div>
                         </label>
@@ -551,19 +704,32 @@ const DailyMenus = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8" style={{ color: theme.textSecondary }}>
+                <div
+                  className="text-center py-8"
+                  style={{ color: theme.textSecondary }}
+                >
                   <FaUtensils className="text-4xl mx-auto mb-4 opacity-30" />
-                  <p>No menu items found. Please create some menu items first.</p>
-                  <p className="text-sm mt-2">Go to Menu Items tab to add food items.</p>
+                  <p>
+                    No menu items found. Please create some menu items first.
+                  </p>
+                  <p className="text-sm mt-2">
+                    Go to Menu Items tab to add food items.
+                  </p>
                 </div>
               )}
 
               {/* Actions */}
-              <div className="flex justify-end space-x-4 pt-6 border-t" style={{ borderColor: theme.border }}>
+              <div
+                className="flex justify-end space-x-4 pt-6 border-t"
+                style={{ borderColor: theme.border }}
+              >
                 <button
                   onClick={() => setShowCreateModal(false)}
                   className="px-6 py-2 rounded-lg font-medium border"
-                  style={{ borderColor: theme.border, color: theme.textSecondary }}
+                  style={{
+                    borderColor: theme.border,
+                    color: theme.textSecondary,
+                  }}
                   disabled={createLoading}
                 >
                   Cancel
@@ -617,7 +783,7 @@ const DailyMenus = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {menus.map((menu) => (
             <div
-              key={menu.id || menu._id}
+              key={menu._id}
               className="rounded-2xl border p-6 transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg"
               style={{
                 backgroundColor: theme.panels,
@@ -636,7 +802,14 @@ const DailyMenus = () => {
                     {menu.name}
                   </h3>
                   <p className="text-sm" style={{ color: theme.textSecondary }}>
-                    {format(new Date(menu.date), "PPP")}
+                    {menu.date
+                      ? new Date(menu.date).toLocaleDateString("en-IN", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "No date"}
                   </p>
                 </div>
                 <span
@@ -781,7 +954,7 @@ const DailyMenus = () => {
                     }}
                     onClick={() => {
                       const newStatus = !menu.is_active;
-                      updateDailyMenu(menu.id || menu._id, {
+                      updateDailyMenu(menu._id, {
                         is_active: newStatus,
                       });
                     }}
