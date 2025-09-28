@@ -1,46 +1,271 @@
 import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
-import { getAuthHeaders, handleApiError } from "../../utils/api";
-import { FaGem, FaUsers, FaRupeeSign, FaUtensils } from "react-icons/fa";
-import Footer from "../../components/Footer";
+import { useTheme } from "../../context/ThemeContext";
+import MenuItems from "./MenuItems";
+import DailyMenus from "./DailyMenus";
+import { 
+  FaSun, 
+  FaMoon, 
+  FaCheckCircle, 
+  FaTimesCircle, 
+  FaLeaf, 
+  FaFire, 
+  FaClock, 
+  FaRupeeSign,
+  FaUsers,
+  FaShoppingBag,
+  FaUtensils,
+  FaChartLine,
+  FaHome,
+  FaBoxes,
+  FaCalendarAlt,
+  FaCog,
+  FaSignOutAlt,
+  FaBell
+} from "react-icons/fa";
+import { 
+  MdDeliveryDining, 
+  MdRestaurant, 
+  MdFoodBank,
+  MdDashboard 
+} from "react-icons/md";
+import { 
+  GiIndianPalace, 
+  GiHotMeal, 
+  GiCookingPot 
+} from "react-icons/gi";
+import { IoFastFood } from "react-icons/io5";
+import { FiUser, FiStar, FiTrendingUp } from "react-icons/fi";
+import { BsBoxSeam } from "react-icons/bs";
 
+// Dashboard Overview Component
+const DashboardOverview = ({ theme, dashboardData, vendorInfo }) => {
+  const quickStats = [
+    {
+      title: 'Total Orders',
+      value: dashboardData?.totalOrders || 0,
+      change: '+12%',
+      icon: FaShoppingBag,
+      color: theme.primary,
+      bg: `${theme.primary}15`
+    },
+    {
+      title: 'Active Customers',
+      value: dashboardData?.activeCustomers || 0,
+      change: '+8%',
+      icon: FaUsers,
+      color: theme.success,
+      bg: `${theme.success}15`
+    },
+    {
+      title: 'Revenue',
+      value: `₹${dashboardData?.revenue?.toLocaleString() || 0}`,
+      change: '+15%',
+      icon: FaRupeeSign,
+      color: theme.warning,
+      bg: `${theme.warning}15`
+    },
+    {
+      title: 'Menu Items',
+      value: dashboardData?.totalMenuItems || 0,
+      change: `${dashboardData?.outOfStockItems || 0} out`,
+      icon: FaUtensils,
+      color: theme.secondary,
+      bg: `${theme.secondary}15`
+    }
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div>
+        <h2 className="text-3xl font-bold mb-2" style={{ color: theme.text }}>
+          Welcome back, {vendorInfo?.first_name || vendorInfo?.username}! 👨‍🍳
+        </h2>
+        <p className="text-lg" style={{ color: theme.textSecondary }}>
+          Here's your kitchen overview for today
+        </p>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {quickStats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <div
+              key={index}
+              className="p-6 rounded-2xl border transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg"
+              style={{ 
+                backgroundColor: theme.panels,
+                borderColor: theme.border
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: stat.bg }}
+                >
+                  <Icon size={24} style={{ color: stat.color }} />
+                </div>
+                <FiTrendingUp 
+                  size={16} 
+                  style={{ color: theme.success }}
+                />
+              </div>
+              <h3 
+                className="text-sm font-medium mb-1"
+                style={{ color: theme.textSecondary }}
+              >
+                {stat.title}
+              </h3>
+              <p 
+                className="text-2xl font-bold mb-1"
+                style={{ color: theme.text }}
+              >
+                {stat.value}
+              </p>
+              <p 
+                className="text-xs"
+                style={{ color: theme.success }}
+              >
+                {stat.change}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Business Info and Recent Orders Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Kitchen Info */}
+        <div className="rounded-2xl border p-6" 
+          style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+          <h3 className="text-xl font-bold mb-6 flex items-center" style={{ color: theme.text }}>
+            <MdRestaurant className="mr-3" style={{ color: theme.primary }} /> 
+            Your Kitchen
+          </h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-4 rounded-xl transition-all duration-200" 
+              style={{ backgroundColor: theme.background }}>
+              <span className="font-medium" style={{ color: theme.textSecondary }}>Business</span>
+              <span className="font-semibold" style={{ color: theme.text }}>
+                {vendorInfo?.kitchen_name || "Not Set"}
+              </span>
+            </div>
+            <div className="flex justify-between items-center p-4 rounded-xl transition-all duration-200" 
+              style={{ backgroundColor: theme.background }}>
+              <span className="font-medium" style={{ color: theme.textSecondary }}>Owner</span>
+              <span className="font-semibold" style={{ color: theme.text }}>
+                {vendorInfo?.first_name} {vendorInfo?.last_name}
+              </span>
+            </div>
+            <div className="flex justify-between items-center p-4 rounded-xl transition-all duration-200" 
+              style={{ backgroundColor: theme.background }}>
+              <span className="font-medium" style={{ color: theme.textSecondary }}>Verification</span>
+              <div className="flex items-center gap-2">
+                {vendorInfo?.is_verified ? (
+                  <>
+                    <FaCheckCircle style={{ color: theme.success }} />
+                    <span style={{ color: theme.success }}>Verified</span>
+                  </>
+                ) : (
+                  <>
+                    <FaClock style={{ color: theme.warning }} />
+                    <span style={{ color: theme.warning }}>Pending</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Orders */}
+        <div className="rounded-2xl border p-6"
+          style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+          <h3 className="text-xl font-bold mb-6 flex items-center" style={{ color: theme.text }}>
+            <BsBoxSeam className="mr-3" style={{ color: theme.primary }} /> 
+            Recent Orders
+          </h3>
+          <div className="space-y-4 max-h-64 overflow-y-auto">
+            {dashboardData?.recentOrders?.length > 0 ? (
+              dashboardData.recentOrders.map((order) => (
+                <div key={order.id} 
+                  className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 hover:transform hover:scale-102"
+                  style={{ backgroundColor: theme.background }}>
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: `${theme.primary}15` }}
+                  >
+                    <IoFastFood size={20} style={{ color: theme.primary }} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold" style={{ color: theme.text }}>
+                      {order.customer_name}
+                    </h4>
+                    <p className="text-sm" style={{ color: theme.textSecondary }}>
+                      Order #{order.id}
+                    </p>
+                    <p className="text-xs" style={{ color: theme.textSecondary }}>
+                      {new Date(order.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold" style={{ color: theme.success }}>
+                      ₹{order.total_amount}
+                    </p>
+                    <span className="text-xs px-2 py-1 rounded-full"
+                      style={{
+                        backgroundColor: `${theme.warning}15`,
+                        color: theme.warning
+                      }}>
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8" style={{ color: theme.textSecondary }}>
+                No recent orders found
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Orders Component (placeholder)
+const OrdersComponent = ({ theme }) => (
+  <div className="p-6 rounded-2xl border" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+    <h2 style={{ color: theme.text }}>Orders Management</h2>
+    <p style={{ color: theme.textSecondary }}>This is where you'll manage all your orders. Coming soon!</p>
+  </div>
+);
+
+// Analytics Component (placeholder)
+const AnalyticsComponent = ({ theme }) => (
+  <div className="p-6 rounded-2xl border" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+    <h2 style={{ color: theme.text }}>Analytics Dashboard</h2>
+    <p style={{ color: theme.textSecondary }}>View your business analytics and insights here. Coming soon!</p>
+  </div>
+);
+
+// Settings Component (placeholder)
+const SettingsComponent = ({ theme }) => (
+  <div className="p-6 rounded-2xl border" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+    <h2 style={{ color: theme.text }}>Vendor Settings</h2>
+    <p style={{ color: theme.textSecondary }}>Manage your vendor settings and preferences. Coming soon!</p>
+  </div>
+);
+
+// Main Vendor Dashboard Component
 const VendorDashboard = () => {
-  // const { isDarkMode, theme } = useTheme();
-  const [showOverview, setShowOverview] = useState(false);
   const { vendor, logout } = useVendorAuth();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { isDarkMode, toggleTheme, theme } = useTheme();
+  const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState(null);
-
-  // Theme matching VendorMenuManager
-  const [isDarkMode] = useState(() => {
-    const saved = localStorage.getItem("darkMode");
-    return saved ? JSON.parse(saved) : false;
-  });
-
-  const theme = isDarkMode ? {
-    background: "#121212",
-    panels: "#1D1D1D",
-    primary: "#00BCD4",
-    secondary: "#64FFDA",
-    text: "#E0E0E0",
-    textSecondary: "#BDBDBD",
-    border: "#333333",
-    error: "#FF5555",
-    success: "#69F0AE",
-    warning: "#FFEA00",
-  } : {
-    background: "#FFFFFF",
-    panels: "#F2F4F7",
-    primary: "#144640",
-    secondary: "#607D8B",
-    text: "#212121",
-    textSecondary: "#757575",
-    border: "#E0E0E0",
-    error: "#D32F2F",
-    success: "#144640",
-    warning: "#FBC02D",
-  };
+  const [loading, setLoading] = useState(true);
 
   const getVendorAuthHeaders = () => {
     const token = localStorage.getItem('vendor_token');
@@ -48,26 +273,8 @@ const VendorDashboard = () => {
   };
 
   useEffect(() => {
-    fetchProfile();
     fetchDashboardData();
   }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/api/vendor/profile/`,
-        { headers: getVendorAuthHeaders() }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data.user);
-      }
-    } catch (error) {
-      console.error("Failed to fetch vendor profile:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const fetchDashboardData = async () => {
     try {
@@ -87,330 +294,149 @@ const VendorDashboard = () => {
     }
   };
 
+  const sidebarItems = [
+    { id: 'overview', label: 'Dashboard', icon: FaHome, component: <DashboardOverview theme={theme} dashboardData={dashboardData} vendorInfo={vendor} /> },
+    { id: 'menu-items', label: 'Manage Dishes', icon: IoFastFood, component: <MenuItems /> },
+    { id: 'daily-menus', label: 'Daily Tiffins', icon: MdFoodBank, component: <DailyMenus /> },
+    { id: 'orders', label: 'Orders', icon: FaBoxes, component: <OrdersComponent theme={theme} /> },
+    { id: 'analytics', label: 'Analytics', icon: FaChartLine, component: <AnalyticsComponent theme={theme} /> },
+    { id: 'settings', label: 'Settings', icon: FaCog, component: <SettingsComponent theme={theme} /> },
+  ];
+
+  const activeItem = sidebarItems.find(item => item.id === activeTab);
+  const ActiveComponent = activeItem?.component || <div>Component not found</div>;
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: theme.background }}>
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4" 
-            style={{ borderColor: theme.primary }}></div>
-          <div className="text-lg" style={{ color: theme.text }}>Loading dashboard...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.background }}>
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: theme.primary }}></div>
+          <div className="text-xl font-semibold" style={{ color: theme.text }}>Loading...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <>
-    <div className="min-h-screen" style={{ background: theme.background }}>
-      {/* Floating Info Icon */}
-      <button
-        onClick={() => setShowOverview(true)}
-        className="fixed bottom-8 right-8 z-50 p-4 rounded-full shadow-lg border-2 flex items-center justify-center backdrop-blur-md hover:scale-110 transition-all"
-        style={{
-          backgroundColor: `${theme.panels}95`,
-          borderColor: theme.primary,
-          color: theme.primary,
-        }}
-        aria-label="Show Page Overview"
-      >
-        <FaGem style={{ fontSize: '2rem' }} />
-      </button>
-
-      {/* Page Overview Modal */}
-      {showOverview && (
-        <div
-          id="overview-modal-bg"
-          className="fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-lg"
-          style={{
-            background: isDarkMode
-              ? 'rgba(20, 20, 20, 0.25)'
-              : 'rgba(255, 255, 255, 0.25)',
-            transition: 'background 0.3s',
-          }}
-          onClick={e => { if (e.target.id === 'overview-modal-bg') setShowOverview(false); }}
-        >
-          <div
-            className="relative max-w-lg w-full mx-4 rounded-2xl border-2 shadow-2xl overflow-hidden"
-            style={{
-              borderColor: theme.primary,
-              fontFamily: 'Merriweather, serif',
-              background: isDarkMode
-                ? 'linear-gradient(135deg, #18181b 0%, #23272f 100%)'
-                : 'linear-gradient(135deg, #f8fafc 0%, #f3f4f6 100%)',
-              boxShadow: isDarkMode
-                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30`
-                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60`,
-              transition: 'background 0.3s, box-shadow 0.3s',
-            }}
-            onMouseMove={e => {
-              const card = e.currentTarget;
-              const rect = card.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              const centerX = rect.width / 2;
-              const centerY = rect.height / 2;
-              const rotateX = ((y - centerY) / centerY) * 10;
-              const rotateY = ((x - centerX) / centerX) * -10;
-              card.style.transform = `perspective(900px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
-              card.style.boxShadow = isDarkMode
-                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30, 0 0 32px 8px ${theme.primary}60`
-                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60, 0 0 32px 8px ${theme.primary}80`;
-            }}
-            onMouseLeave={e => {
-              const card = e.currentTarget;
-              card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg)';
-              card.style.boxShadow = isDarkMode
-                ? `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}30`
-                : `0 0 32px 0 ${theme.primary}40, 0 0 0 4px ${theme.primary}60`;
-            }}
-          >
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              pointerEvents: 'none',
-              zIndex: 0,
-              background: isDarkMode
-                ? `radial-gradient(circle at 80% 20%, ${theme.primary}30 0%, transparent 60%), radial-gradient(circle at 20% 80%, ${theme.secondary}20 0%, transparent 60%)`
-                : `radial-gradient(circle at 80% 20%, ${theme.primary}40 0%, transparent 60%), radial-gradient(circle at 20% 80%, ${theme.secondary}30 0%, transparent 60%)`
-            }} />
-            <button
-              onClick={() => setShowOverview(false)}
-              className="absolute top-4 right-4 text-2xl p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all z-10"
-              style={{ color: theme.primary }}
-              aria-label="Close Overview"
-            >
-              &times;
-            </button>
-            <div className="flex items-center gap-3 mb-2 pt-8 px-8 z-10">
-              <FaGem style={{ color: theme.primary, fontSize: '1.5rem' }} />
-              <h2 className="text-2xl font-bold" style={{ color: theme.primary, fontFamily: 'Playfair Display, serif', letterSpacing: '0.5px' }}>Page Overview</h2>
-            </div>
-            <div className="px-8 pb-8 z-10">
-              <p className="text-base mb-2" style={{ color: theme.text, fontFamily: 'Merriweather, serif' }}>
-                Welcome to your Vendor Dashboard! Here you can view business stats, manage menu items, track orders, and access quick actions. All features are designed for a premium, efficient vendor experience.
-              </p>
-              <ul className="list-disc pl-6" style={{ color: theme.textSecondary, fontFamily: 'Merriweather, serif' }}>
-                <li>Monitor orders, customers, and revenue at a glance</li>
-                <li>Access business information and recent orders</li>
-                <li>Use quick actions for fast management</li>
-                <li>Enjoy a premium UI in both light and dark mode</li>
-              </ul>
-            </div>
-            {/* Glowing border effect */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              borderRadius: '1.25rem',
-              pointerEvents: 'none',
-              zIndex: 1,
-              boxShadow: isDarkMode
-                ? `0 0 32px 8px ${theme.primary}60`
-                : `0 0 32px 8px ${theme.primary}80`,
-              border: `2px solid ${theme.primary}`,
-              opacity: 0.7,
-            }} />
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen transition-all duration-300" style={{ backgroundColor: theme.background }}>
       {/* Header */}
-      <header className="bg-[#161B22] border-b border-[#21262D]">
+      <header className="border-b sticky top-0 z-40 backdrop-blur-md"
+        style={{ 
+          backgroundColor: `${theme.panels}95`,
+          borderColor: theme.border 
+        }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-[#F97316]">
+            <div className="flex items-center space-x-4">
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: theme.primary }}>
+                <GiCookingPot size={24} color="white" />
+              </div>
+              <h1 className="text-2xl font-bold" style={{ color: theme.text }}>
                 NourishNet Vendor
               </h1>
             </div>
-            <div className="flex items-center gap-4">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold"
+
+            <div className="flex items-center space-x-4">
+              {/* Status Badge */}
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                 style={{
-                  background: vendor?.is_verified ? `${theme.success}15` : `${theme.warning}15`,
+                  backgroundColor: vendor?.is_verified ? `${theme.success}15` : `${theme.warning}15`,
                   color: vendor?.is_verified ? theme.success : theme.warning
                 }}>
                 {vendor?.is_verified ? "Verified" : "Pending Verification"}
               </span>
-              <button onClick={logout}
-                className="px-4 py-2 rounded-sm font-medium transition-all hover:opacity-90"
-                style={{ background: theme.error, color: '#fff' }}>
-                Logout
+
+              {/* Notifications */}
+              <button 
+                className="p-2 rounded-lg hover:opacity-80 transition-opacity relative"
+                style={{ 
+                  backgroundColor: theme.panels,
+                  color: theme.textSecondary 
+                }}
+              >
+                <FaBell size={20} />
+                <span 
+                  className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
+                  style={{ backgroundColor: theme.primary }}
+                ></span>
+              </button>
+
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-lg hover:opacity-80 transition-opacity"
+                style={{ 
+                  backgroundColor: theme.panels,
+                  color: theme.textSecondary 
+                }}>
+                {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
+              </button>
+
+              {/* Vendor Info */}
+              <div className="flex items-center space-x-3">
+                <div 
+                  className="w-8 h-8 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: theme.secondary }}
+                >
+                  <FiUser size={16} color="white" />
+                </div>
+                <span className="font-medium" style={{ color: theme.text }}>
+                  {vendor?.first_name || vendor?.username}
+                </span>
+              </div>
+
+              <button
+                onClick={logout}
+                className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
+                style={{ 
+                  backgroundColor: theme.error,
+                  color: 'white'
+                }}>
+                <FaSignOutAlt size={16} />
+                <span>Logout</span>
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h3 className="text-sm font-medium text-[#8B949E] mb-2">
-              Total Orders
-            </h3>
-            <p className="text-3xl font-bold text-[#F0F6FC]">
-              {dashboardData?.totalOrders || 0}
-            </p>
-            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-              Total Orders
-            </p>
-          </div>
+      <div className="flex">
+        {/* Sidebar */}
+        <aside className="w-64 min-h-screen border-r"
+          style={{ 
+            backgroundColor: theme.panels,
+            borderColor: theme.border 
+          }}>
+          <nav className="p-4 space-y-2">
+            {sidebarItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    isActive ? 'transform scale-105' : 'hover:transform hover:scale-102'
+                  }`}
+                  style={{
+                    backgroundColor: isActive ? theme.primary : 'transparent',
+                    color: isActive ? 'white' : theme.textSecondary
+                  }}>
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </aside>
 
-          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
-            style={{ background: theme.panels, borderLeft: `5px solid ${theme.success}`,
-              border: `1px solid ${theme.border}` }}>
-            <div className="flex items-center justify-between mb-3">
-              <FaUsers className="text-3xl" style={{ color: theme.success }} />
-              <span className="text-xs font-medium" style={{ color: theme.success }}>
-                {dashboardData?.customerChange || '+8%'}
-              </span>
-            </div>
-            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
-              {dashboardData?.activeCustomers || 0}
-            </h3>
-            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-              Active Customers
-            </p>
-          </div>
-
-          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
-            style={{ background: theme.panels, borderLeft: `5px solid ${theme.warning}`,
-              border: `1px solid ${theme.border}` }}>
-            <div className="flex items-center justify-between mb-3">
-              <FaRupeeSign className="text-3xl" style={{ color: theme.warning }} />
-              <span className="text-xs font-medium" style={{ color: theme.success }}>
-                {dashboardData?.revenueChange || '+15%'}
-              </span>
-            </div>
-            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
-              ₹{dashboardData?.revenue?.toLocaleString() || 0}
-            </h3>
-            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-              Revenue
-            </p>
-          </div>
-
-          <div className="rounded-sm shadow-md p-6 transition-all hover:scale-105"
-            style={{ background: theme.panels, borderLeft: `5px solid ${theme.secondary}`,
-              border: `1px solid ${theme.border}` }}>
-            <div className="flex items-center justify-between mb-3">
-              <FaUtensils className="text-3xl" style={{ color: theme.secondary }} />
-              <span className="text-xs font-medium" style={{ color: theme.warning }}>
-                {dashboardData?.outOfStockItems || 0} out
-              </span>
-            </div>
-            <h3 className="text-2xl font-bold mb-1" style={{ color: theme.text }}>
-              {dashboardData?.totalMenuItems || 0}
-            </h3>
-            <p className="text-sm uppercase tracking-wide" style={{ color: theme.textSecondary }}>
-              Menu Items
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Business Details */}
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
-              Business Information
-            </h2>
-            <div className="space-y-4">
-              {[
-                { label: "Kitchen Name", value: vendor?.kitchen_name },
-                { label: "Owner", value: `${vendor?.first_name} ${vendor?.last_name}` },
-                { label: "Phone", value: vendor?.phone_number },
-                { label: "License", value: vendor?.license_number },
-                { label: "Address", value: vendor?.address }
-              ].map((item, index) => (
-                <div key={index} className="flex justify-between items-center p-3 rounded"
-                  style={{ background: theme.background, border: `1px solid ${theme.border}` }}>
-                  <span className="font-medium" style={{ color: theme.textSecondary }}>{item.label}</span>
-                  <span className="font-semibold text-right" style={{ color: theme.text }}>
-                    {item.value || "Not Set"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Recent Orders */}
-          <div className="bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
-              Recent Orders
-            </h2>
-            <div className="space-y-3 max-h-64 overflow-y-auto">
-              {dashboardData?.recentOrders?.length > 0 ? (
-                dashboardData.recentOrders.map((order) => (
-                  <div key={order.id} className="p-3 rounded border-l-4 transition-all hover:scale-[1.01]"
-                    style={{ 
-                      background: theme.background,
-                      borderColor: theme.primary,
-                      borderRight: `1px solid ${theme.border}`,
-                      borderTop: `1px solid ${theme.border}`,
-                      borderBottom: `1px solid ${theme.border}`
-                    }}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="font-semibold" style={{ color: theme.text }}>
-                          {order.customer_name}
-                        </p>
-                        <p className="text-xs" style={{ color: theme.textSecondary }}>
-                          {new Date(order.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold" style={{ color: theme.success }}>
-                          ₹{order.total_amount}
-                        </p>
-                        <span className="text-xs px-2 py-1 rounded"
-                          style={{
-                            background: `${theme.warning}20`,
-                            color: theme.warning
-                          }}>
-                          {order.status}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8" style={{ color: theme.textSecondary }}>
-                  No recent orders found
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mt-8 bg-[#161B22] border border-[#21262D] rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-[#F0F6FC] mb-4">
-            Quick Actions
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
-              style={{ background: theme.primary, color: '#fff' }}>
-              Add Menu Item
-            </button>
-            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
-              style={{ background: theme.success, color: '#fff' }}>
-              View Orders
-            </button>
-            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
-              style={{ background: theme.secondary, color: '#fff' }}>
-              Manage Customers
-            </button>
-            <button className="px-6 py-3 rounded-sm font-semibold transition-all hover:opacity-90"
-              style={{ background: theme.warning, color: isDarkMode ? '#000' : '#fff' }}>
-              View Analytics
-            </button>
-          </div>
-        </div>
-      </main>
+        {/* Main Content */}
+        <main className="flex-1 p-6">
+          {ActiveComponent}
+        </main>
+      </div>
     </div>
-    
-    {/* Premium Footer */}
-    <Footer variant="simple" />
-    </>
   );
 };
 

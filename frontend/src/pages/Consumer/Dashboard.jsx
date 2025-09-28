@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import Footer from '../../components/Footer';
+import OrderForm from '../../components/OrderForm';
+import SubscriptionManagement from '../../components/SuscriptionForm';
 import { 
   FiSun, 
   FiMoon, 
@@ -18,12 +19,8 @@ import {
   FiHeart,
   FiMapPin,
   FiBell,
-  FiStar,
-  FiRotateCcw
+  FiStar
 } from 'react-icons/fi';
-import { FaMicrophone } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import ConsumerChatbot from '../../components/ConsumerChatbot';
 import { 
   MdRestaurant, 
   MdDeliveryDining,
@@ -36,100 +33,8 @@ import {
   BsPiggyBank
 } from 'react-icons/bs';
 
-const Dashboard = () => {
-  const { user, logout } = useAuth();
-  const { isDarkMode, toggleTheme, theme } = useTheme();
-  const navigate = useNavigate();
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [isCardFlipped, setIsCardFlipped] = useState(false);
-  const [listening, setListening] = useState(false);
-  const recognitionRef = React.useRef(null);
-
-  useEffect(() => {
-    fetchProfile();
-    
-    // Setup voice recognition
-    if ('webkitSpeechRecognition' in window) {
-      recognitionRef.current = new window.webkitSpeechRecognition();
-      recognitionRef.current.continuous = false;
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.lang = 'en-US';
-      
-      recognitionRef.current.onresult = (event) => {
-        const transcript = event.results[0][0].transcript.toLowerCase();
-        handleVoiceCommand(transcript);
-      };
-      
-      recognitionRef.current.onend = () => {
-        setListening(false);
-      };
-    }
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile/`, {
-        credentials: 'include',
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setProfile(data.user);
-      }
-    } catch (error) {
-      console.error('Failed to fetch profile:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-  };
-
-  const handleVoiceCommand = (transcript) => {
-    if (transcript.includes('menu')) {
-      navigate('/consumer/menu');
-    } else if (transcript.includes('dashboard')) {
-      navigate('/consumer/dashboard');
-    } else if (transcript.includes('payments')) {
-      navigate('/consumer/payments');
-    } else if (transcript.includes('nutrition')) {
-      navigate('/consumer/nutritioninsights');
-    }
-  };
-
-  const handleVoiceStart = () => {
-    if (recognitionRef.current && !listening) {
-      setListening(true);
-      recognitionRef.current.start();
-    }
-  };
-
-  if (loading) {
-    return (
-      <div 
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: theme.background }}
-      >
-        <div className="flex flex-col items-center space-y-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: theme.primary }}></div>
-          <div className="text-xl font-semibold" style={{ color: theme.text }}>Loading...</div>
-        </div>
-      </div>
-    );
-  }
-
-  const sidebarItems = [
-    { id: 'overview', label: 'Overview', icon: FiHome },
-    { id: 'orders', label: 'My Orders', icon: BsBoxSeam },
-    { id: 'subscriptions', label: 'Subscriptions', icon: MdRestaurant },
-    { id: 'payments', label: 'Payments', icon: BsCreditCard },
-    { id: 'profile', label: 'Profile', icon: FiUser },
-    { id: 'settings', label: 'Settings', icon: FiSettings },
-  ];
-
+// Dummy Components - Replace these with your actual components
+const OverviewComponent = ({ profile, user, theme }) => {
   const quickStats = [
     {
       title: 'Active Orders',
@@ -211,7 +116,441 @@ const Dashboard = () => {
   ];
 
   return (
-    <>
+    <div className="space-y-6">
+      {/* Welcome Section */}
+      <div>
+        <h2 
+          className="text-3xl font-bold mb-2"
+          style={{ color: theme.text }}
+        >
+          Welcome back, {profile?.first_name || user?.username}! 🍽️
+        </h2>
+        <p 
+          className="text-lg"
+          style={{ color: theme.textSecondary }}
+        >
+          Here's what's happening with your tiffin subscriptions today.
+        </p>
+      </div>
+
+      {/* Quick Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {quickStats.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <div
+              key={index}
+              className="p-6 rounded-2xl border transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg"
+              style={{ 
+                backgroundColor: theme.panels,
+                borderColor: theme.border
+              }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: stat.bg }}
+                >
+                  <Icon size={24} style={{ color: stat.color }} />
+                </div>
+                <FiTrendingUp 
+                  size={16} 
+                  style={{ color: theme.success }}
+                />
+              </div>
+              <h3 
+                className="text-sm font-medium mb-1"
+                style={{ color: theme.textSecondary }}
+              >
+                {stat.title}
+              </h3>
+              <p 
+                className="text-2xl font-bold mb-1"
+                style={{ color: theme.text }}
+              >
+                {stat.value}
+              </p>
+              <p 
+                className="text-xs"
+                style={{ color: theme.success }}
+              >
+                {stat.change}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Orders */}
+        <div 
+          className="p-6 rounded-2xl border"
+          style={{ 
+            backgroundColor: theme.panels,
+            borderColor: theme.border
+          }}
+        >
+          <h3 
+            className="text-xl font-bold mb-6 flex items-center"
+            style={{ color: theme.text }}
+          >
+            <BsBoxSeam className="mr-3" style={{ color: theme.primary }} />
+            Recent Orders
+          </h3>
+          <div className="space-y-4">
+            {recentOrders.map((order, index) => {
+              const Icon = order.icon;
+              return (
+                <div
+                  key={index}
+                  className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 hover:transform hover:scale-102"
+                  style={{ backgroundColor: theme.background }}
+                >
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center"
+                    style={{ backgroundColor: `${theme.primary}15` }}
+                  >
+                    <Icon size={20} style={{ color: theme.primary }} />
+                  </div>
+                  <div className="flex-1">
+                    <h4 
+                      className="font-semibold"
+                      style={{ color: theme.text }}
+                    >
+                      {order.meal}
+                    </h4>
+                    <p 
+                      className="text-sm"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      {order.vendor}
+                    </p>
+                    <p 
+                      className="text-xs"
+                      style={{ color: theme.textSecondary }}
+                    >
+                      {order.time}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p 
+                      className="font-bold"
+                      style={{ color: theme.success }}
+                    >
+                      {order.price}
+                    </p>
+                    <span 
+                      className="text-xs px-2 py-1 rounded-full"
+                      style={{ 
+                        backgroundColor: `${theme.success}15`,
+                        color: theme.success 
+                      }}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Upcoming Deliveries */}
+        <div 
+          className="p-6 rounded-2xl border"
+          style={{ 
+            backgroundColor: theme.panels,
+            borderColor: theme.border
+          }}
+        >
+          <h3 
+            className="text-xl font-bold mb-6 flex items-center"
+            style={{ color: theme.text }}
+          >
+            <MdDeliveryDining className="mr-3" style={{ color: theme.secondary }} />
+            Today's Schedule
+          </h3>
+          <div className="space-y-4">
+            {upcomingDeliveries.map((delivery, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 hover:transform hover:scale-102"
+                style={{ backgroundColor: theme.background }}
+              >
+                <div 
+                  className="w-12 h-12 rounded-xl flex items-center justify-center"
+                  style={{ backgroundColor: `${theme.secondary}15` }}
+                >
+                  <FiClock size={20} style={{ color: theme.secondary }} />
+                </div>
+                <div className="flex-1">
+                  <h4 
+                    className="font-semibold"
+                    style={{ color: theme.text }}
+                  >
+                    {delivery.meal}
+                  </h4>
+                  <p 
+                    className="text-sm"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {delivery.vendor}
+                  </p>
+                  <p 
+                    className="text-xs"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    {delivery.time}
+                  </p>
+                </div>
+                <span 
+                  className="text-xs px-3 py-1 rounded-full font-medium"
+                  style={{ 
+                    backgroundColor: delivery.status === 'Preparing' ? `${theme.warning}15` : `${theme.primary}15`,
+                    color: delivery.status === 'Preparing' ? theme.warning : theme.primary
+                  }}
+                >
+                  {delivery.status}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const OrdersComponent = () => (
+  <div style={{ padding: '20px', backgroundColor: '#e8f5e9', borderRadius: '8px' }}>
+    <h2>Orders Component</h2>
+    <p>This is a dummy orders component. Replace with actual orders list.</p>
+  </div>
+);
+
+const SubscriptionsComponent = () => (
+  <div style={{ padding: '20px', backgroundColor: '#e3f2fd', borderRadius: '8px' }}>
+    <h2>Subscriptions Component</h2>
+    <p>This is a dummy subscriptions component. Replace with actual subscriptions.</p>
+  </div>
+);
+
+const PaymentsComponent = () => (
+  <div style={{ padding: '20px', backgroundColor: '#fce4ec', borderRadius: '8px' }}>
+    <h2>Payments Component</h2>
+    <p>This is a dummy payments component. Replace with actual payment history.</p>
+  </div>
+);
+
+const ProfileComponent = ({ profile, theme }) => {
+  if (!profile) {
+    return (
+      <div className="space-y-6">
+        <h2 
+          className="text-3xl font-bold"
+          style={{ color: theme.text }}
+        >
+          Profile Information
+        </h2>
+        <p style={{ color: theme.textSecondary }}>Loading profile information...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <h2 
+        className="text-3xl font-bold"
+        style={{ color: theme.text }}
+      >
+        Profile Information
+      </h2>
+      
+      <div 
+        className="p-8 rounded-2xl border max-w-2xl"
+        style={{ 
+          backgroundColor: theme.panels,
+          borderColor: theme.border
+        }}
+      >
+        <div className="flex items-center space-x-6 mb-8">
+          <div 
+            className="w-20 h-20 rounded-2xl flex items-center justify-center"
+            style={{ backgroundColor: theme.primary }}
+          >
+            <FiUser size={32} color="white" />
+          </div>
+          <div>
+            <h3 
+              className="text-2xl font-bold"
+              style={{ color: theme.text }}
+            >
+              {profile.first_name} {profile.last_name}
+            </h3>
+            <p 
+              className="text-lg"
+              style={{ color: theme.textSecondary }}
+            >
+              @{profile.username}
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <FiUser size={20} style={{ color: theme.textSecondary }} />
+              <div>
+                <p 
+                  className="text-sm font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Username
+                </p>
+                <p 
+                  className="font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  {profile.username}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <FiMail size={20} style={{ color: theme.textSecondary }} />
+              <div>
+                <p 
+                  className="text-sm font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Email
+                </p>
+                <p 
+                  className="font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  {profile.email}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center space-x-3">
+              <FiCalendar size={20} style={{ color: theme.textSecondary }} />
+              <div>
+                <p 
+                  className="text-sm font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Member Since
+                </p>
+                <p 
+                  className="font-semibold"
+                  style={{ color: theme.text }}
+                >
+                  {new Date(profile.date_joined).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <FiStar size={20} style={{ color: theme.textSecondary }} />
+              <div>
+                <p 
+                  className="text-sm font-medium"
+                  style={{ color: theme.textSecondary }}
+                >
+                  Account Status
+                </p>
+                <span 
+                  className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium"
+                  style={{ 
+                    backgroundColor: `${theme.success}15`,
+                    color: theme.success 
+                  }}
+                >
+                  Active Premium
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const SettingsComponent = () => (
+  <div style={{ padding: '20px', backgroundColor: '#fff3e0', borderRadius: '8px' }}>
+    <h2>Settings Component</h2>
+    <p>This is a dummy settings component. Replace with actual settings.</p>
+  </div>
+);
+
+const Dashboard = () => {
+  const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme, theme } = useTheme();
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('overview');
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile/`, {
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProfile(data.user);
+      }
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  if (loading) {
+    return (
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: theme.background }}
+      >
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: theme.primary }}></div>
+          <div className="text-xl font-semibold" style={{ color: theme.text }}>Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+ const sidebarItems = [
+  { id: 'overview', label: 'Overview', icon: FiHome, component: <OverviewComponent profile={profile} user={user} theme={theme} /> },
+  { id: 'orders', label: 'My Orders', icon: BsBoxSeam, component: <OrderForm user={user} theme={theme} /> },
+  { id: 'subscriptions', label: 'Subscriptions', icon: MdRestaurant, component: <SubscriptionManagement user={user} theme={theme} /> },
+  { id: 'payments', label: 'Payments', icon: BsCreditCard, component: <PaymentsComponent /> },
+  { id: 'profile', label: 'Profile', icon: FiUser, component: <ProfileComponent profile={profile} theme={theme} /> },
+  { id: 'settings', label: 'Settings', icon: FiSettings, component: <SettingsComponent /> },
+];
+
+  // Get the active component
+  const activeItem = sidebarItems.find(item => item.id === activeTab);
+  const ActiveComponent = activeItem?.component || <div>Component not found</div>;
+
+  return (
     <div 
       className="min-h-screen transition-all duration-300"
       style={{ backgroundColor: theme.background }}
@@ -336,446 +675,10 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6">
-          {activeTab === 'overview' && (
-            <div className="space-y-6 relative">
-              {/* Welcome Section */}
-              <div>
-                <h2 
-                  className="text-3xl font-bold mb-2"
-                  style={{ color: theme.text }}
-                >
-                  Welcome back, {profile?.first_name || user?.username}! 🍽️
-                </h2>
-                <p 
-                  className="text-lg"
-                  style={{ color: theme.textSecondary }}
-                >
-                  Here's what's happening with your tiffin subscriptions today.
-                </p>
-              </div>
-
-              {/* Flippable Page Overview Card */}
-              <div className="mt-4 mb-2 relative h-32 perspective-1000">
-                <div 
-                  className={`absolute inset-0 w-full h-full transition-transform duration-700 transform-style-preserve-3d ${
-                    isCardFlipped ? 'rotate-y-180' : ''
-                  }`}
-                >
-                  {/* Front Side - Page Overview */}
-                  <div 
-                    className="absolute inset-0 w-full h-full p-4 rounded-xl border backface-hidden flex items-center justify-between"
-                    style={{ backgroundColor: theme.panels, borderColor: theme.border }}
-                  >
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2" style={{ color: theme.text }}>Page Overview</h3>
-                      <ul className="list-disc ml-6 text-sm" style={{ color: theme.textSecondary }}>
-                        <li>Quick stats about your orders, savings, and favorite meals</li>
-                        <li>Recent orders and upcoming deliveries</li>
-                        <li>Use the voice icon at bottom for hands-free navigation</li>
-                      </ul>
-                    </div>
-                    <button
-                      onClick={() => setIsCardFlipped(!isCardFlipped)}
-                      className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                      style={{ backgroundColor: theme.primary, color: 'white' }}
-                      title="Flip to see routing info"
-                    >
-                      <FiRotateCcw size={20} />
-                    </button>
-                  </div>
-
-                  {/* Back Side - Voice Commands */}
-                  <div 
-                    className="absolute inset-0 w-full h-full p-4 rounded-xl border backface-hidden rotate-y-180 flex items-center justify-between"
-                    style={{ backgroundColor: theme.panels, borderColor: theme.border }}
-                  >
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-2" style={{ color: theme.primary }}>Voice Navigation Commands</h3>
-                      <div className="grid grid-cols-2 gap-2 text-sm" style={{ color: theme.textSecondary }}>
-                        <div><span className="font-semibold">"Go to menu"</span> - Navigate to Menu</div>
-                        <div><span className="font-semibold">"Go to dashboard"</span> - Back to Dashboard</div>
-                        <div><span className="font-semibold">"Go to payments"</span> - Open Payments</div>
-                        <div><span className="font-semibold">"Go to nutrition"</span> - Nutrition Insights</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setIsCardFlipped(!isCardFlipped)}
-                      className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                      style={{ backgroundColor: theme.primary, color: 'white' }}
-                      title="Flip to see overview"
-                    >
-                      <FiRotateCcw size={20} />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {quickStats.map((stat, index) => {
-                  const Icon = stat.icon;
-                  return (
-                    <div
-                      key={index}
-                      className="p-6 rounded-2xl border transition-all duration-200 hover:transform hover:scale-105 hover:shadow-lg"
-                      style={{ 
-                        backgroundColor: theme.panels,
-                        borderColor: theme.border
-                      }}
-                    >
-                      <div className="flex items-center justify-between mb-4">
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center"
-                          style={{ backgroundColor: stat.bg }}
-                        >
-                          <Icon size={24} style={{ color: stat.color }} />
-                        </div>
-                        <FiTrendingUp 
-                          size={16} 
-                          style={{ color: theme.success }}
-                        />
-                      </div>
-                      <h3 
-                        className="text-sm font-medium mb-1"
-                        style={{ color: theme.textSecondary }}
-                      >
-                        {stat.title}
-                      </h3>
-                      <p 
-                        className="text-2xl font-bold mb-1"
-                        style={{ color: theme.text }}
-                      >
-                        {stat.value}
-                      </p>
-                      <p 
-                        className="text-xs"
-                        style={{ color: theme.success }}
-                      >
-                        {stat.change}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Orders */}
-                <div 
-                  className="p-6 rounded-2xl border"
-                  style={{ 
-                    backgroundColor: theme.panels,
-                    borderColor: theme.border
-                  }}
-                >
-                  <h3 
-                    className="text-xl font-bold mb-6 flex items-center"
-                    style={{ color: theme.text }}
-                  >
-                    <BsBoxSeam className="mr-3" style={{ color: theme.primary }} />
-                    Recent Orders
-                  </h3>
-                  <div className="space-y-4">
-                    {recentOrders.map((order, index) => {
-                      const Icon = order.icon;
-                      return (
-                        <div
-                          key={index}
-                          className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 hover:transform hover:scale-102"
-                          style={{ backgroundColor: theme.background }}
-                        >
-                          <div 
-                            className="w-12 h-12 rounded-xl flex items-center justify-center"
-                            style={{ backgroundColor: `${theme.primary}15` }}
-                          >
-                            <Icon size={20} style={{ color: theme.primary }} />
-                          </div>
-                          <div className="flex-1">
-                            <h4 
-                              className="font-semibold"
-                              style={{ color: theme.text }}
-                            >
-                              {order.meal}
-                            </h4>
-                            <p 
-                              className="text-sm"
-                              style={{ color: theme.textSecondary }}
-                            >
-                              {order.vendor}
-                            </p>
-                            <p 
-                              className="text-xs"
-                              style={{ color: theme.textSecondary }}
-                            >
-                              {order.time}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p 
-                              className="font-bold"
-                              style={{ color: theme.success }}
-                            >
-                              {order.price}
-                            </p>
-                            <span 
-                              className="text-xs px-2 py-1 rounded-full"
-                              style={{ 
-                                backgroundColor: `${theme.success}15`,
-                                color: theme.success 
-                              }}
-                            >
-                              {order.status}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Upcoming Deliveries */}
-                <div 
-                  className="p-6 rounded-2xl border"
-                  style={{ 
-                    backgroundColor: theme.panels,
-                    borderColor: theme.border
-                  }}
-                >
-                  <h3 
-                    className="text-xl font-bold mb-6 flex items-center"
-                    style={{ color: theme.text }}
-                  >
-                    <MdDeliveryDining className="mr-3" style={{ color: theme.secondary }} />
-                    Today's Schedule
-                  </h3>
-                  <div className="space-y-4">
-                    {upcomingDeliveries.map((delivery, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center space-x-4 p-4 rounded-xl transition-all duration-200 hover:transform hover:scale-102"
-                        style={{ backgroundColor: theme.background }}
-                      >
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center"
-                          style={{ backgroundColor: `${theme.secondary}15` }}
-                        >
-                          <FiClock size={20} style={{ color: theme.secondary }} />
-                        </div>
-                        <div className="flex-1">
-                          <h4 
-                            className="font-semibold"
-                            style={{ color: theme.text }}
-                          >
-                            {delivery.meal}
-                          </h4>
-                          <p 
-                            className="text-sm"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            {delivery.vendor}
-                          </p>
-                          <p 
-                            className="text-xs"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            {delivery.time}
-                          </p>
-                        </div>
-                        <span 
-                          className="text-xs px-3 py-1 rounded-full font-medium"
-                          style={{ 
-                            backgroundColor: delivery.status === 'Preparing' ? `${theme.warning}15` : `${theme.primary}15`,
-                            color: delivery.status === 'Preparing' ? theme.warning : theme.primary
-                          }}
-                        >
-                          {delivery.status}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'profile' && (
-            <div className="space-y-6">
-              <h2 
-                className="text-3xl font-bold"
-                style={{ color: theme.text }}
-              >
-                Profile Information
-              </h2>
-              
-              <div 
-                className="p-8 rounded-2xl border max-w-2xl"
-                style={{ 
-                  backgroundColor: theme.panels,
-                  borderColor: theme.border
-                }}
-              >
-                <div className="flex items-center space-x-6 mb-8">
-                  <div 
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center"
-                    style={{ backgroundColor: theme.primary }}
-                  >
-                    <FiUser size={32} color="white" />
-                  </div>
-                  <div>
-                    <h3 
-                      className="text-2xl font-bold"
-                      style={{ color: theme.text }}
-                    >
-                      {profile?.first_name} {profile?.last_name}
-                    </h3>
-                    <p 
-                      className="text-lg"
-                      style={{ color: theme.textSecondary }}
-                    >
-                      @{profile?.username}
-                    </p>
-                  </div>
-                </div>
-
-                {profile && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <FiUser size={20} style={{ color: theme.textSecondary }} />
-                        <div>
-                          <p 
-                            className="text-sm font-medium"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            Username
-                          </p>
-                          <p 
-                            className="font-semibold"
-                            style={{ color: theme.text }}
-                          >
-                            {profile.username}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <FiMail size={20} style={{ color: theme.textSecondary }} />
-                        <div>
-                          <p 
-                            className="text-sm font-medium"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            Email
-                          </p>
-                          <p 
-                            className="font-semibold"
-                            style={{ color: theme.text }}
-                          >
-                            {profile.email}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <FiCalendar size={20} style={{ color: theme.textSecondary }} />
-                        <div>
-                          <p 
-                            className="text-sm font-medium"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            Member Since
-                          </p>
-                          <p 
-                            className="font-semibold"
-                            style={{ color: theme.text }}
-                          >
-                            {new Date(profile.date_joined).toLocaleDateString('en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center space-x-3">
-                        <FiStar size={20} style={{ color: theme.textSecondary }} />
-                        <div>
-                          <p 
-                            className="text-sm font-medium"
-                            style={{ color: theme.textSecondary }}
-                          >
-                            Account Status
-                          </p>
-                          <span 
-                            className="inline-flex items-center px-2 py-1 rounded-full text-sm font-medium"
-                            style={{ 
-                              backgroundColor: `${theme.success}15`,
-                              color: theme.success 
-                            }}
-                          >
-                            Active Premium
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Other tabs can be added here */}
-          {activeTab !== 'overview' && activeTab !== 'profile' && (
-            <div className="text-center py-20">
-              <div 
-                className="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-4"
-                style={{ backgroundColor: `${theme.primary}15` }}
-              >
-                <FiSettings size={40} style={{ color: theme.primary }} />
-              </div>
-              <h3 
-                className="text-2xl font-bold mb-2"
-                style={{ color: theme.text }}
-              >
-                Coming Soon
-              </h3>
-              <p 
-                className="text-lg"
-                style={{ color: theme.textSecondary }}
-              >
-                The {activeTab} section is under development.
-              </p>
-            </div>
-          )}
+          {ActiveComponent}
         </main>
       </div>
-
-      {/* Fixed Voice Router Icon at Bottom */}
-      <button
-        onClick={handleVoiceStart}
-        className={`fixed bottom-8 left-8 z-40 p-4 rounded-full shadow-lg border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
-          listening ? 'animate-pulse scale-110' : 'hover:scale-110'
-        }`}
-        style={{ 
-          backgroundColor: listening ? theme.secondary : `${theme.panels}95`, 
-          borderColor: listening ? theme.secondary : theme.primary, 
-          color: listening ? 'white' : theme.primary 
-        }}
-        title={listening ? 'Listening...' : 'Voice Navigation'}
-        aria-label="Voice Navigation"
-      >
-        <FaMicrophone size={24} />
-      </button>
-
-      {/* Chatbot Component */}
-      <ConsumerChatbot />
     </div>
-    
-    {/* Premium Footer */}
-    <Footer />
-    </>
   );
 };
 

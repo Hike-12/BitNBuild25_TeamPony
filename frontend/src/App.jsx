@@ -18,30 +18,54 @@ import VendorDashboard from "./pages/Vendor/VendorDashboard";
 import LandingPage from "./pages/Landing/LandingPage_new";
 import DailyMenus from "./pages/Vendor/DailyMenus";
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
-import Menu from "./pages/Consumer/Menu";
-import ConsumerChatbot from "./components/ConsumerChatbot";
-
-
+import Menu from "./pages/Consumer/Menu"
+import { Check } from "lucide-react";
+import Checkpage from "./pages/Consumer/Checkpage";
 function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
         <VendorAuthProvider>
           <Router>
-            <ConsumerChatbot />
+          
             <div className="App">
               <Routes>
                 {/* Landing Page Route */}
                 <Route path="/" element={<LandingPage />} />
-                {/* Consumer Routes - Remove ProtectedRoute wrapper */}
+              
+                <Route path="/menu" element={<Menu />} />
+                {/* Consumer Routes */}
                 <Route path="/login" element={<Login />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/menu" element={<Menu />} />
                 {/* Vendor Routes - Remove VendorProtectedRoute wrapper */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
-                <Route path="/vendor/dashboard" element={<VendorDashboard />} />
-                <Route path="/vendor/menu" element={<VendorMenuManager />} />
-                <Route path="/vendor/daily-menus" element={<DailyMenus />} />
+                <Route
+                  path="/vendor/dashboard"
+                  element={
+                    <VendorProtectedRoute>
+                      <VendorDashboard />
+                    </VendorProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/vendor/menu"
+                  element={
+                   
+                      <VendorMenuManager />
+                
+                  }
+                />
+                  <Route path="/check" element={<Checkpage />} />
+                <Route
+                  path="/vendor/daily-menus"
+                  element={
+                    <VendorProtectedRoute>
+                      <DailyMenus />
+                    </VendorProtectedRoute>
+                  }
+                />
+
                 {/* Catch all route - redirect to landing page */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
