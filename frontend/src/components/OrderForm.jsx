@@ -14,6 +14,8 @@ import {
   FiMail
 } from 'react-icons/fi';
 import { FaLeaf } from 'react-icons/fa';
+import { FeedbackForm } from './FeedbackComponent';
+import { FiStar } from 'react-icons/fi';
 
 const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
   const { user } = useAuth();
