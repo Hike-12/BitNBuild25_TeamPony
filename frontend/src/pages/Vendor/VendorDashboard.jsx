@@ -296,15 +296,24 @@ const VendorDashboard = () => {
     }
   };
 
-  const sidebarItems = [
-    { id: 'overview', label: 'Dashboard', icon: FaHome, component: <DashboardOverview theme={theme} dashboardData={dashboardData} vendorInfo={vendor} /> },
-    { id: 'menu-items', label: 'Manage Dishes', icon: IoFastFood, component: <MenuItems /> },
-    { id: 'daily-menus', label: 'Daily Tiffins', icon: MdFoodBank, component: <DailyMenus /> },
-    { id: 'orders', label: 'Orders', icon: FaBoxes, component: <OrdersComponent theme={theme} /> },
-    { id: 'analytics', label: 'Analytics', icon: FaChartLine, component: <AnalyticsComponent theme={theme} /> },
-    { id: 'settings', label: 'Settings', icon: FaCog, component: <SettingsComponent theme={theme} /> },
-  ];
-
+const sidebarItems = [
+  { id: 'overview', label: 'Dashboard', icon: FaHome, component: <DashboardOverview theme={theme} dashboardData={dashboardData} vendorInfo={vendor} /> },
+  { id: 'menu-items', label: 'Manage Dishes', icon: IoFastFood, component: <MenuItems /> },
+  { id: 'daily-menus', label: 'Daily Tiffins', icon: MdFoodBank, component: <DailyMenus /> },
+  { id: 'orders', label: 'Order Tracking', icon: FaBoxes, component: (
+    <div className="space-y-6">
+      <div className="p-6 rounded-2xl border" style={{ backgroundColor: theme.panels, borderColor: theme.border }}>
+        <h2 className="text-2xl font-bold mb-4" style={{ color: theme.text }}>Order Tracking Dashboard</h2>
+        <p className="mb-4" style={{ color: theme.textSecondary }}>Monitor and track all your orders in real-time</p>
+      </div>
+      <div className="h-96 rounded-2xl border overflow-hidden" style={{ borderColor: theme.border }}>
+        <OrderTracker userType="vendor" />
+      </div>
+    </div>
+  ) },
+  { id: 'analytics', label: 'Analytics', icon: FaChartLine, component: <AnalyticsComponent theme={theme} /> },
+  { id: 'settings', label: 'Settings', icon: FaCog, component: <SettingsComponent theme={theme} /> },
+];
   const activeItem = sidebarItems.find(item => item.id === activeTab);
   const ActiveComponent = activeItem?.component || <div>Component not found</div>;
 
