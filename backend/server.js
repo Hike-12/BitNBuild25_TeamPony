@@ -13,7 +13,7 @@ const feedbackRoutes = require('./routes/feedbackRoutes');
 
 const app = express();
 const corsOptions = {
-  origin: ["http://localhost:5173", "http://127.0.0.1:5173"], // Vite default ports
+  origin: ["http://localhost:5173", "http://127.0.0.1:5173","https://nourish-net-gamma.vercel.app/","https://nourish-net-gamma.vercel.app"], // Vite default ports
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
