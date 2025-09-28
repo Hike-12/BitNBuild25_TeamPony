@@ -50,54 +50,109 @@ const deliveryIcon = new L.DivIcon({
   popupAnchor: [0, -16]
 });
 
-// Simulate orders with colors
+// Simulate orders with colors and proper routing
 function generateOrders(center, n = 5) {
   return Array.from({ length: n }).map((_, i) => {
-    const vendorLoc = randomNearby(center, 0.01);
-    const deliveryLoc = randomNearby(center, 0.03);
+    const vendorLoc = randomNearby(center, 0.008); // Smaller radius for better routes
+    const deliveryLoc = randomNearby(center, 0.015); // Reasonable distance
     return {
       id: `order-${i + 1}`,
       order_number: `#ORD${1000 + i}`,
       vendor_location: vendorLoc,
       delivery_location: deliveryLoc,
-      current_location: [...vendorLoc], // Start at vendor (copy array)
+      current_location: [...vendorLoc], // Start at vendor
       status: 'out_for_delivery',
       color: orderColors[i % orderColors.length],
-      icon: createOrderIcon(orderColors[i % orderColors.length])
+      icon: createOrderIcon(orderColors[i % orderColors.length]),
+      route_points: [], // Store the full route
+      current_route_index: 0 // Track position on route
     };
   });
 }
 
-// Smooth movement function with slower speed
-function moveTowards(current, target, step = 0.0003) { // Reduced from 0.001 to 0.0003
+// Improved OSRM route fetching with error handling
+async function fetchRoute(from, to) {
+  try {
+    console.log(`Fetching route from [${from[1]}, ${from[0]}] to [${to[1]}, ${to[0]}]`);
+    
+    const url = `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
+    
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (data.routes && data.routes[0] && data.routes[0].geometry) {
+      const coordinates = data.routes[0].geometry.coordinates;
+      const route = coordinates.map(([lng, lat]) => [lat, lng]);
+      console.log(`Route fetched successfully with ${route.length} points`);
+      return route;
+    } else {
+      console.log('No route found in OSRM response');
+      throw new Error('No route found');
+    }
+  } catch (error) {
+    console.error('Route fetch failed:', error);
+    // Fallback: create a simple route with intermediate points
+    const latDiff = (to[0] - from[0]) / 3;
+    const lngDiff = (to[1] - from[1]) / 3;
+    
+    return [
+      from,
+      [from[0] + latDiff, from[1] + lngDiff],
+      [from[0] + latDiff * 2, from[1] + lngDiff * 2],
+      to
+    ];
+  }
+}
+
+// Move along the route points instead of direct line
+function moveAlongRoute(order, step = 0.0003) {
+  if (!order.route_points || order.route_points.length === 0) {
+    return moveTowards(order.current_location, order.delivery_location, step);
+  }
+
+  const routePoints = order.route_points;
+  const currentIndex = order.current_route_index || 0;
+  
+  if (currentIndex >= routePoints.length - 1) {
+    return [...order.delivery_location];
+  }
+
+  const currentTarget = routePoints[currentIndex + 1];
+  const newLocation = moveTowards(order.current_location, currentTarget, step);
+  
+  // Check if we've reached the current target point
+  const distanceToTarget = Math.sqrt(
+    Math.pow(newLocation[0] - currentTarget[0], 2) + 
+    Math.pow(newLocation[1] - currentTarget[1], 2)
+  );
+  
+  if (distanceToTarget < 0.0001) {
+    // Move to next point in route
+    order.current_route_index = Math.min(currentIndex + 1, routePoints.length - 1);
+  }
+  
+  return newLocation;
+}
+
+// Standard move towards function
+function moveTowards(current, target, step = 0.0003) {
   const [clat, clng] = current;
   const [tlat, tlng] = target;
   const dlat = tlat - clat;
   const dlng = tlng - clng;
   const dist = Math.sqrt(dlat * dlat + dlng * dlng);
   
-  if (dist < step) return [...target]; // Return copy of target
+  if (dist < step) return [...target];
   
   const ratio = step / dist;
   return [
     clat + dlat * ratio,
     clng + dlng * ratio
   ];
-}
-
-// Fetch route from OSRM
-async function fetchRoute(from, to) {
-  try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${from[1]},${from[0]};${to[1]},${to[0]}?overview=full&geometries=geojson`;
-    const res = await fetch(url);
-    const data = await res.json();
-    if (data.routes && data.routes[0]) {
-      return data.routes[0].geometry.coordinates.map(([lng, lat]) => [lat, lng]);
-    }
-  } catch (error) {
-    console.log('Route fetch failed, using direct line');
-  }
-  return [from, to]; // Fallback to direct line
 }
 
 // MapUpdater to fit bounds
@@ -124,20 +179,61 @@ export default function SimulatedBusMap() {
   const [routes, setRoutes] = useState({});
   const intervalRef = useRef();
 
-  // Simulate live GPS movement (slower interval for smoother animation)
+  // Fetch routes for all orders on component mount
+  useEffect(() => {
+    const fetchAllRoutes = async () => {
+      const routePromises = orders.map(async (order) => {
+        try {
+          const route = await fetchRoute(order.vendor_location, order.delivery_location);
+          return { orderId: order.id, route };
+        } catch (error) {
+          console.error(`Failed to fetch route for order ${order.id}:`, error);
+          return { 
+            orderId: order.id, 
+            route: [order.vendor_location, order.delivery_location] 
+          };
+        }
+      });
+
+      const routeResults = await Promise.all(routePromises);
+      const newRoutes = {};
+      
+      // Update orders with route points and routes state
+      setOrders(prevOrders => 
+        prevOrders.map(order => {
+          const routeResult = routeResults.find(r => r.orderId === order.id);
+          if (routeResult) {
+            newRoutes[order.id] = routeResult.route;
+            return {
+              ...order,
+              route_points: routeResult.route,
+              current_route_index: 0
+            };
+          }
+          return order;
+        })
+      );
+      
+      setRoutes(newRoutes);
+    };
+
+    fetchAllRoutes();
+  }, []);
+
+  // Simulate live GPS movement along the route
   useEffect(() => {
     intervalRef.current = setInterval(() => {
       setOrders(prevOrders =>
         prevOrders.map(order => {
           if (order.status === 'delivered') return order;
           
-          const nextLoc = moveTowards(order.current_location, order.delivery_location, 0.0003);
+          const nextLoc = moveAlongRoute(order, 0.0002); // Slower movement
           const distance = Math.sqrt(
             Math.pow(nextLoc[0] - order.delivery_location[0], 2) + 
             Math.pow(nextLoc[1] - order.delivery_location[1], 2)
           );
           
-          const delivered = distance < 0.0005; // Close enough to destination
+          const delivered = distance < 0.0005;
           
           return {
             ...order,
@@ -146,25 +242,14 @@ export default function SimulatedBusMap() {
           };
         })
       );
-    }, 1500); // Increased from 2000ms to 1500ms for smoother movement
+    }, 1500);
     
     return () => clearInterval(intervalRef.current);
   }, []);
 
-  // Fetch route for selected order
-  useEffect(() => {
-    if (!selectedOrder) return;
-    const order = orders.find(o => o.id === selectedOrder);
-    if (!order) return;
-    
-    fetchRoute(order.current_location, order.delivery_location).then(route => {
-      setRoutes(r => ({ ...r, [order.id]: route }));
-    });
-  }, [selectedOrder, orders]);
-
   return (
     <div className="w-full h-full relative" style={{ height: '100vh' }}>
-      {/* Order selection */}
+      {/* Order selection panel */}
       <div style={{
         position: 'absolute', top: 16, left: 16, zIndex: 1000, 
         background: 'rgba(255,255,255,0.95)', 
@@ -297,24 +382,24 @@ export default function SimulatedBusMap() {
                 </Popup>
               </Marker>
               
-              {/* Route polyline for selected order */}
+              {/* Full route polyline for selected order */}
               {selectedOrder === order.id && routes[order.id] && (
                 <Polyline 
                   positions={routes[order.id]} 
                   color={order.color} 
                   weight={4}
-                  opacity={0.8}
-                  dashArray="5, 10"
+                  opacity={0.7}
+                  dashArray="8, 8"
                 />
               )}
               
-              {/* Trail line from vendor to current location */}
-              {order.status === 'out_for_delivery' && (
+              {/* Completed route trail (from vendor to current location) */}
+              {order.route_points && order.route_points.length > 0 && (
                 <Polyline 
-                  positions={[order.vendor_location, order.current_location]} 
+                  positions={order.route_points.slice(0, (order.current_route_index || 0) + 1)}
                   color={order.color} 
-                  weight={2}
-                  opacity={0.6}
+                  weight={3}
+                  opacity={0.9}
                 />
               )}
             </React.Fragment>
