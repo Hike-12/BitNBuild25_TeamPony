@@ -346,65 +346,7 @@ const Menu = () => {
 
   return (
     <div className="min-h-screen transition-all duration-300" style={{ backgroundColor: theme.background }}>
-      {/* Header */}
-      <header className="border-b sticky top-0 z-40 backdrop-blur-md"
-              style={{ backgroundColor: `${theme.panels}95`, borderColor: theme.border }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard" className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                    style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
-                <FiArrowLeft size={20} />
-              </Link>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: theme.primary }}>
-                <MdRestaurant size={24} color="white" />
-              </div>
-              <h1 className="text-2xl font-bold" style={{ color: theme.text }}>NourishNet</h1>
-            </div>
 
-            <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-lg hover:opacity-80 transition-opacity relative"
-                      style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
-                <FiBell size={20} />
-                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                      style={{ backgroundColor: theme.primary }}></span>
-              </button>
-
-              <button onClick={toggleTheme} className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                      style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
-                {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-              </button>
-
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                     style={{ backgroundColor: theme.secondary }}>
-                  <FiUser size={16} color="white" />
-                </div>
-                <span className="font-medium" style={{ color: theme.text }}>
-                  {user?.first_name || user?.username || 'Guest'}
-                </span>
-              </div>
-
-              {user ? (
-                <button onClick={() => logout()} 
-                        className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
-                        style={{ backgroundColor: theme.error, color: 'white' }}>
-                  <FiLogOut size={16} />
-                  <span>Logout</span>
-                </button>
-              ) : (
-                <Link to="/login"
-                      className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
-                      style={{ backgroundColor: theme.primary, color: 'white' }}>
-                  <FiUser size={16} />
-                  <span>Login</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
