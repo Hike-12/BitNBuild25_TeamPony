@@ -21,6 +21,7 @@ import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
 import Menu from "./pages/Consumer/Menu";
 import ConsumerChatbot from "./components/ConsumerChatbot";
 import AdminDashboard from "./pages/Admin";
+import PWAInstall from "./pages/PWAInstall";
 
 
 function App() {
@@ -75,6 +76,7 @@ function App() {
                   },
                 }}
               />
+              <PWAInstall />
             </div>
           </Router>
         </VendorAuthProvider>
