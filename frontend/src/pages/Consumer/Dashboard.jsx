@@ -37,6 +37,7 @@ import {
 
 // Import the Menu component
 import MenuComponent from './Menu';
+import ARNutritionAnalyzer from './ARNutritionAnalyzer'
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
@@ -223,6 +224,7 @@ const Dashboard = () => {
     { id: 'orders', label: 'My Orders', icon: BsBoxSeam },
     { id: 'subscriptions', label: 'Subscriptions', icon: MdRestaurant },
     { id: 'payments', label: 'Payments', icon: BsCreditCard },
+    { id: 'nutrition_analyzer', label: 'Nutrition Analyzer', icon: BsCreditCard },
     { id: 'favorites', label: 'Favorites', icon: FiHeart },
     { id: 'profile', label: 'Profile', icon: FiUser },
     { id: 'settings', label: 'Settings', icon: FiSettings },
@@ -653,6 +655,9 @@ const Dashboard = () => {
             <p style={{ color: theme.textSecondary }}>App settings and preferences will appear here.</p>
           </div>
         );
+      
+      case 'nutrition_analyzer':
+        return (<ARNutritionAnalyzer/>)
       
       default:
         return (

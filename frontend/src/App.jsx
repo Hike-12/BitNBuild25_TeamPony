@@ -20,6 +20,7 @@ import DailyMenus from "./pages/Vendor/DailyMenus";
 import VendorMenuManager from "./pages/Vendor/VendorMenuManager";
 import Menu from "./pages/Consumer/Menu";
 import ConsumerChatbot from "./components/ConsumerChatbot";
+import AdminDashboard from "./pages/Admin";
 
 
 function App() {
@@ -43,6 +44,8 @@ function App() {
                 <Route path="/vendor/menu" element={<VendorMenuManager />} />
                 <Route path="/vendor/daily-menus" element={<DailyMenus />} />
                 {/* Catch all route - redirect to landing page */}
+
+                <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
               {/* Toast Container */}
