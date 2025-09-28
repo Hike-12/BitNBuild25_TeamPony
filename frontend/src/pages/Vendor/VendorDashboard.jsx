@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useVendorAuth } from "../../context/VendorAuthContext";
 import { useTheme } from "../../context/ThemeContext";
 import MenuItems from "./MenuItems";
@@ -307,10 +307,12 @@ const SettingsComponent = ({ theme }) => (
 // Main Vendor Dashboard Component
 const VendorDashboard = () => {
   const { vendor, logout } = useVendorAuth();
-  const { theme, isDarkMode, toggleTheme } = useContext(ThemeContext);
+  const { theme, isDarkMode, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
   const API_URL = import.meta.env.VITE_API_URL;
 
   const getVendorAuthHeaders = () => {
@@ -325,40 +327,40 @@ const VendorDashboard = () => {
     fetchDashboardData();
   }, []);
 
- const fetchDashboardData = async () => {
-  try {
-    console.log('Fetching dashboard data...');
-    const response = await fetch(
-      `${API_URL}/api/vendor/dashboard`,
-      { headers: getVendorAuthHeaders() }
-    );
+  const fetchDashboardData = async () => {
+    try {
+      console.log('Fetching dashboard data...');
+      const response = await fetch(
+        `${API_URL}/api/vendor/dashboard`,
+        { headers: getVendorAuthHeaders() }
+      );
 
-    console.log('Response status:', response.status);
-    const data = await response.json();
-    console.log('Response data:', data);
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
 
-    if (data.success && data.dashboard_data) {
-      const dashboard = data.dashboard_data;
-      const processedData = {
-        totalOrders: dashboard.statistics?.total_orders || 0,
-        activeCustomers: dashboard.statistics?.active_customers || 0,
-        revenue: dashboard.statistics?.total_revenue || 0,
-        totalMenuItems: dashboard.statistics?.total_menu_items || 0,
-        activeMenuItems: dashboard.statistics?.active_menu_items || 0,
-        activeMenus: dashboard.statistics?.active_menus || 0,
-        vendorInfo: dashboard.vendor_info || {},
-        recentOrders: dashboard.recent_orders || [],
-        recentMenus: dashboard.recent_menus || []
-      };
-      console.log('Processed data:', processedData);
-      setDashboardData(processedData);
+      if (data.success && data.dashboard_data) {
+        const dashboard = data.dashboard_data;
+        const processedData = {
+          totalOrders: dashboard.statistics?.total_orders || 0,
+          activeCustomers: dashboard.statistics?.active_customers || 0,
+          revenue: dashboard.statistics?.total_revenue || 0,
+          totalMenuItems: dashboard.statistics?.total_menu_items || 0,
+          activeMenuItems: dashboard.statistics?.active_menu_items || 0,
+          activeMenus: dashboard.statistics?.active_menus || 0,
+          vendorInfo: dashboard.vendor_info || {},
+          recentOrders: dashboard.recent_orders || [],
+          recentMenus: dashboard.recent_menus || []
+        };
+        console.log('Processed data:', processedData);
+        setDashboardData(processedData);
+      }
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Failed to fetch dashboard data:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const sidebarItems = [
     { id: 'overview', label: 'Dashboard', icon: FaHome, component: <DashboardOverview theme={theme} dashboardData={dashboardData} /> },
@@ -384,37 +386,37 @@ const VendorDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen transition-all duration-300 relative" style={{ backgroundColor: theme.background }}>
-      {/* Premium Background Image/Pattern */}
-      <div className="absolute inset-0 z-0" style={{
-        backgroundImage: `url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80'),
-          linear-gradient(135deg, ${theme.background} 80%, ${theme.panels} 100%)`,
-        backgroundSize: 'cover, 100% 100%',
-        backgroundPosition: 'center, center',
-        opacity: isDarkMode ? 0.18 : 0.12,
-        pointerEvents: 'none'
-      }} />
-      <header className="border-b sticky top-0 z-50 backdrop-blur-xl shadow-lg"
+    <div 
+      className="min-h-screen transition-all duration-300"
+      style={{ backgroundColor: theme.background }}
+    >
+      {/* Header */}
+      <header 
+        className="border-b sticky top-0 z-40 backdrop-blur-md"
         style={{ 
-          background: isDarkMode
-            ? `linear-gradient(90deg, ${theme.panels} 80%, ${theme.primary}10 100%)`
-            : `linear-gradient(90deg, ${theme.panels} 80%, ${theme.primary}05 100%)`,
-          borderColor: theme.border
-        }}>
+          backgroundColor: `${theme.panels}95`,
+          borderColor: theme.border 
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{ backgroundColor: theme.primary }}>
-                <GiCookingPot size={24} color="white" />
+              <div 
+                className="w-10 h-10 rounded-xl flex items-center justify-center"
+                style={{ backgroundColor: theme.primary }}
+              >
+                <MdRestaurant size={24} color="white" />
               </div>
-              <h1 className="text-2xl font-bold" style={{ color: theme.text }}>
+              <h1 
+                className="text-2xl font-bold"
+                style={{ color: theme.text }}
+              >
                 NourishNet Vendor
               </h1>
             </div>
 
             <div className="flex items-center space-x-4">
-              {/* Status Badge */}
+              {/* Vendor Status */}
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                 style={{
                   backgroundColor: dashboardData?.vendorInfo?.is_verified ? `${theme.success}15` : `${theme.warning}15`,
@@ -445,11 +447,12 @@ const VendorDashboard = () => {
                 style={{ 
                   backgroundColor: theme.panels,
                   color: theme.textSecondary 
-                }}>
+                }}
+              >
                 {isDarkMode ? <FaSun size={20} /> : <FaMoon size={20} />}
               </button>
 
-              {/* Vendor Info */}
+              {/* User Info */}
               <div className="flex items-center space-x-3">
                 <div 
                   className="w-8 h-8 rounded-full flex items-center justify-center"
@@ -457,8 +460,11 @@ const VendorDashboard = () => {
                 >
                   <FiUser size={16} color="white" />
                 </div>
-                <span className="font-medium" style={{ color: theme.text }}>
-                  {vendor?.username || 'Vendor'}
+                <span 
+                  className="font-medium"
+                  style={{ color: theme.text }}
+                >
+                  {vendor?.business_name || 'Vendor'}
                 </span>
               </div>
 
@@ -468,7 +474,8 @@ const VendorDashboard = () => {
                 style={{ 
                   backgroundColor: theme.error,
                   color: 'white'
-                }}>
+                }}
+              >
                 <FaSignOutAlt size={16} />
                 <span>Logout</span>
               </button>
@@ -476,19 +483,17 @@ const VendorDashboard = () => {
           </div>
         </div>
       </header>
-      <div className="flex relative z-10">
+
+      <div className="flex">
         {/* Sidebar */}
-        <aside
-          className={`min-h-screen border-r shadow-xl transition-all duration-300 ${sidebarOpen ? 'w-72' : 'w-20'} flex flex-col items-center justify-between`}
-          style={{
-            background: `linear-gradient(135deg, ${theme.primary}cc 60%, ${theme.panels}ee 100%)`,
-            borderColor: theme.border,
-            backdropFilter: 'blur(16px)',
-            boxShadow: `0 8px 32px 0 ${theme.primary}40`,
-            opacity: 0.92
+        <aside 
+          className="w-64 min-h-screen border-r"
+          style={{ 
+            backgroundColor: theme.panels,
+            borderColor: theme.border 
           }}
         >
-          <nav className={`p-6 space-y-3 w-full ${sidebarOpen ? '' : 'px-2'}`}>
+          <nav className="p-4 space-y-2">
             {sidebarItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -496,56 +501,28 @@ const VendorDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-semibold transition-all duration-200 w-full ${
-                    isActive ? 'bg-gradient-to-r from-primary to-secondary scale-105 shadow-lg' : 'hover:bg-gradient-to-r hover:from-primary/10 hover:to-secondary/10 hover:scale-102'
+                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    isActive ? 'transform scale-105' : 'hover:transform hover:scale-102'
                   }`}
                   style={{
-                    background: isActive ? `linear-gradient(90deg, ${theme.primary} 0%, ${theme.secondary} 100%)` : 'transparent',
-                    color: isActive ? 'white' : theme.textSecondary,
-                    border: isActive ? `2px solid ${theme.primary}` : 'none',
-                    boxShadow: isActive ? `0 4px 24px ${theme.primary}30` : 'none',
-                    fontFamily: 'Playfair Display, serif',
-                    justifyContent: sidebarOpen ? 'flex-start' : 'center'
+                    backgroundColor: isActive ? theme.primary : 'transparent',
+                    color: isActive ? 'white' : theme.textSecondary
                   }}
                 >
-                  <Icon size={22} />
-                  {sidebarOpen && <span>{item.label}</span>}
+                  <Icon size={20} />
+                  <span>{item.label}</span>
                 </button>
               );
             })}
           </nav>
-          {/* Sidebar collapse/expand label */}
-          <div className="mb-6">
-            <span className="text-xs text-white/60 font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>
-              {sidebarOpen ? "Collapse" : "Expand"}
-            </span>
-          </div>
         </aside>
+
         {/* Main Content */}
-        <main className="flex-1 p-8 bg-transparent">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Crisp Card Layout for Active Component */}
-            <div className="rounded-3xl shadow-2xl bg-white/80 dark:bg-black/60 backdrop-blur-xl border border-gray-200 dark:border-gray-700 p-8 transition-all duration-300" style={{ boxShadow: `0 8px 32px 0 ${theme.primary}20` }}>
-              {ActiveComponent}
-            </div>
-            {/* Quick Stats Card Example */}
-            <div className="rounded-3xl shadow-2xl bg-gradient-to-br from-primary/30 to-secondary/20 backdrop-blur-xl border border-gray-200 dark:border-gray-700 p-8 flex flex-col gap-6 justify-center items-center transition-all duration-300">
-              <h2 className="text-2xl font-bold mb-2" style={{ fontFamily: 'Playfair Display, serif', color: theme.text }}>
-                Quick Stats
-              </h2>
-              <div className="grid grid-cols-2 gap-6 w-full">
-                {quickStats.map((stat) => (
-                  <div key={stat.label} className="rounded-xl bg-white/60 dark:bg-black/40 p-4 shadow-md flex flex-col items-center justify-center border border-gray-100 dark:border-gray-800">
-                    <span className="text-lg font-semibold" style={{ color: theme.primary }}>{stat.value}</span>
-                    <span className="text-xs text-gray-500 dark:text-gray-300 mt-1">{stat.label}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        <main className="flex-1 p-6">
+          {ActiveComponent}
         </main>
       </div>
-      {/* Premium Footer with spacing */}
+
       <Footer variant="simple" style={{ marginTop: '40px' }} />
     </div>
   );
