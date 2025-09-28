@@ -1,35 +1,228 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
-import { Link } from 'react-router-dom';
 import OrderForm from '../../components/OrderForm';
 import SubscriptionForm from '../../components/SuscriptionForm';
-import toast from 'react-hot-toast'; // ADD THIS IMPORT
 import Footer from '../../components/Footer';
+import toast from 'react-hot-toast';
 import { 
-  FiSun, 
-  FiMoon, 
   FiSearch,
   FiFilter,
-  FiMapPin,
-  FiPhone,
-  FiClock,
-  FiShoppingCart,
   FiArrowLeft,
-  FiStar,
-  FiHeart,
   FiBell,
+  FiSun,
+  FiMoon,
   FiUser,
-  FiLogOut
+  FiLogOut,
+  FiMapPin,
+  FiHeart,
+  FiStar,
+  FiClock,
+  FiShoppingCart
 } from 'react-icons/fi';
 import { 
   MdRestaurant, 
   MdLocalDining,
   MdFastfood,
-  MdCake,
-  MdLocalBar,
-  MdSetMeal  // ADD THIS IMPORT
+  MdSetMeal
 } from 'react-icons/md';
+
+// Mock JSON Data
+const MOCK_MENUS = [
+  {
+    _id: 'menu_1',
+    name: 'Premium North Indian Thali',
+    vendor: {
+      _id: 'vendor_1',
+      business_name: 'Sharma Kitchen',
+      address: 'Sector 14, Gurgaon',
+      phone_number: '+91 9876543210'
+    },
+    main_items: [
+      { _id: 'item_1', name: 'Dal Makhani', price: 80, category: 'dal', is_vegetarian: true },
+      { _id: 'item_2', name: 'Paneer Butter Masala', price: 120, category: 'sabzi', is_vegetarian: true },
+      { _id: 'item_3', name: 'Jeera Rice', price: 60, category: 'rice_item', is_vegetarian: true }
+    ],
+    side_items: [
+      { _id: 'item_4', name: 'Butter Roti', price: 15, category: 'roti_bread', is_vegetarian: true },
+      { _id: 'item_5', name: 'Mixed Raita', price: 30, category: 'raita_salad', is_vegetarian: true }
+    ],
+    extras: [
+      { _id: 'item_6', name: 'Gulab Jamun', price: 25, category: 'sweet', is_vegetarian: true },
+      { _id: 'item_7', name: 'Pickle', price: 10, category: 'pickle_papad', is_vegetarian: true }
+    ],
+    full_dabba_price: 250,
+    max_dabbas: 50,
+    dabbas_sold: 15,
+    date: new Date().toISOString(),
+    is_active: true,
+    is_veg_only: true,
+    cooking_style: 'Traditional',
+    todays_special: 'Fresh homemade paneer with special masala',
+    image: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=600&h=400&fit=crop'
+  },
+  {
+    _id: 'menu_2',
+    name: 'South Indian Combo',
+    vendor: {
+      _id: 'vendor_2',
+      business_name: 'Chennai Express Kitchen',
+      address: 'DLF Phase 1, Gurgaon',
+      phone_number: '+91 9876543211'
+    },
+    main_items: [
+      { _id: 'item_8', name: 'Sambar', price: 60, category: 'dal', is_vegetarian: true },
+      { _id: 'item_9', name: 'Rasam', price: 40, category: 'dal', is_vegetarian: true },
+      { _id: 'item_10', name: 'Coconut Rice', price: 70, category: 'rice_item', is_vegetarian: true }
+    ],
+    side_items: [
+      { _id: 'item_11', name: 'Dosa', price: 50, category: 'roti_bread', is_vegetarian: true },
+      { _id: 'item_12', name: 'Coconut Chutney', price: 20, category: 'raita_salad', is_vegetarian: true }
+    ],
+    extras: [
+      { _id: 'item_13', name: 'Filter Coffee', price: 15, category: 'drink', is_vegetarian: true },
+      { _id: 'item_14', name: 'Papad', price: 8, category: 'pickle_papad', is_vegetarian: true }
+    ],
+    full_dabba_price: 180,
+    max_dabbas: 30,
+    dabbas_sold: 8,
+    date: new Date().toISOString(),
+    is_active: true,
+    is_veg_only: true,
+    cooking_style: 'Regional',
+    todays_special: 'Authentic filter coffee and fresh sambar',
+    image: 'https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=600&h=400&fit=crop'
+  },
+  {
+    _id: 'menu_3',
+    name: 'Punjabi Power Meal',
+    vendor: {
+      _id: 'vendor_3',
+      business_name: 'Delhi Darbar',
+      address: 'Cyber City, Gurgaon',
+      phone_number: '+91 9876543212'
+    },
+    main_items: [
+      { _id: 'item_15', name: 'Butter Chicken', price: 150, category: 'non_veg', is_vegetarian: false },
+      { _id: 'item_16', name: 'Dal Tadka', price: 70, category: 'dal', is_vegetarian: true },
+      { _id: 'item_17', name: 'Basmati Rice', price: 50, category: 'rice_item', is_vegetarian: true }
+    ],
+    side_items: [
+      { _id: 'item_18', name: 'Naan', price: 25, category: 'roti_bread', is_vegetarian: true },
+      { _id: 'item_19', name: 'Onion Salad', price: 15, category: 'raita_salad', is_vegetarian: true }
+    ],
+    extras: [
+      { _id: 'item_20', name: 'Lassi', price: 30, category: 'drink', is_vegetarian: true },
+      { _id: 'item_21', name: 'Achar', price: 12, category: 'pickle_papad', is_vegetarian: true }
+    ],
+    full_dabba_price: 320,
+    max_dabbas: 40,
+    dabbas_sold: 25,
+    date: new Date().toISOString(),
+    is_active: true,
+    is_veg_only: false,
+    cooking_style: 'Homestyle',
+    todays_special: 'Tender butter chicken with aromatic basmati rice',
+    image: 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=600&h=400&fit=crop'
+  },
+  {
+    _id: 'menu_4',
+    name: 'Gujarati Thali Special',
+    vendor: {
+      _id: 'vendor_4',
+      business_name: 'Rajkot Kitchen',
+      address: 'Golf Course Road, Gurgaon',
+      phone_number: '+91 9876543213'
+    },
+    main_items: [
+      { _id: 'item_22', name: 'Gujarati Dal', price: 60, category: 'dal', is_vegetarian: true },
+      { _id: 'item_23', name: 'Aloo Gobi', price: 80, category: 'sabzi', is_vegetarian: true },
+      { _id: 'item_24', name: 'Khichdi', price: 70, category: 'rice_item', is_vegetarian: true }
+    ],
+    side_items: [
+      { _id: 'item_25', name: 'Gujarati Rotli', price: 12, category: 'roti_bread', is_vegetarian: true },
+      { _id: 'item_26', name: 'Buttermilk', price: 20, category: 'drink', is_vegetarian: true }
+    ],
+    extras: [
+      { _id: 'item_27', name: 'Jalebi', price: 35, category: 'sweet', is_vegetarian: true },
+      { _id: 'item_28', name: 'Khakhra', price: 15, category: 'pickle_papad', is_vegetarian: true }
+    ],
+    full_dabba_price: 220,
+    max_dabbas: 35,
+    dabbas_sold: 12,
+    date: new Date().toISOString(),
+    is_active: true,
+    is_veg_only: true,
+    cooking_style: 'Traditional',
+    todays_special: 'Authentic Gujarati flavors with fresh jalebi',
+    image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=600&h=400&fit=crop'
+  },
+  {
+    _id: 'menu_5',
+    name: 'Bengali Fish Curry Combo',
+    vendor: {
+      _id: 'vendor_5',
+      business_name: 'Kolkata Kitchen',
+      address: 'MG Road, Gurgaon',
+      phone_number: '+91 9876543214'
+    },
+    main_items: [
+      { _id: 'item_29', name: 'Fish Curry', price: 180, category: 'non_veg', is_vegetarian: false },
+      { _id: 'item_30', name: 'Dal Posto', price: 90, category: 'dal', is_vegetarian: true },
+      { _id: 'item_31', name: 'Steamed Rice', price: 40, category: 'rice_item', is_vegetarian: true }
+    ],
+    side_items: [
+      { _id: 'item_32', name: 'Luchi', price: 20, category: 'roti_bread', is_vegetarian: true },
+      { _id: 'item_33', name: 'Begun Bhaja', price: 60, category: 'sabzi', is_vegetarian: true }
+    ],
+    extras: [
+      { _id: 'item_34', name: 'Mishti Doi', price: 40, category: 'sweet', is_vegetarian: true },
+      { _id: 'item_35', name: 'Kasundi', price: 15, category: 'pickle_papad', is_vegetarian: true }
+    ],
+    full_dabba_price: 350,
+    max_dabbas: 25,
+    dabbas_sold: 20,
+    date: new Date().toISOString(),
+    is_active: true,
+    is_veg_only: false,
+    cooking_style: 'Regional',
+    todays_special: 'Fresh fish curry with authentic Bengali spices',
+    image: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=600&h=400&fit=crop'
+  },
+  {
+    _id: 'menu_6',
+    name: 'Rajasthani Royal Thali',
+    vendor: {
+      _id: 'vendor_6',
+      business_name: 'Jaipur Spice Kitchen',
+      address: 'Sohna Road, Gurgaon',
+      phone_number: '+91 9876543215'
+    },
+    main_items: [
+      { _id: 'item_36', name: 'Laal Maas', price: 200, category: 'non_veg', is_vegetarian: false },
+      { _id: 'item_37', name: 'Dal Baati', price: 120, category: 'dal', is_vegetarian: true },
+      { _id: 'item_38', name: 'Jeera Rice', price: 60, category: 'rice_item', is_vegetarian: true }
+    ],
+    side_items: [
+      { _id: 'item_39', name: 'Churma', price: 50, category: 'sweet', is_vegetarian: true },
+      { _id: 'item_40', name: 'Ker Sangri', price: 80, category: 'sabzi', is_vegetarian: true }
+    ],
+    extras: [
+      { _id: 'item_41', name: 'Malpua', price: 45, category: 'sweet', is_vegetarian: true },
+      { _id: 'item_42', name: 'Rajasthani Pickle', price: 20, category: 'pickle_papad', is_vegetarian: true }
+    ],
+    full_dabba_price: 400,
+    max_dabbas: 20,
+    dabbas_sold: 18,
+    date: new Date().toISOString(),
+    is_active: false, // Sold out
+    is_veg_only: false,
+    cooking_style: 'Royal',
+    todays_special: 'Royal Rajasthani flavors with traditional spices',
+    image: 'https://images.unsplash.com/photo-1567188040759-fb8a883dc6d8?w=600&h=400&fit=crop'
+  }
+];
 
 const Menu = () => {
   const { user, logout } = useAuth();
@@ -39,7 +232,6 @@ const Menu = () => {
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  // console.log('User in Menu component:', user); // DEBUG LOG
 
   // Modal states
   const [showOrderForm, setShowOrderForm] = useState(false);
@@ -47,25 +239,17 @@ const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState(null);
   const [selectedVendor, setSelectedVendor] = useState(null);
 
-  // Fetch all vendor daily menus (public route)
+  // Simulate API call with mock data
   const fetchMenus = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/public/daily-menus`);
-      const data = await response.json();
-      console.log('Fetched menus:', data); // DEBUG LOG
-
-      if (data.success) {
-        setMenus(data.menus || []);
-        setError('');
-      } else {
-        setError(data.error || 'Failed to fetch menus');
-        toast.error('Failed to load menus');
-      }
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setMenus(MOCK_MENUS);
+      setError('');
     } catch (err) {
-      setError('Network error. Please try again.');
-      toast.error('Network error occurred');
-      console.error('Error fetching menus:', err);
+      console.error('Fetch menus error:', err);
+      setError('Failed to load menus. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -96,10 +280,10 @@ const Menu = () => {
 
   // Handle Order Click
   const handleOrderClick = (menu) => {
-    console.log('Order clicked for menu:', menu); // DEBUG LOG
+    console.log('Order clicked for menu:', menu);
     
     if (!menu.is_active || (menu.max_dabbas - (menu.dabbas_sold || 0)) === 0) {
-      toast.error('This menu is not available for ordering');
+      toast.error('Sorry, this menu is currently unavailable or sold out!');
       return;
     }
     
@@ -112,22 +296,22 @@ const Menu = () => {
     setSelectedMenu(menu);
     setSelectedVendor(menu.vendor);
     setShowOrderForm(true);
-    console.log('Order form should open now'); // DEBUG LOG
+    console.log('Order form should open now');
   };
 
   // Handle Subscription Click
   const handleSubscriptionClick = (vendor) => {
-    console.log('Subscribe clicked for vendor:', vendor); // DEBUG LOG
+    console.log('Subscribe clicked for vendor:', vendor);
     
     // Check if user is logged in
     if (!user) {
-      toast.error('Please login to create a subscription');
+      toast.error('Please login to subscribe');
       return;
     }
     
     setSelectedVendor(vendor);
     setShowSubscriptionForm(true);
-    console.log('Subscription form should open now'); // DEBUG LOG
+    console.log('Subscription form should open now');
   };
 
   // Close modals
@@ -136,6 +320,17 @@ const Menu = () => {
     setShowSubscriptionForm(false);
     setSelectedMenu(null);
     setSelectedVendor(null);
+  };
+
+  // Update menu after successful order (simulate sold count increase)
+  const updateMenuAfterOrder = (menuId, quantity) => {
+    setMenus(prevMenus => 
+      prevMenus.map(menu => 
+        menu._id === menuId 
+          ? { ...menu, dabbas_sold: (menu.dabbas_sold || 0) + quantity }
+          : menu
+      )
+    );
   };
 
   if (loading) {
@@ -151,65 +346,7 @@ const Menu = () => {
 
   return (
     <div className="min-h-screen transition-all duration-300" style={{ backgroundColor: theme.background }}>
-      {/* Header - same as before */}
-      <header className="border-b sticky top-0 z-40 backdrop-blur-md"
-              style={{ backgroundColor: `${theme.panels}95`, borderColor: theme.border }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-4">
-              <Link to="/dashboard" className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                    style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
-                <FiArrowLeft size={20} />
-              </Link>
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                   style={{ backgroundColor: theme.primary }}>
-                <MdRestaurant size={24} color="white" />
-              </div>
-              <h1 className="text-2xl font-bold" style={{ color: theme.text }}>NourishNet</h1>
-            </div>
 
-            <div className="flex items-center space-x-4">
-              <button className="p-2 rounded-lg hover:opacity-80 transition-opacity relative"
-                      style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
-                <FiBell size={20} />
-                <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full"
-                      style={{ backgroundColor: theme.primary }}></span>
-              </button>
-
-              <button onClick={toggleTheme} className="p-2 rounded-lg hover:opacity-80 transition-opacity"
-                      style={{ backgroundColor: theme.panels, color: theme.textSecondary }}>
-                {isDarkMode ? <FiSun size={20} /> : <FiMoon size={20} />}
-              </button>
-
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full flex items-center justify-center"
-                     style={{ backgroundColor: theme.secondary }}>
-                  <FiUser size={16} color="white" />
-                </div>
-                <span className="font-medium" style={{ color: theme.text }}>
-                  {user?.first_name || user?.username || 'Guest'}
-                </span>
-              </div>
-
-              {user ? (
-                <button onClick={() => logout()} 
-                        className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
-                        style={{ backgroundColor: theme.error, color: 'white' }}>
-                  <FiLogOut size={16} />
-                  <span>Logout</span>
-                </button>
-              ) : (
-                <Link to="/login"
-                      className="flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 hover:transform hover:scale-105"
-                      style={{ backgroundColor: theme.primary, color: 'white' }}>
-                  <FiUser size={16} />
-                  <span>Login</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -221,6 +358,9 @@ const Menu = () => {
           <p className="text-lg" style={{ color: theme.textSecondary }}>
             Discover delicious home-cooked meals from verified vendors in your area
           </p>
+          <div className="mt-4 text-sm" style={{ color: theme.textSecondary }}>
+            Found {filteredMenus.length} menu{filteredMenus.length !== 1 ? 's' : ''} • {filteredMenus.filter(m => m.is_active).length} available now
+          </div>
         </div>
 
         {/* Search and Filter Controls */}
@@ -310,7 +450,7 @@ const Menu = () => {
                 {menu.image && (
                   <div className="h-48 bg-cover bg-center relative"
                        style={{ backgroundImage: `url(${menu.image})` }}>
-                    <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+                    {/* <div className="absolute inset-0 bg-black bg-opacity-30"></div> */}
                     <div className="absolute top-4 right-4">
                       <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                         menu.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -385,6 +525,17 @@ const Menu = () => {
                     </div>
                   </div>
 
+                  {/* Progress Bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                    <div 
+                      className="h-2 rounded-full transition-all duration-300"
+                      style={{ 
+                        backgroundColor: menu.is_active ? theme.success : theme.error,
+                        width: `${Math.min(((menu.dabbas_sold || 0) / menu.max_dabbas) * 100, 100)}%`
+                      }}
+                    ></div>
+                  </div>
+
                   {/* Menu Footer */}
                   <div className="flex justify-between items-center">
                     <div>
@@ -432,7 +583,7 @@ const Menu = () => {
           </div>
         )}
       </div>
-
+      
       {/* Order Form Modal */}
       {showOrderForm && selectedMenu && selectedVendor && (
         <OrderForm
@@ -440,8 +591,8 @@ const Menu = () => {
           vendor={selectedVendor}
           onClose={closeModals}
           onSuccess={(order) => {
-            toast.success('Order placed successfully!');
-            fetchMenus(); // Refresh to update availability
+            toast.success('Order placed successfully! 🎉');
+            updateMenuAfterOrder(selectedMenu._id, order.quantity || 1);
             closeModals();
           }}
         />
@@ -451,14 +602,15 @@ const Menu = () => {
       {showSubscriptionForm && selectedVendor && (
         <SubscriptionForm
           vendor={selectedVendor}
+          menus={menus.filter(menu => menu.vendor._id === selectedVendor._id)} // Pass all vendor menus
           onClose={closeModals}
           onSuccess={(subscription) => {
-            toast.success('Subscription created successfully!');
+            toast.success('Subscription created successfully! 🎉');
             closeModals();
           }}
         />
       )}
-      {/* Premium Footer */}
+
       <Footer />
     </div>
   );
