@@ -27,7 +27,7 @@ function App() {
       <AuthProvider>
         <VendorAuthProvider>
           <Router>
-            <ConsumerChatbot />
+          
             <div className="App">
               <Routes>
                 {/* Landing Page Route */}
