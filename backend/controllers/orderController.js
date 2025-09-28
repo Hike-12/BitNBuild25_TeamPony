@@ -102,6 +102,50 @@ exports.createOrder = async (req, res) => {
 };
 
 
+// Update your orderController.js getUserOrders function
+exports.getUserOrders = async (req, res) => {
+  try {
+    // HARDCODED USER ID - Same as in feedbackController
+    const userId = '68d81c38257f975d59bc9cf3';
+    console.log('Fetching orders for user:', userId); // Debug log
+    
+    const { status, limit = 10, page = 1 } = req.query;
+
+    let filter = { customer: userId };
+    if (status) filter.order_status = status;
+
+    console.log('Filter being used:', filter); // Debug log
+
+    const orders = await Order.find(filter)
+      .populate('menu', 'name full_dabba_price date')
+      .populate('vendor', 'business_name phone_number address')
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const total = await Order.countDocuments(filter);
+    
+    console.log('Orders found:', orders.length); // Debug log
+    console.log('Order statuses:', orders.map(o => o.order_status)); // Debug log
+
+    res.json({
+      success: true,
+      orders,
+      pagination: {
+        current_page: parseInt(page),
+        total_pages: Math.ceil(total / limit),
+        total_orders: total
+      }
+    });
+
+  } catch (error) {
+    console.error('Get user orders error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
 
 // Add to orderController.js
 exports.getVendorOrders = async (req, res) => {
@@ -139,40 +183,6 @@ exports.getVendorOrders = async (req, res) => {
   }
 };
 
-exports.getUserOrders = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const { status, limit = 10, page = 1 } = req.query;
-
-    let filter = { customer: userId };
-    if (status) filter.order_status = status;
-
-    const orders = await Order.find(filter)
-      .populate('menu', 'name full_dabba_price date')
-      .populate('vendor', 'business_name phone_number address')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
-
-    const total = await Order.countDocuments(filter);
-
-    res.json({
-      success: true,
-      orders,
-      pagination: {
-        current_page: parseInt(page),
-        total_pages: Math.ceil(total / limit),
-        total_orders: total
-      }
-    });
-
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-};
 
 exports.updateOrderStatus = async (req, res) => {
   try {
