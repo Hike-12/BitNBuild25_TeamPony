@@ -4,6 +4,48 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- PWA Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#ff6b35" />
+    <meta name="background-color" content="#1a1a1a" />
+    
+    <!-- App Description -->
+    <meta name="description" content="NourishNet - Your premium daily tiffin companion with AR nutrition analysis, real-time tracking, and curated meals." />
+    <meta name="keywords" content="tiffin, food delivery, nutrition, AR analysis, premium meals, NourishNet" />
+    <meta name="author" content="NourishNet Team" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://nourishnet.com/" />
+    <meta property="og:title" content="NourishNet - Premium Tiffin Service" />
+    <meta property="og:description" content="Your premium daily tiffin companion with AR nutrition analysis" />
+    <meta property="og:image" content="/logo.png" />
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://nourishnet.com/" />
+    <meta property="twitter:title" content="NourishNet - Premium Tiffin Service" />
+    <meta property="twitter:description" content="Your premium daily tiffin companion with AR nutrition analysis" />
+    <meta property="twitter:image" content="/logo.png" />
+    
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="shortcut icon" href="/logo.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- iOS PWA Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="NourishNet" />
+    <link rel="apple-touch-startup-image" href="/logo.png" />
+    
+    <!-- Windows PWA Support -->
+    <meta name="msapplication-TileColor" content="#ff6b35" />
+    <meta name="msapplication-TileImage" content="/logo.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
     <title>NourishNet - Tiffin Service</title>
   </head>
   <body>
@@ -11,5 +53,41 @@
     <!-- Updated Razorpay script with latest version -->
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Service Worker Registration
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+              console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+              console.log('SW registration failed: ', registrationError);
+            });
+        });
+      }
+      
+      // PWA Install Prompt
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Show custom install button
+        const installBtn = document.getElementById('pwa-install-btn');
+        if (installBtn) {
+          installBtn.style.display = 'block';
+          installBtn.addEventListener('click', () => {
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+              }
+              deferredPrompt = null;
+              installBtn.style.display = 'none';
+            });
+          });
+        }
+      });
+    </script>
   </body>
 </html>
