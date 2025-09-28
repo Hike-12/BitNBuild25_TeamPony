@@ -5,6 +5,8 @@ import MenuItems from "./MenuItems";
 import DailyMenus from "./DailyMenus";
 import Orders from './Orders';
 import Analytics from './Analytics';
+import OrderTracking from '../../components/BusMap';
+
 import { 
   FaSun, 
   FaMoon, 
@@ -367,6 +369,7 @@ const VendorDashboard = () => {
     { id: 'menu-items', label: 'Manage Dishes', icon: IoFastFood, component: <MenuItems /> },
     { id: 'daily-menus', label: 'Daily Tiffins', icon: MdFoodBank, component: <DailyMenus /> },
     { id: 'orders', label: 'Orders', icon: FaBoxes, component: <Orders /> },
+    { id: 'orders_tracking', label: 'Orders Tracking', icon: FaBoxes, component: <OrderTracking userType="vendor" /> },
     { id: 'analytics', label: 'Analytics', icon: FaChartLine, component: <Analytics /> },
     { id: 'settings', label: 'Settings', icon: FaCog, component: <SettingsComponent theme={theme} /> },
   ];
