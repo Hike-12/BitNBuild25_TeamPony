@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import Carousel3D from '../../components/Carousel3D';
-import VoiceRouter from '../../components/VoiceRouter';
+// import VoiceRouter from '../../components/VoiceRouter';
 import Footer from '../../components/Footer';
 import { 
   FaSun, 
@@ -342,7 +342,7 @@ const LandingPage = () => {
 
   return (
     <>
-      <VoiceRouter routes={voiceRoutes} />
+      {/* <VoiceRouter routes={voiceRoutes} /> */}
       <div
       className="min-h-screen w-full flex flex-col justify-between relative"
       style={{
