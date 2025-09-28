@@ -19,8 +19,12 @@ import {
   FiHeart,
   FiMapPin,
   FiBell,
-  FiStar
+  FiStar,
+  FiRotateCcw
 } from 'react-icons/fi';
+import { FaMicrophone } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+import ConsumerChatbot from '../../components/ConsumerChatbot';
 import { 
   MdRestaurant, 
   MdDeliveryDining,
@@ -678,7 +682,31 @@ const Dashboard = () => {
           {ActiveComponent}
         </main>
       </div>
+
+      {/* Fixed Voice Router Icon at Bottom */}
+      <button
+        onClick={handleVoiceStart}
+        className={`fixed bottom-8 left-8 z-40 p-4 rounded-full shadow-lg border-2 flex items-center justify-center backdrop-blur-md transition-all duration-200 ${
+          listening ? 'animate-pulse scale-110' : 'hover:scale-110'
+        }`}
+        style={{ 
+          backgroundColor: listening ? theme.secondary : `${theme.panels}95`, 
+          borderColor: listening ? theme.secondary : theme.primary, 
+          color: listening ? 'white' : theme.primary 
+        }}
+        title={listening ? 'Listening...' : 'Voice Navigation'}
+        aria-label="Voice Navigation"
+      >
+        <FaMicrophone size={24} />
+      </button>
+
+      {/* Chatbot Component */}
+      <ConsumerChatbot />
     </div>
+    
+    {/* Premium Footer */}
+    <Footer />
+    </>
   );
 };
 

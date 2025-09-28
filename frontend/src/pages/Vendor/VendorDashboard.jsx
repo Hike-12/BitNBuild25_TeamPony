@@ -261,6 +261,8 @@ const SettingsComponent = ({ theme }) => (
 
 // Main Vendor Dashboard Component
 const VendorDashboard = () => {
+  // const { isDarkMode, theme } = useTheme();
+  const [showOverview, setShowOverview] = useState(false);
   const { vendor, logout } = useVendorAuth();
   const { isDarkMode, toggleTheme, theme } = useTheme();
   const [activeTab, setActiveTab] = useState('overview');
@@ -437,6 +439,10 @@ const VendorDashboard = () => {
         </main>
       </div>
     </div>
+    
+    {/* Premium Footer */}
+    <Footer variant="simple" />
+    </>
   );
 };
 

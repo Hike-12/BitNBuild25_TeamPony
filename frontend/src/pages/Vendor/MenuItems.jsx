@@ -243,7 +243,7 @@ const MenuItems = () => {
                 )}
               </div>
 
-              <div className="flex justify-between items-center pt-4" 
+              <div className="flex justify-between items-center pt-4"
                 style={{ borderTop: `1px solid ${theme.border}` }}>
                 <p className="text-xs" style={{ color: theme.textSecondary }}>
                   Added: {new Date(item.created_at).toLocaleDateString()}
@@ -372,7 +372,8 @@ const MenuItems = () => {
           </div>
         </div>
       )}
-    </div>
+      {/* Premium Footer */}
+    </div><Footer variant="simple" /></>
   );
 };
 

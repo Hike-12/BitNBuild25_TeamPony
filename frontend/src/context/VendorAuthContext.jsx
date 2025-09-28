@@ -29,36 +29,6 @@ export const VendorAuthProvider = ({ children }) => {
       setLoading(false);
       return;
     }
-    
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/check-auth`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      console.log("Auth check response status:", response.status);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("Auth response:", data);
-      
-      if (data.success && data.authenticated) {
-        setVendor(data.vendor);
-      } else {
-        setVendor(null);
-        localStorage.removeItem('vendor_token');
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      setVendor(null);
-      localStorage.removeItem('vendor_token');
-    } finally {
-      setLoading(false);
-    }
   };
 
   const login = async (identifier, password) => {

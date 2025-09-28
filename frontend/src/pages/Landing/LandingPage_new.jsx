@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
 import Carousel3D from '../../components/Carousel3D';
+import VoiceRouter from '../../components/VoiceRouter';
+import Footer from '../../components/Footer';
 import { 
   FaSun, 
   FaMoon, 
@@ -224,6 +226,14 @@ const RestaurantCarousel = ({ theme }) => {
 };
 
 const LandingPage = () => {
+  const voiceRoutes = [
+    { keyword: 'menu', path: '/menu' },
+    { keyword: 'dashboard', path: '/dashboard' },
+    { keyword: 'payments', path: '/payments' },
+    { keyword: 'nutrition', path: '/nutritioninsights' },
+    { keyword: 'login', path: '/login' },
+    { keyword: 'partner', path: '/vendor/login' },
+  ];
   const { isDarkMode, toggleTheme, theme } = useTheme();
   const [currentHero, setCurrentHero] = useState(0);
   const [gameScore, setGameScore] = useState(0);
@@ -331,7 +341,9 @@ const LandingPage = () => {
   };
 
   return (
-    <div
+    <>
+      <VoiceRouter routes={voiceRoutes} />
+      <div
       className="min-h-screen w-full flex flex-col justify-between relative"
       style={{
         fontFamily: 'Merriweather, serif',
@@ -783,46 +795,8 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Elegant Footer */}
-      <footer className="w-full py-12 px-6 text-center relative z-10" style={{ backgroundColor: `${theme.panels}95` }}>
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <FaCrown style={{ color: theme.primary, fontSize: '24px' }} />
-            <span 
-              style={{ 
-                color: theme.textSecondary,
-                fontFamily: 'Playfair Display, serif'
-              }} 
-              className="text-sm"
-            >
-              &copy; {new Date().getFullYear()} NourishNet. Crafted with excellence.
-            </span>
-          </div>
-          <div className="flex gap-8 justify-center md:justify-end">
-            <a 
-              href="#" 
-              style={{ color: theme.primary }} 
-              className="hover:underline transition-all duration-300 text-sm font-medium"
-            >
-              Instagram
-            </a>
-            <a 
-              href="#" 
-              style={{ color: theme.primary }} 
-              className="hover:underline transition-all duration-300 text-sm font-medium"
-            >
-              Twitter
-            </a>
-            <a 
-              href="#" 
-              style={{ color: theme.primary }} 
-              className="hover:underline transition-all duration-300 text-sm font-medium"
-            >
-              LinkedIn
-            </a>
-          </div>
-        </div>
-      </footer>
+      {/* Premium Footer */}
+      <Footer />
 
       {/* Premium Confetti Effect */}
       {showConfetti && (
@@ -844,7 +818,8 @@ const LandingPage = () => {
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import OrderForm from '../../components/OrderForm';
 import SubscriptionForm from '../../components/SuscriptionForm';
 import toast from 'react-hot-toast'; // ADD THIS IMPORT
+import Footer from '../../components/Footer';
 import { 
   FiSun, 
   FiMoon, 
@@ -38,6 +39,7 @@ const Menu = () => {
   const [error, setError] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  // console.log('User in Menu component:', user); // DEBUG LOG
 
   // Modal states
   const [showOrderForm, setShowOrderForm] = useState(false);
@@ -51,6 +53,7 @@ const Menu = () => {
       setLoading(true);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/vendor/public/daily-menus`);
       const data = await response.json();
+      console.log('Fetched menus:', data); // DEBUG LOG
 
       if (data.success) {
         setMenus(data.menus || []);
@@ -453,6 +456,8 @@ const Menu = () => {
           }}
         />
       )}
+      {/* Premium Footer */}
+      <Footer />
     </div>
   );
 };

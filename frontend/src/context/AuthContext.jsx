@@ -23,34 +23,12 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     const token = localStorage.getItem('userToken');
-    
+    console.log("Checking auth with token in user:", token ? "exists" : "missing");
     if (!token) {
       setLoading(false);
       return;
     }
-
-    try {
-      const response = await fetch(`${API_URL}/api/user/check-auth/`, {
-        method: 'GET',
-        headers: getAuthHeaders()
-      });
-
-      const data = await response.json();
-      
-      if (data.success && data.authenticated && data.user) {
-        setUser(data.user);
-      } else {
-        // Token is invalid, clear it
-        localStorage.removeItem('userToken');
-        setUser(null);
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      localStorage.removeItem('userToken');
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    setUser(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null);
   };
 
   const login = async (username, password) => {
@@ -65,11 +43,13 @@ export const AuthProvider = ({ children }) => {
 
       const data = await response.json();
       console.log(data);
+      console.log("Login response data:", data);
 
       if (data.success && data.token) {
         // Store the token
         localStorage.setItem('userToken', data.token);
         localStorage.setItem('vendor_token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         console.log(data.token);
         
         // Set the user data
@@ -133,19 +113,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    try {
-      // Optional: Call logout endpoint if you want to invalidate token on server
-      await fetch(`${API_URL}/api/user/logout/`, {
-        method: 'GET',
-        headers: getAuthHeaders()
-      });
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
       // Clear token and user data
       localStorage.removeItem('userToken');
       setUser(null);
-    }
   };
 
   return (

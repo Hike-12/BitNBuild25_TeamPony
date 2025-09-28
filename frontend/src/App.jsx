@@ -27,6 +27,7 @@ function App() {
       <AuthProvider>
         <VendorAuthProvider>
           <Router>
+            <ConsumerChatbot />
             <div className="App">
               <Routes>
                 {/* Landing Page Route */}
@@ -35,16 +36,9 @@ function App() {
                 <Route path="/menu" element={<Menu />} />
                 {/* Consumer Routes */}
                 <Route path="/login" element={<Login />} />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-
-                {/* Vendor Routes */}
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/menu" element={<Menu />} />
+                {/* Vendor Routes - Remove VendorProtectedRoute wrapper */}
                 <Route path="/vendor/login" element={<VendorLogin />} />
                 <Route
                   path="/vendor/dashboard"
@@ -75,7 +69,6 @@ function App() {
                 {/* Catch all route - redirect to landing page */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
-
               {/* Toast Container */}
               <Toaster
                 position="top-right"
@@ -110,5 +103,4 @@ function App() {
     </ThemeProvider>
   );
 }
-
 export default App;

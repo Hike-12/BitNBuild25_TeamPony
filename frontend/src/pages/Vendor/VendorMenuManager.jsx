@@ -5,6 +5,7 @@ import { FaSun, FaMoon, FaCheckCircle, FaTimesCircle, FaLeaf, FaFire, FaClock, F
 import { MdDeliveryDining, MdRestaurant, MdFoodBank } from "react-icons/md";
 import { GiIndianPalace, GiHotMeal, GiCookingPot } from "react-icons/gi";
 import { IoFastFood } from "react-icons/io5";
+import Footer from "../../components/Footer";
 
 const VendorMenuManager = () => {
   const [activeTab, setActiveTab] = useState("menu-items");
@@ -384,15 +385,8 @@ const VendorMenuManager = () => {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-16 py-8 text-center" style={{ 
-        background: theme.panels,
-        borderTop: `1px solid ${theme.border}`
-      }}>
-        <p className="text-sm font-medium" style={{ color: theme.textSecondary }}>
-          NourishNet Vendor Manager © {new Date().getFullYear()} • Delivering Happiness, One Tiffin at a Time
-        </p>
-      </footer>
+      {/* Premium Footer */}
+      <Footer variant="simple" />
     </div>
   );
 };
