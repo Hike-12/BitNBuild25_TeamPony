@@ -4,13 +4,37 @@ const menuController = require('../controllers/menuController');
 const auth = require('../middleware/auth');
 const Menu = require('../models/Menu'); // Add this import
 
-// PUBLIC ROUTES (BEFORE auth middleware)
 router.get('/public/daily-menus', async (req, res) => {
   try {
+    console.log('Fetching public menus...');
+    
     const menus = await Menu.find({ is_active: true })
       .populate('vendor', 'business_name address phone_number')
-      .populate('main_items side_items extras')
+      .populate({
+        path: 'main_items',
+        select: 'name price category is_vegetarian'
+      })
+      .populate({
+        path: 'side_items', 
+        select: 'name price category is_vegetarian'
+      })
+      .populate({
+        path: 'extras',
+        select: 'name price category is_vegetarian'
+      })
       .sort({ date: -1 });
+
+    console.log(`Found ${menus.length} menus`);
+    
+    if (menus.length > 0) {
+      console.log('Sample menu structure:', {
+        name: menus[0].name,
+        main_items: menus[0].main_items?.length || 0,
+        side_items: menus[0].side_items?.length || 0,
+        extras: menus[0].extras?.length || 0,
+        vendor: menus[0].vendor
+      });
+    }
 
     res.json({ success: true, menus });
   } catch (err) {
