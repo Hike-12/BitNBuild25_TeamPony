@@ -7,6 +7,7 @@ const authRoutes = require("./routes/venderAuthRoutes");
 const userAuthRoutes = require("./routes/userAuthRoutes");
 const orderRoutes = require('./routes/orderRoutes');
 const subscriptionRoutes = require('./routes/subscriptionRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 const app = express();
 const corsOptions = {
@@ -41,6 +42,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/user', userAuthRoutes);
   app.use('/api/orders', orderRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/payments', paymentRoutes);
 
 // Health check
 app.get("/", (req, res) => res.send("Tiffin backend running!"));

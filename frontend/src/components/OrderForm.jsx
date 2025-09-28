@@ -42,12 +42,11 @@ const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
     { value: 'wallet', label: 'Digital Wallet', icon: FiCreditCard }
   ];
 
-  // Auto-populate delivery date to today or tomorrow
+  // Auto-populate delivery date
   useEffect(() => {
     const today = new Date();
     const currentHour = today.getHours();
     
-    // If it's past 6 PM, auto-set to tomorrow
     if (currentHour >= 18) {
       const tomorrow = new Date();
       tomorrow.setDate(today.getDate() + 1);
@@ -75,15 +74,89 @@ const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
     return menu.full_dabba_price * orderData.quantity;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Razorpay Payment Handler
+  const handleRazorpayPayment = async () => {
+    try {
+      const token = localStorage.getItem('userToken');
+      
+      // Create Razorpay order
+      const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: calculateTotal(),
+          currency: 'INR',
+          receipt: `order_${Date.now()}`
+        })
+      });
 
-    if (!orderData.delivery_address || !orderData.delivery_date || !orderData.delivery_time_slot) {
-      toast.error('Please fill in all required fields');
-      return;
+      const orderData_razorpay = await orderResponse.json();
+      
+      if (!orderData_razorpay.success) {
+        toast.error('Failed to create payment order');
+        return;
+      }
+
+      // Initialize Razorpay payment
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Replace with your test key
+        amount: orderData_razorpay.order.amount,
+        currency: orderData_razorpay.order.currency,
+        name: 'NourishNet',
+        description: `Order for ${menu.name}`,
+        order_id: orderData_razorpay.order.id,
+        handler: async function(response) {
+          // Verify payment
+          const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/verify-payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+
+          const verifyData = await verifyResponse.json();
+          
+          if (verifyData.success) {
+            // Create order after successful payment
+            await createOrder({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              payment_signature: response.razorpay_signature
+            });
+          } else {
+            toast.error('Payment verification failed');
+          }
+        },
+        prefill: {
+          name: `${user?.first_name} ${user?.last_name}`,
+          email: user?.email,
+          contact: user?.phone || ''
+        },
+        theme: {
+          color: theme.primary
+        }
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
+    } catch (error) {
+      console.error('Razorpay payment error:', error);
+      toast.error('Payment failed. Please try again.');
     }
+  };
 
-    setLoading(true);
+  // Create Order Function
+  const createOrder = async (paymentDetails = {}) => {
     try {
       const token = localStorage.getItem('userToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
@@ -96,7 +169,9 @@ const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
           menu_id: menu._id,
           vendor_id: vendor._id,
           ...orderData,
-          total_amount: calculateTotal() // Include calculated total
+          total_amount: calculateTotal(),
+          payment_status: orderData.payment_method === 'cod' ? 'pending' : 'paid',
+          ...paymentDetails
         })
       });
 
@@ -110,8 +185,29 @@ const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
         toast.error(data.error || 'Failed to place order');
       }
     } catch (error) {
-      console.error('Order error:', error);
-      toast.error('Network error occurred');
+      console.error('Order creation error:', error);
+      toast.error('Failed to create order');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!orderData.delivery_address || !orderData.delivery_date || !orderData.delivery_time_slot) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      if (orderData.payment_method === 'cod') {
+        // Direct order creation for COD
+        await createOrder();
+      } else {
+        // Razorpay payment for other methods
+        await handleRazorpayPayment();
+      }
     } finally {
       setLoading(false);
     }
@@ -288,7 +384,7 @@ const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
                   value={orderData.delivery_date}
                   onChange={handleInputChange}
                   min={new Date().toISOString().split('T')[0]}
-                  max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]} // Max 7 days ahead
+                  max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
                   className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-opacity-50 transition-all duration-300"
                   style={{
                     backgroundColor: theme.background,
@@ -441,7 +537,11 @@ const OrderForm = ({ menu, vendor, onClose, onSuccess }) => {
                 }}
               >
                 <FiShoppingCart size={16} />
-                <span>{loading ? 'Placing Order...' : `Place Order - ₹${calculateTotal()}`}</span>
+                <span>
+                  {loading ? 'Processing...' : 
+                   orderData.payment_method === 'cod' ? `Place Order - ₹${calculateTotal()}` : 
+                   `Pay Now - ₹${calculateTotal()}`}
+                </span>
               </button>
             </div>
           </form>

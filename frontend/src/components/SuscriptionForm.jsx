@@ -10,7 +10,8 @@ import {
   FiX,
   FiCheck,
   FiUser,
-  FiMail
+  FiMail,
+  FiCreditCard
 } from 'react-icons/fi';
 import { FaLeaf } from 'react-icons/fa';
 
@@ -19,7 +20,6 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
   const { theme } = useTheme();
   const [loading, setLoading] = useState(false);
   
-  // Calculate average price from vendor's menus
   const averagePrice = menus.length > 0 
     ? Math.round(menus.reduce((sum, menu) => sum + menu.full_dabba_price, 0) / menus.length)
     : 250;
@@ -37,7 +37,8 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
     start_date: '',
     end_date: '',
     price_per_meal: averagePrice,
-    special_instructions: ''
+    special_instructions: '',
+    payment_method: 'cod'
   });
 
   const planTypes = [
@@ -69,7 +70,13 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
     { value: 'high', label: 'Hot', description: 'High spice level' }
   ];
 
-  // Auto-populate dates based on plan type
+  const paymentMethods = [
+    { value: 'cod', label: 'Cash on Delivery', icon: FiCreditCard },
+    { value: 'upi', label: 'UPI Payment', icon: FiCreditCard },
+    { value: 'card', label: 'Credit/Debit Card', icon: FiCreditCard },
+    { value: 'wallet', label: 'Digital Wallet', icon: FiCreditCard }
+  ];
+
   useEffect(() => {
     const today = new Date();
     const tomorrow = new Date();
@@ -87,7 +94,6 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
         end_date: endDate.toISOString().split('T')[0]
       }));
     } else {
-      // For custom plan, just set start date
       setSubscriptionData(prev => ({
         ...prev,
         start_date: tomorrow.toISOString().split('T')[0]
@@ -141,22 +147,113 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
     return calculateTotalMeals() * subscriptionData.price_per_meal;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // Razorpay Payment Handler for Subscription
+  const handleRazorpayPayment = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('userToken');
+      
+      // Create Razorpay order
+      const orderResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/create-order`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          amount: calculateTotalAmount(),
+          currency: 'INR',
+          receipt: `subscription_${Date.now()}`
+        })
+      });
 
-    if (!subscriptionData.delivery_address || !subscriptionData.delivery_time_slot || 
-        !subscriptionData.delivery_days.length || !subscriptionData.start_date || 
-        !subscriptionData.end_date) {
-      toast.error('Please fill in all required fields');
-      return;
+      const orderData = await orderResponse.json();
+
+      if (!orderData.success) {
+        throw new Error(orderData.error || 'Failed to create payment order');
+      }
+
+      // Configure Razorpay options
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Replace with your Razorpay key
+        amount: orderData.order.amount,
+        currency: orderData.order.currency,
+        name: 'NourishNet',
+        description: `Subscription for ${vendor.business_name}`,
+        order_id: orderData.order.id,
+        prefill: {
+          name: `${user?.first_name || ''} ${user?.last_name || ''}`.trim(),
+          email: user?.email || '',
+          contact: user?.phone || ''
+        },
+        theme: {
+          color: theme.primary
+        },
+        handler: async function(response) {
+          // Payment successful, verify on backend
+          await verifyPayment(response);
+        },
+        modal: {
+          ondismiss: function() {
+            setLoading(false);
+            toast.error('Payment cancelled');
+          }
+        }
+      };
+
+      // Open Razorpay checkout
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+
+    } catch (error) {
+      console.error('Razorpay payment error:', error);
+      toast.error('Payment setup failed. Please try again.');
+      setLoading(false);
     }
+  };
 
-    if (subscriptionData.delivery_days.length === 0) {
-      toast.error('Please select at least one delivery day');
-      return;
+  // Verify payment and create subscription
+  const verifyPayment = async (paymentResponse) => {
+    try {
+      const token = localStorage.getItem('userToken');
+      
+      // Verify payment signature
+      const verifyResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          razorpay_order_id: paymentResponse.razorpay_order_id,
+          razorpay_payment_id: paymentResponse.razorpay_payment_id,
+          razorpay_signature: paymentResponse.razorpay_signature
+        })
+      });
+
+      const verifyData = await verifyResponse.json();
+
+      if (verifyData.success) {
+        // Payment verified, create subscription
+        await createSubscription({
+          razorpay_order_id: paymentResponse.razorpay_order_id,
+          razorpay_payment_id: paymentResponse.razorpay_payment_id,
+          payment_signature: paymentResponse.razorpay_signature,
+          payment_status: 'paid'
+        });
+      } else {
+        throw new Error('Payment verification failed');
+      }
+
+    } catch (error) {
+      console.error('Payment verification error:', error);
+      toast.error('Payment verification failed');
+      setLoading(false);
     }
+  };
 
-    setLoading(true);
+  // Create Subscription Function
+  const createSubscription = async (paymentDetails = {}) => {
     try {
       const token = localStorage.getItem('userToken');
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subscriptions`, {
@@ -169,7 +266,8 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
           vendor_id: vendor._id,
           ...subscriptionData,
           total_meals: calculateTotalMeals(),
-          total_amount: calculateTotalAmount()
+          total_amount: calculateTotalAmount(),
+          ...paymentDetails
         })
       });
 
@@ -187,6 +285,36 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
       toast.error('Network error occurred');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!subscriptionData.delivery_address || !subscriptionData.delivery_time_slot || 
+        !subscriptionData.delivery_days.length || !subscriptionData.start_date || 
+        !subscriptionData.end_date) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (subscriptionData.delivery_days.length === 0) {
+      toast.error('Please select at least one delivery day');
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      if (subscriptionData.payment_method === 'cod') {
+        // Direct subscription creation for COD
+        await createSubscription({ payment_status: 'pending' });
+      } else {
+        // Handle online payments via Razorpay
+        await handleRazorpayPayment();
+      }
+    } finally {
+      // Loading state handled in individual functions
     }
   };
 
@@ -506,6 +634,42 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
               </div>
             </div>
 
+            {/* Payment Method */}
+            <div>
+              <label className="flex items-center space-x-2 text-sm font-medium mb-3" style={{ color: theme.textSecondary }}>
+                <FiCreditCard size={16} />
+                <span>Payment Method</span>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {paymentMethods.map(method => {
+                  const Icon = method.icon;
+                  return (
+                    <label
+                      key={method.value}
+                      className="flex items-center space-x-3 p-3 border rounded-lg cursor-pointer hover:opacity-80 transition-all duration-300"
+                      style={{
+                        backgroundColor: subscriptionData.payment_method === method.value ? `${theme.primary}20` : theme.background,
+                        borderColor: subscriptionData.payment_method === method.value ? theme.primary : theme.border
+                      }}
+                    >
+                      <input
+                        type="radio"
+                        name="payment_method"
+                        value={method.value}
+                        checked={subscriptionData.payment_method === method.value}
+                        onChange={handleInputChange}
+                        className="sr-only"
+                      />
+                      <Icon size={16} style={{ color: theme.textSecondary }} />
+                      <span className="text-sm" style={{ color: theme.text }}>
+                        {method.label}
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Special Instructions */}
             <div>
               <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>
@@ -597,7 +761,9 @@ const SubscriptionForm = ({ vendor, menus = [], onClose, onSuccess }) => {
               >
                 <FiRefreshCw size={16} />
                 <span>
-                  {loading ? 'Creating...' : `Subscribe for ₹${calculateTotalAmount().toLocaleString()}`}
+                  {loading ? 'Processing...' : 
+                   subscriptionData.payment_method === 'cod' ? `Subscribe for ₹${calculateTotalAmount().toLocaleString()}` : 
+                   `Pay Now - ₹${calculateTotalAmount().toLocaleString()}`}
                 </span>
               </button>
               

@@ -41,6 +41,9 @@ const SubscriptionSchema = new mongoose.Schema({
   },
   auto_renewal: { type: Boolean, default: false },
   special_instructions: { type: String, default: '' },
+  razorpay_order_id: { type: String },
+  razorpay_payment_id: { type: String },
+  payment_signature: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Subscription', SubscriptionSchema);
