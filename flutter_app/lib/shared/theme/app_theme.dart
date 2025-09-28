@@ -4,65 +4,84 @@ import 'app_colors.dart';
 import '../../core/constants/app_constants.dart';
 
 class AppTheme {
+  // Premium Google Fonts integration
+  static const String primaryFont = 'SF Pro Display';
+  static const String displayFont = 'Playfair Display';
+  static const String bodyFont = 'Inter';
+
   static ThemeData lightTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
+    fontFamily: primaryFont,
 
-    // Color Scheme
+    // Color Scheme - Sophisticated light theme
     colorScheme: const ColorScheme.light(
-      primary: AppColors.primary,
+      primary: AppColors.lightPrimary,
       onPrimary: AppColors.white,
-      secondary: AppColors.secondary,
+      secondary: AppColors.lightSecondary,
       onSecondary: AppColors.white,
-      surface: AppColors.lightSurface,
-      onSurface: AppColors.lightOnSurface,
+      surface: AppColors.lightPanels,
+      onSurface: AppColors.lightText,
       background: AppColors.lightBackground,
-      onBackground: AppColors.lightOnBackground,
-      error: AppColors.error,
+      onBackground: AppColors.lightText,
+      error: AppColors.lightError,
       onError: AppColors.white,
+      outline: AppColors.lightBorder,
     ),
 
-    // Scaffold
+    // Scaffold - Premium background
     scaffoldBackgroundColor: AppColors.lightBackground,
 
-    // App Bar
+    // App Bar - Premium styling
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.lightSurface,
-      foregroundColor: AppColors.lightOnSurface,
+      backgroundColor: AppColors.lightPanels,
+      foregroundColor: AppColors.lightText,
       elevation: 0,
-      scrolledUnderElevation: 1,
+      scrolledUnderElevation: 4,
       systemOverlayStyle: SystemUiOverlayStyle.dark,
       titleTextStyle: TextStyle(
-        color: AppColors.lightOnSurface,
-        fontSize: 20,
+        color: AppColors.lightText,
+        fontSize: 22,
         fontWeight: FontWeight.w600,
+        fontFamily: displayFont,
       ),
+      centerTitle: true,
     ),
 
-    // Card
+    // Card - Sophisticated styling
     cardTheme: CardThemeData(
-      color: AppColors.lightCardBackground,
-      elevation: AppConstants.cardElevation,
+      color: AppColors.lightPanels,
+      elevation: 8,
+      shadowColor: AppColors.lightPrimary.withOpacity(0.15),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: AppColors.lightBorder.withOpacity(0.3),
+          width: 1,
+        ),
       ),
       margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.defaultPadding,
-        vertical: AppConstants.smallPadding,
+        horizontal: 16,
+        vertical: 8,
       ),
     ),
 
-    // Elevated Button
+    // Elevated Button - Premium design
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.lightPrimary,
         foregroundColor: AppColors.white,
-        elevation: 2,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        elevation: 8,
+        shadowColor: AppColors.lightPrimary.withOpacity(0.3),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+          borderRadius: BorderRadius.circular(16),
         ),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 16, 
+          fontWeight: FontWeight.w600,
+          fontFamily: primaryFont,
+        ),
       ),
     ),
 
@@ -150,62 +169,76 @@ class AppTheme {
   static ThemeData darkTheme = ThemeData(
     useMaterial3: true,
     brightness: Brightness.dark,
+    fontFamily: primaryFont,
 
-    // Color Scheme
+    // Color Scheme - Sophisticated dark theme
     colorScheme: const ColorScheme.dark(
-      primary: AppColors.primaryLight,
+      primary: AppColors.darkPrimary,
       onPrimary: AppColors.black,
-      secondary: AppColors.secondaryLight,
+      secondary: AppColors.darkSecondary,
       onSecondary: AppColors.black,
-      surface: AppColors.darkSurface,
-      onSurface: AppColors.darkOnSurface,
+      surface: AppColors.darkPanels,
+      onSurface: AppColors.darkText,
       background: AppColors.darkBackground,
-      onBackground: AppColors.darkOnBackground,
-      error: AppColors.error,
+      onBackground: AppColors.darkText,
+      error: AppColors.darkError,
       onError: AppColors.white,
+      outline: AppColors.darkBorder,
     ),
 
-    // Scaffold
+    // Scaffold - Deep sophisticated background
     scaffoldBackgroundColor: AppColors.darkBackground,
 
-    // App Bar
+    // App Bar - Premium dark styling
     appBarTheme: const AppBarTheme(
-      backgroundColor: AppColors.darkSurface,
-      foregroundColor: AppColors.darkOnSurface,
+      backgroundColor: AppColors.darkPanels,
+      foregroundColor: AppColors.darkText,
       elevation: 0,
-      scrolledUnderElevation: 1,
+      scrolledUnderElevation: 4,
       systemOverlayStyle: SystemUiOverlayStyle.light,
       titleTextStyle: TextStyle(
-        color: AppColors.darkOnSurface,
-        fontSize: 20,
+        color: AppColors.darkText,
+        fontSize: 22,
         fontWeight: FontWeight.w600,
+        fontFamily: displayFont,
       ),
+      centerTitle: true,
     ),
 
-    // Card
+    // Card - Sophisticated dark styling
     cardTheme: CardThemeData(
-      color: AppColors.darkCardBackground,
-      elevation: AppConstants.cardElevation,
+      color: AppColors.darkPanels,
+      elevation: 12,
+      shadowColor: AppColors.black.withOpacity(0.3),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: AppColors.darkBorder.withOpacity(0.5),
+          width: 1,
+        ),
       ),
       margin: const EdgeInsets.symmetric(
-        horizontal: AppConstants.defaultPadding,
-        vertical: AppConstants.smallPadding,
+        horizontal: 16,
+        vertical: 8,
       ),
     ),
 
-    // Elevated Button
+    // Elevated Button - Premium dark design
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primaryLight,
+        backgroundColor: AppColors.darkPrimary,
         foregroundColor: AppColors.black,
-        elevation: 2,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        elevation: 12,
+        shadowColor: AppColors.darkPrimary.withOpacity(0.3),
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppConstants.borderRadius),
+          borderRadius: BorderRadius.circular(16),
         ),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(
+          fontSize: 16, 
+          fontWeight: FontWeight.w600,
+          fontFamily: primaryFont,
+        ),
       ),
     ),
 
