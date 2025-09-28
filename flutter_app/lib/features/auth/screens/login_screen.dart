@@ -91,7 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 80,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: AppColors.primaryGradient,
+                        colors: AppColors.primaryGradientLight,
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
