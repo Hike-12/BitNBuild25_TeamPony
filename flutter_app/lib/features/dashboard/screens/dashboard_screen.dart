@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'dart:async';
 import '../../../shared/providers/auth_provider.dart';
 import '../../../shared/providers/theme_provider.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../core/data/dummy_data.dart';
@@ -22,7 +23,7 @@ class DashboardScreen extends StatefulWidget {
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> 
+class _DashboardScreenState extends State<DashboardScreen>
     with TickerProviderStateMixin {
   List<subscription_models.Subscription> _subscriptions = [];
   List<order_models.Order> _recentOrders = [];
@@ -35,20 +36,25 @@ class _DashboardScreenState extends State<DashboardScreen>
   late Animation<Offset> _slideAnimation;
   Timer? _typewriterTimer;
 
-  final List<String> _heroTexts = [
-    "Curated Culinary Excellence",
-    "Sophisticated Dining Experience", 
-    "Premium Local Gastronomy"
-  ];
-  
-  final List<String> _heroSubtitles = [
-    "Discover artisanal flavors from the finest local establishments",
-    "Where exceptional taste meets unparalleled service",
-    "Elevating neighborhood dining to extraordinary heights"
-  ];
+  List<String> _getHeroTexts(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      l10n.curatedCulinaryExcellence,
+      l10n.sophisticatedDiningExperience,
+      l10n.premiumLocalGastronomy,
+    ];
+  }
+
+  List<String> _getHeroSubtitles(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      l10n.discoverArtisanalFlavors,
+      l10n.exceptionalTasteService,
+      l10n.elevatingNeighborhoodDining,
+    ];
+  }
 
   int _currentHeroIndex = 0;
-  String _currentTypewriterText = "";
 
   @override
   void initState() {
@@ -61,11 +67,12 @@ class _DashboardScreenState extends State<DashboardScreen>
       duration: const Duration(milliseconds: 600),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _fadeController, curve: Curves.easeOut),
-    );
-    
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _fadeController, curve: Curves.easeOut));
+
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 0.3),
       end: Offset.zero,
@@ -88,7 +95,7 @@ class _DashboardScreenState extends State<DashboardScreen>
     Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
         setState(() {
-          _currentHeroIndex = (_currentHeroIndex + 1) % _heroTexts.length;
+          _currentHeroIndex = (_currentHeroIndex + 1) % 3; // 3 hero texts
         });
         _startTypewriterEffect();
       }
@@ -97,21 +104,11 @@ class _DashboardScreenState extends State<DashboardScreen>
 
   void _startTypewriterEffect() {
     _typewriterTimer?.cancel();
-    _currentTypewriterText = "";
-    
-    final text = _heroTexts[_currentHeroIndex];
-    int currentIndex = 0;
-    
-    _typewriterTimer = Timer.periodic(const Duration(milliseconds: 80), (timer) {
-      if (currentIndex < text.length) {
-        setState(() {
-          _currentTypewriterText = text.substring(0, currentIndex + 1);
-        });
-        currentIndex++;
-      } else {
-        timer.cancel();
-      }
-    });
+
+    // We'll update this in the widget to use context
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _loadDashboardData() async {
@@ -164,7 +161,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                         child: const Padding(
                           padding: EdgeInsets.all(16),
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                             strokeWidth: 3,
                           ),
                         ),
@@ -245,7 +244,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Welcome back,',
+                AppLocalizations.of(context)!.welcome,
                 style: TextStyle(
                   fontSize: 16,
                   color: themeProvider.textSecondaryColor,
@@ -270,7 +269,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ],
           ),
         ),
-        
+
         // Profile Avatar with Premium Design
         GestureDetector(
           onTap: () {
@@ -282,9 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           child: Container(
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: themeProvider.primaryGradient,
-              ),
+              gradient: LinearGradient(colors: themeProvider.primaryGradient),
               borderRadius: BorderRadius.circular(25),
               boxShadow: [
                 BoxShadow(
@@ -308,9 +305,9 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
           ),
         ),
-        
+
         const SizedBox(width: 16),
-        
+
         // Theme Toggle with Premium Design
         Container(
           decoration: BoxDecoration(
@@ -322,7 +319,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             ),
             boxShadow: [
               BoxShadow(
-                color: themeProvider.isDarkMode 
+                color: themeProvider.isDarkMode
                     ? Colors.black.withOpacity(0.3)
                     : Colors.black.withOpacity(0.1),
                 blurRadius: 8,
@@ -357,6 +354,9 @@ class _DashboardScreenState extends State<DashboardScreen>
   }
 
   Widget _buildHeroSection(ThemeProvider themeProvider) {
+    final heroTexts = _getHeroTexts(context);
+    final heroSubtitles = _getHeroSubtitles(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(32),
@@ -379,7 +379,7 @@ class _DashboardScreenState extends State<DashboardScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            _currentTypewriterText,
+            heroTexts[_currentHeroIndex],
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w700,
@@ -392,7 +392,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),
             child: Text(
-              _heroSubtitles[_currentHeroIndex],
+              heroSubtitles[_currentHeroIndex],
               key: ValueKey(_currentHeroIndex),
               style: TextStyle(
                 fontSize: 16,
@@ -442,7 +442,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => const SubscriptionScreen(),
+                    ),
                   );
                 },
               ),
@@ -484,21 +486,24 @@ class _DashboardScreenState extends State<DashboardScreen>
       {
         'icon': Icons.emoji_events_rounded,
         'title': 'Elite Rewards',
-        'description': 'Exclusive privileges and premium benefits with every curated experience',
+        'description':
+            'Exclusive privileges and premium benefits with every curated experience',
         'points': 50,
         'color': themeProvider.primaryColor,
       },
       {
         'icon': Icons.military_tech_rounded,
         'title': 'Culinary Achievements',
-        'description': 'Unlock prestigious badges as you explore refined dining experiences',
+        'description':
+            'Unlock prestigious badges as you explore refined dining experiences',
         'points': 25,
         'color': themeProvider.secondaryColor,
       },
       {
         'icon': Icons.stars_rounded,
         'title': 'VIP Recognition',
-        'description': 'Distinguished status and personalized recommendations for connoisseurs',
+        'description':
+            'Distinguished status and personalized recommendations for connoisseurs',
         'points': 75,
         'color': themeProvider.warningColor,
       },
@@ -578,8 +583,6 @@ class _DashboardScreenState extends State<DashboardScreen>
     );
   }
 
-
-
   Widget _buildPremiumSubscription(ThemeProvider themeProvider) {
     if (_subscriptions.isEmpty) {
       return PremiumCard(
@@ -627,9 +630,7 @@ class _DashboardScreenState extends State<DashboardScreen>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: themeProvider.primaryGradient,
-                ),
+                gradient: LinearGradient(colors: themeProvider.primaryGradient),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: const Text(
@@ -694,7 +695,10 @@ class _DashboardScreenState extends State<DashboardScreen>
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: themeProvider.successColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
@@ -729,7 +733,7 @@ class _DashboardScreenState extends State<DashboardScreen>
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: themeProvider.isDarkMode 
+              color: themeProvider.isDarkMode
                   ? Colors.white.withOpacity(0.05)
                   : Colors.black.withOpacity(0.03),
               borderRadius: BorderRadius.circular(16),
@@ -844,12 +848,17 @@ class _DashboardScreenState extends State<DashboardScreen>
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const MenuScreen()),
+                      MaterialPageRoute(
+                        builder: (context) => const MenuScreen(),
+                      ),
                     );
                   },
                   borderRadius: BorderRadius.circular(16),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -905,9 +914,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 Text(
                   'Our culinary team is crafting today\'s selection. Check back soon!',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: themeProvider.textSecondaryColor,
-                  ),
+                  style: TextStyle(color: themeProvider.textSecondaryColor),
                 ),
               ],
             ),
@@ -987,7 +994,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                             Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: themeProvider.primaryColor.withOpacity(0.1),
+                                color: themeProvider.primaryColor.withOpacity(
+                                  0.1,
+                                ),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
@@ -1053,9 +1062,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                 Text(
                   'Your order history and dining experiences will appear here',
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: themeProvider.textSecondaryColor,
-                  ),
+                  style: TextStyle(color: themeProvider.textSecondaryColor),
                 ),
               ],
             ),
@@ -1079,13 +1086,17 @@ class _DashboardScreenState extends State<DashboardScreen>
                           gradient: LinearGradient(
                             colors: [
                               _getOrderStatusColor(order.orderStatus),
-                              _getOrderStatusColor(order.orderStatus).withOpacity(0.7),
+                              _getOrderStatusColor(
+                                order.orderStatus,
+                              ).withOpacity(0.7),
                             ],
                           ),
                           borderRadius: BorderRadius.circular(20),
                           boxShadow: [
                             BoxShadow(
-                              color: _getOrderStatusColor(order.orderStatus).withOpacity(0.3),
+                              color: _getOrderStatusColor(
+                                order.orderStatus,
+                              ).withOpacity(0.3),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -1097,9 +1108,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                           size: 28,
                         ),
                       ),
-                      
+
                       const SizedBox(width: 16),
-                      
+
                       // Order Details
                       Expanded(
                         child: Column(
@@ -1125,12 +1136,19 @@ class _DashboardScreenState extends State<DashboardScreen>
                             ),
                             const SizedBox(height: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
-                                color: _getOrderStatusColor(order.orderStatus).withOpacity(0.1),
+                                color: _getOrderStatusColor(
+                                  order.orderStatus,
+                                ).withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: _getOrderStatusColor(order.orderStatus).withOpacity(0.3),
+                                  color: _getOrderStatusColor(
+                                    order.orderStatus,
+                                  ).withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
@@ -1138,7 +1156,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                                 order.orderStatusDisplayName,
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: _getOrderStatusColor(order.orderStatus),
+                                  color: _getOrderStatusColor(
+                                    order.orderStatus,
+                                  ),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -1146,7 +1166,7 @@ class _DashboardScreenState extends State<DashboardScreen>
                           ],
                         ),
                       ),
-                      
+
                       // Price and Date
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -1161,7 +1181,9 @@ class _DashboardScreenState extends State<DashboardScreen>
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            DateFormat('MMM dd, yyyy').format(order.deliveryDate),
+                            DateFormat(
+                              'MMM dd, yyyy',
+                            ).format(order.deliveryDate),
                             style: TextStyle(
                               fontSize: 12,
                               color: themeProvider.textSecondaryColor,
@@ -1187,9 +1209,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         'icon': Icons.restaurant_menu_rounded,
         'color': themeProvider.primaryColor,
         'onTap': () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const MenuScreen()),
-            ),
+          context,
+          MaterialPageRoute(builder: (context) => const MenuScreen()),
+        ),
       },
       {
         'title': 'Premium Plans',
@@ -1197,9 +1219,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         'icon': Icons.subscriptions_rounded,
         'color': themeProvider.secondaryColor,
         'onTap': () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
-            ),
+          context,
+          MaterialPageRoute(builder: (context) => const SubscriptionScreen()),
+        ),
       },
       {
         'title': 'Profile & Settings',
@@ -1207,9 +1229,9 @@ class _DashboardScreenState extends State<DashboardScreen>
         'icon': Icons.person_rounded,
         'color': themeProvider.warningColor,
         'onTap': () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            ),
+          context,
+          MaterialPageRoute(builder: (context) => const ProfileScreen()),
+        ),
       },
     ];
 
@@ -1296,8 +1318,6 @@ class _DashboardScreenState extends State<DashboardScreen>
       ],
     );
   }
-
-
 
   Color _getOrderStatusColor(order_models.OrderStatus status) {
     switch (status) {

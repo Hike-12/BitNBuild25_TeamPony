@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'shared/providers/auth_provider.dart';
 import 'shared/providers/theme_provider.dart';
+import 'shared/providers/locale_provider.dart';
 import 'shared/theme/app_theme.dart';
 import 'shared/theme/app_colors.dart';
+import 'l10n/app_localizations.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/dashboard/screens/dashboard_screen.dart';
 import 'features/menu/screens/menu_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/subscription/screens/subscription_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const NourishNetApp());
 }
 
-class NourishNetApp extends StatelessWidget {
+class NourishNetApp extends StatefulWidget {
   const NourishNetApp({super.key});
+
+  @override
+  State<NourishNetApp> createState() => _NourishNetAppState();
+}
+
+class _NourishNetAppState extends State<NourishNetApp> {
+  late LocaleProvider localeProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    localeProvider = LocaleProvider();
+    // Load saved locale
+    localeProvider.loadLocale();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,15 +42,30 @@ class NourishNetApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider.value(value: localeProvider),
       ],
-      child: Consumer<ThemeProvider>(
-        builder: (context, themeProvider, child) {
+      child: Consumer2<ThemeProvider, LocaleProvider>(
+        builder: (context, themeProvider, localeProvider, child) {
           return MaterialApp(
             title: 'NourishNet - Tiffin Service',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,
             themeMode: themeProvider.themeMode,
+
+            // Localization configuration
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: const [
+              Locale('en'), // English
+              Locale('hi'), // Hindi
+            ],
+            locale: localeProvider.locale,
+
             home: const AuthWrapper(),
           );
         },
@@ -69,7 +103,7 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen> 
+class _MainNavigationScreenState extends State<MainNavigationScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   late PageController _pageController;
@@ -82,32 +116,35 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
     const ProfileScreen(),
   ];
 
-  final List<NavigationItem> _navigationItems = [
-    NavigationItem(
-      icon: Icons.dashboard_outlined,
-      selectedIcon: Icons.dashboard_rounded,
-      label: 'Dashboard',
-      activeColor: AppColors.lightPrimary,
-    ),
-    NavigationItem(
-      icon: Icons.restaurant_menu_outlined,
-      selectedIcon: Icons.restaurant_menu_rounded,
-      label: 'Menu',
-      activeColor: AppColors.lightSecondary,
-    ),
-    NavigationItem(
-      icon: Icons.subscriptions_outlined,
-      selectedIcon: Icons.subscriptions_rounded,
-      label: 'Premium',
-      activeColor: AppColors.lightWarning,
-    ),
-    NavigationItem(
-      icon: Icons.person_outlined,
-      selectedIcon: Icons.person_rounded,
-      label: 'Profile',
-      activeColor: AppColors.info,
-    ),
-  ];
+  List<NavigationItem> _getNavigationItems(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return [
+      NavigationItem(
+        icon: Icons.dashboard_outlined,
+        selectedIcon: Icons.dashboard_rounded,
+        label: l10n.dashboard,
+        activeColor: AppColors.lightPrimary,
+      ),
+      NavigationItem(
+        icon: Icons.restaurant_menu_outlined,
+        selectedIcon: Icons.restaurant_menu_rounded,
+        label: l10n.menu,
+        activeColor: AppColors.lightSecondary,
+      ),
+      NavigationItem(
+        icon: Icons.subscriptions_outlined,
+        selectedIcon: Icons.subscriptions_rounded,
+        label: l10n.premium,
+        activeColor: AppColors.lightWarning,
+      ),
+      NavigationItem(
+        icon: Icons.person_outlined,
+        selectedIcon: Icons.person_rounded,
+        label: l10n.profile,
+        activeColor: AppColors.info,
+      ),
+    ];
+  }
 
   @override
   void initState() {
@@ -146,7 +183,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    
+
     return Scaffold(
       backgroundColor: themeProvider.backgroundColor,
       body: PageView(
@@ -159,7 +196,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
           color: themeProvider.panelsColor,
           boxShadow: [
             BoxShadow(
-              color: themeProvider.isDarkMode 
+              color: themeProvider.isDarkMode
                   ? Colors.black.withOpacity(0.3)
                   : Colors.black.withOpacity(0.1),
               blurRadius: 20,
@@ -172,20 +209,22 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: _navigationItems.asMap().entries.map((entry) {
+              children: _getNavigationItems(context).asMap().entries.map((
+                entry,
+              ) {
                 final index = entry.key;
                 final item = entry.value;
                 final isSelected = index == _currentIndex;
-                
+
                 return GestureDetector(
                   onTap: () => _onNavigationTap(index),
                   child: AnimatedBuilder(
                     animation: _navAnimationController,
                     builder: (context, child) {
-                      final scale = isSelected 
+                      final scale = isSelected
                           ? 1.0 + (_navAnimationController.value * 0.1)
                           : 1.0;
-                      
+
                       return Transform.scale(
                         scale: scale,
                         child: Container(
@@ -194,27 +233,31 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
                             vertical: 12,
                           ),
                           decoration: BoxDecoration(
-                            gradient: isSelected ? LinearGradient(
-                              colors: [
-                                item.activeColor,
-                                item.activeColor.withOpacity(0.7),
-                              ],
-                            ) : null,
+                            gradient: isSelected
+                                ? LinearGradient(
+                                    colors: [
+                                      item.activeColor,
+                                      item.activeColor.withOpacity(0.7),
+                                    ],
+                                  )
+                                : null,
                             borderRadius: BorderRadius.circular(20),
-                            boxShadow: isSelected ? [
-                              BoxShadow(
-                                color: item.activeColor.withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ] : null,
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: item.activeColor.withOpacity(0.3),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : null,
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
                                 isSelected ? item.selectedIcon : item.icon,
-                                color: isSelected 
+                                color: isSelected
                                     ? Colors.white
                                     : themeProvider.textSecondaryColor,
                                 size: 24,

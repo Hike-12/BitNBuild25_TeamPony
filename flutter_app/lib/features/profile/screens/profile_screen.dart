@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../shared/providers/auth_provider.dart';
 import '../../../shared/providers/theme_provider.dart';
+import '../../../shared/providers/locale_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../shared/theme/app_colors.dart';
 import '../../../core/models/user_model.dart';
+import '../../../l10n/app_localizations.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -56,10 +58,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(AppLocalizations.of(context)!.profile),
         actions: [
           if (_isEditing)
-            TextButton(onPressed: _cancelEdit, child: const Text('Cancel'))
+            TextButton(
+              onPressed: _cancelEdit,
+              child: Text(AppLocalizations.of(context)!.cancel),
+            )
           else
             IconButton(
               onPressed: () => setState(() => _isEditing = true),
@@ -288,13 +293,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         const SizedBox(height: 16),
 
+        // Language Selection
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(AppLocalizations.of(context)!.language),
+            subtitle: Text(AppLocalizations.of(context)!.selectLanguage),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => _showLanguageDialog(context),
+          ),
+        ),
+
         // Theme Toggle
         Card(
           child: ListTile(
             leading: Icon(
               themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode,
             ),
-            title: const Text('Dark Mode'),
+            title: Text(AppLocalizations.of(context)!.theme),
             trailing: Switch(
               value: themeProvider.isDarkMode,
               onChanged: (value) => themeProvider.toggleTheme(),
@@ -411,6 +427,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       );
     }
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final localeProvider = Provider.of<LocaleProvider>(context);
+        return AlertDialog(
+          title: Text(AppLocalizations.of(context)!.selectLanguage),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: LocaleProvider.supportedLocales.map((locale) {
+              return ListTile(
+                title: Text(localeProvider.getLocaleName(locale)),
+                leading: Radio<Locale>(
+                  value: locale,
+                  groupValue: localeProvider.locale,
+                  onChanged: (Locale? value) {
+                    if (value != null) {
+                      localeProvider.setLocale(value);
+                      Navigator.of(context).pop();
+                    }
+                  },
+                ),
+                onTap: () {
+                  localeProvider.setLocale(locale);
+                  Navigator.of(context).pop();
+                },
+              );
+            }).toList(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(AppLocalizations.of(context)!.cancel),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _showNotificationSettings() {

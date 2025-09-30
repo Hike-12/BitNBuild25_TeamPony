@@ -1,0 +1,227 @@
+{
+  "@@locale": "en",
+  "appTitle": "NourishNet - Tiffin Service",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "welcome": "Welcome back",
+  "@welcome": {
+    "description": "Welcome message for users"
+  },
+  "welcomeMessage": "Welcome to NourishNet",
+  "@welcomeMessage": {
+    "description": "Welcome message displayed to users"
+  },
+  "selectLanguage": "Select Language",
+  "@selectLanguage": {
+    "description": "Text for language selection option"
+  },
+  "english": "English",
+  "@english": {
+    "description": "English language name"
+  },
+  "hindi": "हिंदी",
+  "@hindi": {
+    "description": "Hindi language name in its native script"
+  },
+  "dashboard": "Dashboard",
+  "@dashboard": {
+    "description": "Dashboard navigation label"
+  },
+  "menu": "Menu",
+  "@menu": {
+    "description": "Menu navigation label"
+  },
+  "premium": "Premium",
+  "@premium": {
+    "description": "Premium/Subscription navigation label"
+  },
+  "profile": "Profile",
+  "@profile": {
+    "description": "Profile navigation label"
+  },
+  "login": "Login",
+  "@login": {
+    "description": "Login button text"
+  },
+  "register": "Register",
+  "@register": {
+    "description": "Register button text"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email field label"
+  },
+  "password": "Password",
+  "@password": {
+    "description": "Password field label"
+  },
+  "username": "Username",
+  "@username": {
+    "description": "Username field label"
+  },
+  "loginSuccessful": "Login successful!",
+  "@loginSuccessful": {
+    "description": "Success message after login"
+  },
+  "loginFailed": "Login failed. Please check your credentials.",
+  "@loginFailed": {
+    "description": "Error message when login fails"
+  },
+  "mySubscriptions": "My Subscriptions",
+  "@mySubscriptions": {
+    "description": "Title for subscriptions page"
+  },
+  "mealsProgress": "Meals Progress",
+  "@mealsProgress": {
+    "description": "Label for meal progress indicator"
+  },
+  "pricePerMeal": "Price per Meal",
+  "@pricePerMeal": {
+    "description": "Label for price per meal"
+  },
+  "unknownVendor": "Unknown Vendor",
+  "@unknownVendor": {
+    "description": "Default text when vendor name is not available"
+  },
+  "curatedCulinaryExcellence": "Curated Culinary Excellence",
+  "@curatedCulinaryExcellence": {
+    "description": "Hero text for sophisticated dining"
+  },
+  "sophisticatedDiningExperience": "Sophisticated Dining Experience",
+  "@sophisticatedDiningExperience": {
+    "description": "Hero text for dining experience"
+  },
+  "premiumLocalGastronomy": "Premium Local Gastronomy",
+  "@premiumLocalGastronomy": {
+    "description": "Hero text for local cuisine"
+  },
+  "discoverArtisanalFlavors": "Discover artisanal flavors from the finest local establishments",
+  "@discoverArtisanalFlavors": {
+    "description": "Subtitle for culinary excellence"
+  },
+  "exceptionalTasteService": "Where exceptional taste meets unparalleled service",
+  "@exceptionalTasteService": {
+    "description": "Subtitle for sophisticated dining"
+  },
+  "elevatingNeighborhoodDining": "Elevating neighborhood dining to extraordinary heights",
+  "@elevatingNeighborhoodDining": {
+    "description": "Subtitle for premium gastronomy"
+  },
+  "yourCulinaryJourney": "Your Culinary Journey",
+  "@yourCulinaryJourney": {
+    "description": "Section title for user stats"
+  },
+  "eliteRewards": "Elite Rewards",
+  "@eliteRewards": {
+    "description": "Game feature title"
+  },
+  "culinaryAchievements": "Culinary Achievements",
+  "@culinaryAchievements": {
+    "description": "Game feature title"
+  },
+  "vipRecognition": "VIP Recognition",
+  "@vipRecognition": {
+    "description": "Game feature title"
+  },
+  "exclusivePrivileges": "Exclusive privileges and premium benefits with every curated experience",
+  "@exclusivePrivileges": {
+    "description": "Description for elite rewards"
+  },
+  "unlockPrestigiousBadges": "Unlock prestigious badges as you explore refined dining experiences",
+  "@unlockPrestigiousBadges": {
+    "description": "Description for culinary achievements"
+  },
+  "distinguishedStatus": "Distinguished status and personalized recommendations for connoisseurs",
+  "@distinguishedStatus": {
+    "description": "Description for VIP recognition"
+  },
+  "startCulinaryJourney": "Start Your Culinary Journey",
+  "@startCulinaryJourney": {
+    "description": "Call to action for new subscriptions"
+  },
+  "subscribeToPremium": "Subscribe to premium dining experiences and unlock exclusive benefits",
+  "@subscribeToPremium": {
+    "description": "Description for premium subscription benefits"
+  },
+  "recentCulinaryExperiences": "Recent Culinary Experiences",
+  "@recentCulinaryExperiences": {
+    "description": "Section title for recent orders"
+  },
+  "discoverMore": "Discover More",
+  "@discoverMore": {
+    "description": "Section title for action items"
+  },
+  "curatedMenus": "Curated Menus",
+  "@curatedMenus": {
+    "description": "Action item title"
+  },
+  "exploreHandpicked": "Explore handpicked selections",
+  "@exploreHandpicked": {
+    "description": "Action item subtitle for menus"
+  },
+  "premiumPlans": "Premium Plans",
+  "@premiumPlans": {
+    "description": "Action item title for subscriptions"
+  },
+  "unlockExclusiveBenefits": "Unlock exclusive benefits",
+  "@unlockExclusiveBenefits": {
+    "description": "Action item subtitle for premium plans"
+  },
+  "profileSettings": "Profile & Settings",
+  "@profileSettings": {
+    "description": "Action item title for profile"
+  },
+  "personalizeExperience": "Personalize your experience",
+  "@personalizeExperience": {
+    "description": "Action item subtitle for profile"
+  },
+  "loading": "Loading...",
+  "@loading": {
+    "description": "Loading indicator text"
+  },
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button text"
+  },
+  "confirm": "Confirm",
+  "@confirm": {
+    "description": "Confirm button text"
+  },
+  "save": "Save",
+  "@save": {
+    "description": "Save button text"
+  },
+  "edit": "Edit",
+  "@edit": {
+    "description": "Edit button text"
+  },
+  "delete": "Delete",
+  "@delete": {
+    "description": "Delete button text"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting label"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme setting label"
+  },
+  "lightMode": "Light Mode",
+  "@lightMode": {
+    "description": "Light theme option"
+  },
+  "darkMode": "Dark Mode",
+  "@darkMode": {
+    "description": "Dark theme option"
+  }
+}
