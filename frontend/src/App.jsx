@@ -23,7 +23,6 @@ import ConsumerChatbot from "./components/ConsumerChatbot";
 import AdminDashboard from "./pages/Admin";
 import PWAInstall from "./pages/PWAInstall";
 
-
 function App() {
   return (
     <ThemeProvider>
